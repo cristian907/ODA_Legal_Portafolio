@@ -45,7 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // ------------------------------------------------------------------------
   // Estado
   // ------------------------------------------------------------------------
-  let savedStyles = JSON.parse(localStorage.getItem('oda_saved_styles')) || [];
+  let savedStyles = [];
+  try {
+    const rawSaved = localStorage.getItem('oda_saved_styles');
+    if (rawSaved) savedStyles = JSON.parse(rawSaved);
+  } catch (e) {
+    console.error('Error parsing oda_saved_styles:', e);
+  }
   let activeLightId = localStorage.getItem('oda_active_style_id_light') || null;
   let activeDarkId = localStorage.getItem('oda_active_style_id_dark') || null;
   let themeDefault = localStorage.getItem('oda_theme_default') || 'light';
@@ -70,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentLibPage = 1;
   let librarySearch = '';
+  let libraryThemeFilter = 'all'; // 'all' | 'light' | 'dark'
 
   // ------------------------------------------------------------------------
   // DOM
@@ -151,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Validación inline (colores + nombre)
   // ------------------------------------------------------------------------
   const HEX_RE = /^#([0-9A-F]{3}){1,2}$/i;
-  const NAME_RE = /^[\p{L}\p{N} _-]+$/u;
+  const NAME_RE = /^[\p{L}\p{N} _#-]+$/u;
 
   // Pinta/limpia el error de un campo. msg === null limpia el estado.
   function setFieldError(inputEl, msgEl, msg) {
@@ -169,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!name) return { ok: true, message: null };
     if (name.length < 2) return { ok: false, message: 'Usa al menos 2 caracteres.' };
     if (name.length > 40) return { ok: false, message: 'Máximo 40 caracteres.' };
-    if (!NAME_RE.test(name)) return { ok: false, message: 'Solo letras, números, espacios, guion y guion bajo.' };
+    if (!NAME_RE.test(name)) return { ok: false, message: 'Solo letras, números, espacios, guiones y numeral (#).' };
     const currentId = draft ? draft.id : null;
     const dup = savedStyles.some((s) => s.id !== currentId && s.name.toLowerCase() === name.toLowerCase());
     if (dup) return { ok: false, message: 'Ya existe un estilo con ese nombre.' };
@@ -464,9 +471,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function isActive(id) { return id === activeLightId || id === activeDarkId; }
 
   function getFilteredStyles() {
+    let list = savedStyles;
+    if (libraryThemeFilter !== 'all') {
+      list = list.filter((s) => s.theme === libraryThemeFilter);
+    }
     const term = librarySearch.trim().toLowerCase();
-    if (!term) return savedStyles;
-    return savedStyles.filter((s) => s.name.toLowerCase().includes(term));
+    if (!term) return list;
+    return list.filter((s) => s.name.toLowerCase().includes(term));
   }
 
   function renderSavedStyles() {
@@ -564,6 +575,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (val === 'prev') currentLibPage = Math.max(1, currentLibPage - 1);
         else if (val === 'next') currentLibPage = Math.min(totalPages, currentLibPage + 1);
         else currentLibPage = parseInt(val);
+        renderSavedStyles();
+      });
+    });
+  }
+
+  const libThemeFilter = document.getElementById('libThemeFilter');
+  if (libThemeFilter) {
+    const btns = libThemeFilter.querySelectorAll('.ed-seg');
+    btns.forEach((b) => {
+      b.addEventListener('click', () => {
+        btns.forEach((x) => x.classList.remove('active'));
+        b.classList.add('active');
+        libraryThemeFilter = b.getAttribute('data-filter') || 'all';
+        currentLibPage = 1;
         renderSavedStyles();
       });
     });

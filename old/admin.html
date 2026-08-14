@@ -74,7 +74,7 @@
       <div class="admin-topbar-right">
         <div class="admin-user-info">
           <i class="fas fa-user-shield"></i>
-          <span>Lic. Carlos Mendoza (Admin)</span>
+          <span>Lic. Oscar De Abreu (Admin)</span>
         </div>
         <a href="index.html" class="btn-secondary btn-sm" target="_blank" title="Ver sitio en pestaña nueva">
           <i class="fas fa-external-link-alt"></i> Ver Sitio Principal
@@ -162,9 +162,16 @@
 
             <div class="lib-toolbar">
               <span class="ed-eyebrow">Estilos guardados</span>
-              <div class="lib-search">
-                <i class="fas fa-search"></i>
-                <input type="text" id="styleSearchInput" placeholder="Buscar..." aria-label="Buscar estilos">
+              <div class="lib-filters">
+                <div class="ed-segmented ed-segmented-sm" id="libThemeFilter">
+                  <button type="button" class="ed-seg active" data-filter="all">Todos</button>
+                  <button type="button" class="ed-seg" data-filter="light"><i class="fas fa-sun"></i> Claro</button>
+                  <button type="button" class="ed-seg" data-filter="dark"><i class="fas fa-moon"></i> Oscuro</button>
+                </div>
+                <div class="lib-search">
+                  <i class="fas fa-search"></i>
+                  <input type="text" id="styleSearchInput" placeholder="Buscar..." aria-label="Buscar estilos">
+                </div>
               </div>
             </div>
 
@@ -329,7 +336,7 @@
         </div>
 
         <div class="admin-preview-container">
-          <iframe id="previewFrame" class="preview-frame" src="index.html" title="Vista previa del sitio completo"></iframe>
+          <iframe id="previewFrame" class="preview-frame" src="index.html?v=2" title="Vista previa del sitio completo"></iframe>
         </div>
 
         <div class="preview-actions">
