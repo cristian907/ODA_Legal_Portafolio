@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | ODA Legal</title>
   <meta name="description" content="Panel de administración, gestión de múltiples estilos guardados, fuentes .TTF y paleta HEX de ODA Legal.">
-  
+
   <!-- FontAwesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Stylesheet -->
+  <!-- Stylesheet base (tokens + sitio) -->
   <link rel="stylesheet" href="css/styles.css">
+  <!-- Stylesheet del panel rediseñado (se carga después para sobrescribir) -->
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-body">
 
@@ -24,7 +26,7 @@
         </div>
         <h2>ODA <span>LEGAL</span></h2>
       </div>
-      
+
       <div class="admin-login-header">
         <h3>Acceso Administrativo</h3>
         <p>Introduce tus credenciales para acceder a la configuración del portal</p>
@@ -66,7 +68,7 @@
         <div class="logo-icon">
           <i class="fas fa-balance-scale"></i>
         </div>
-        <span class="admin-title">Panel de Control & Configurador | ODA Legal</span>
+        <span class="admin-title">Configurador de Estilos | ODA Legal</span>
       </div>
 
       <div class="admin-topbar-right">
@@ -85,174 +87,158 @@
 
     <!-- Contenido Principal Dashboard -->
     <main class="admin-main-container">
-      
-      <!-- Columna Izquierda: Panel de Controles -->
+
+      <!-- ================================================================
+           Columna Izquierda: EDITOR (pestañas + barra de acción fija)
+           ================================================================ -->
       <div class="admin-controls-panel">
-        
-        <!-- Tema Global -->
-        <div class="admin-card">
-          <div class="card-header">
-            <h3><i class="fas fa-adjust"></i> Modo de Tema Global</h3>
-          </div>
-          <div class="theme-switch-wrapper">
-            <button class="theme-switch-btn active" id="btnThemeLight">
-              <i class="fas fa-sun"></i> Modo Claro
-            </button>
-            <button class="theme-switch-btn" id="btnThemeDark">
-              <i class="fas fa-moon"></i> Modo Oscuro
-            </button>
-          </div>
+
+        <!-- Pestañas -->
+        <div class="ed-tabs" role="tablist">
+          <button class="ed-tab active" id="tabEditorBtn" role="tab" aria-selected="true">
+            <i class="fas fa-sliders-h"></i> Editor
+          </button>
+          <button class="ed-tab" id="tabLibraryBtn" role="tab" aria-selected="false">
+            <i class="fas fa-bookmark"></i> Biblioteca
+            <span class="ed-tab-count" id="libCount">0</span>
+          </button>
         </div>
 
-        <!-- Cargar Fuente Única .TTF -->
-        <div class="admin-card">
-          <div class="card-header">
-            <h3><i class="fas fa-font"></i> Tipografía Única (.TTF)</h3>
-            <p>Sube un archivo de fuente (.ttf) que afectará a toda la página</p>
-          </div>
+        <!-- Región desplazable -->
+        <div class="ed-content">
 
-          <div class="form-group">
-            <label for="fontFileInput"><i class="fas fa-file-upload"></i> Seleccionar archivo .TTF</label>
-            <input type="file" id="fontFileInput" class="form-input" accept=".ttf">
-            <span class="font-status-tag" id="fontStatusTag"><i class="fas fa-check-circle"></i> Fuente por defecto: Plus Jakarta Sans</span>
-            <div>
-              <button type="button" class="btn-reset-font" id="btnResetFont"><i class="fas fa-undo"></i> Usar Fuente Predeterminada</button>
-            </div>
-          </div>
-        </div>
+          <!-- ===================== PESTAÑA: EDITOR ===================== -->
+          <section class="ed-pane active" id="paneEditor" role="tabpanel">
 
-        <!-- Tamaños de Texto en Píxeles (Rango Ampliado) -->
-        <div class="admin-card">
-          <div class="card-header">
-            <h3><i class="fas fa-text-height"></i> Tamaños de Texto (en píxeles)</h3>
-            <p>Especifica el tamaño en px para el sitio principal (rangos amplios de personalización)</p>
-          </div>
-
-          <div class="font-sizes-grid">
-            <div class="font-size-item">
-              <label for="sizeTitlesInput" class="font-size-label">Títulos (16-140px)</label>
-              <input type="number" id="sizeTitlesInput" class="font-size-input" value="40" min="16" max="140">
+            <!-- Banner de edición (visible solo al editar un estilo guardado) -->
+            <div class="ed-editing-banner hidden" id="editingBanner">
+              <i class="fas fa-pen"></i>
+              <input type="text" id="editingNameInput" placeholder="Nombre del estilo" aria-label="Nombre del estilo en edición">
+              <div class="ed-banner-actions">
+                <button class="ed-banner-save" id="btnUpdateStyle" title="Guardar cambios en este estilo">Guardar</button>
+                <button class="ed-banner-cancel" id="btnCancelEdit" title="Salir de edición">Cancelar</button>
+              </div>
             </div>
 
-            <div class="font-size-item">
-              <label for="sizeSubtitlesInput" class="font-size-label">Subtítulos (12-80px)</label>
-              <input type="number" id="sizeSubtitlesInput" class="font-size-input" value="20" min="12" max="80">
+            <!-- Tema -->
+            <div class="ed-section">
+              <span class="ed-eyebrow">Tema</span>
+              <div class="ed-segmented">
+                <button class="ed-seg active" id="btnThemeLight"><i class="fas fa-sun"></i> Claro</button>
+                <button class="ed-seg" id="btnThemeDark"><i class="fas fa-moon"></i> Oscuro</button>
+              </div>
             </div>
 
-            <div class="font-size-item">
-              <label for="sizeBodyInput" class="font-size-label">Textos (8-40px)</label>
-              <input type="number" id="sizeBodyInput" class="font-size-input" value="16" min="8" max="40">
+            <!-- Colores -->
+            <div class="ed-section">
+              <span class="ed-eyebrow">Colores</span>
+              <div class="ed-colors">
+                <div class="ed-color-row">
+                  <span class="ed-color-label">Fondo de sección</span>
+                  <div class="ed-color-controls">
+                    <input type="color" id="svcColor1" class="color-input" value="#e4edf7">
+                    <input type="text" id="svcHex1" class="hex-input" value="#E4EDF7" maxlength="7">
+                  </div>
+                </div>
+                <div class="ed-color-row">
+                  <span class="ed-color-label">Fondo de tarjetas</span>
+                  <div class="ed-color-controls">
+                    <input type="color" id="svcColor2" class="color-input" value="#ffffff">
+                    <input type="text" id="svcHex2" class="hex-input" value="#FFFFFF" maxlength="7">
+                  </div>
+                </div>
+                <div class="ed-color-row">
+                  <span class="ed-color-label">Texto principal</span>
+                  <div class="ed-color-controls">
+                    <input type="color" id="svcColor3" class="color-input" value="#1e293b">
+                    <input type="text" id="svcHex3" class="hex-input" value="#1E293B" maxlength="7">
+                  </div>
+                </div>
+                <div class="ed-color-row">
+                  <span class="ed-color-label">Primario / Íconos</span>
+                  <div class="ed-color-controls">
+                    <input type="color" id="svcColor4" class="color-input" value="#c5a059">
+                    <input type="text" id="svcHex4" class="hex-input" value="#C5A059" maxlength="7">
+                  </div>
+                </div>
+                <div class="ed-color-row">
+                  <span class="ed-color-label">Destaque / Hover</span>
+                  <div class="ed-color-controls">
+                    <input type="color" id="svcColor5" class="color-input" value="#0f172a">
+                    <input type="text" id="svcHex5" class="hex-input" value="#0F172A" maxlength="7">
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <button type="button" class="btn-reset-font" id="btnResetFontSizes">
-              <i class="fas fa-undo"></i> Restablecer Tamaños Predeterminados (40, 20, 16px)
+            <!-- Tipografía -->
+            <div class="ed-section">
+              <span class="ed-eyebrow">Tipografía</span>
+
+              <div class="ed-field">
+                <label class="ed-field-label" for="fontFileInput"><i class="fas fa-font"></i> Fuente personalizada (.ttf)</label>
+                <input type="file" id="fontFileInput" class="ed-file" accept=".ttf">
+                <div class="ed-font-status">
+                  <span id="fontStatusTag">Plus Jakarta Sans (por defecto)</span>
+                  <button type="button" class="ed-inline-reset" id="btnResetFont" title="Usar fuente por defecto">
+                    <i class="fas fa-undo"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="ed-size-row">
+                <span class="ed-size-label">Títulos</span>
+                <input type="range" id="sizeTitlesRange" class="ed-range" min="16" max="140" value="40">
+                <input type="number" id="sizeTitlesInput" class="ed-num" min="16" max="140" value="40">
+              </div>
+              <div class="ed-size-row">
+                <span class="ed-size-label">Subtítulos</span>
+                <input type="range" id="sizeSubtitlesRange" class="ed-range" min="12" max="80" value="20">
+                <input type="number" id="sizeSubtitlesInput" class="ed-num" min="12" max="80" value="20">
+              </div>
+              <div class="ed-size-row">
+                <span class="ed-size-label">Cuerpo</span>
+                <input type="range" id="sizeBodyRange" class="ed-range" min="8" max="40" value="16">
+                <input type="number" id="sizeBodyInput" class="ed-num" min="8" max="40" value="16">
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ===================== PESTAÑA: BIBLIOTECA ===================== -->
+          <section class="ed-pane" id="paneLibrary" role="tabpanel">
+
+            <button class="btn-primary ed-save-current" id="btnSaveNewStyle">
+              <i class="fas fa-plus-circle"></i> Guardar estilo actual
             </button>
-          </div>
-        </div>
+            <input type="text" id="styleNameInput" class="form-input ed-style-name" placeholder="Nombre del estilo (opcional)">
 
-        <!-- Paleta de 5 Colores por Código HEX / Color Picker -->
-        <div class="admin-card">
-          <div class="card-header">
-            <h3><i class="fas fa-palette"></i> Configurar Paleta por HEX (5 Colores)</h3>
-            <p>Ingresa el código hexadecimal (#HEX) o usa el selector circular para cada color</p>
-          </div>
-
-          <div class="color-pickers-list">
-            
-            <div class="color-picker-item">
-              <div class="color-picker-info">
-                <span class="color-picker-title">Color 1: Fondo de Sección</span>
-                <span class="color-picker-desc">Variable: --svc-color-1</span>
-              </div>
-              <div class="color-picker-controls">
-                <input type="color" id="svcColor1" class="color-input" value="#e4edf7">
-                <input type="text" id="svcHex1" class="hex-input" value="#E4EDF7" maxlength="7">
+            <div class="lib-toolbar">
+              <span class="ed-eyebrow">Estilos guardados</span>
+              <div class="lib-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="styleSearchInput" placeholder="Buscar..." aria-label="Buscar estilos">
               </div>
             </div>
 
-            <div class="color-picker-item">
-              <div class="color-picker-info">
-                <span class="color-picker-title">Color 2: Fondo de Tarjetas</span>
-                <span class="color-picker-desc">Variable: --svc-color-2</span>
-              </div>
-              <div class="color-picker-controls">
-                <input type="color" id="svcColor2" class="color-input" value="#ffffff">
-                <input type="text" id="svcHex2" class="hex-input" value="#FFFFFF" maxlength="7">
-              </div>
-            </div>
-
-            <div class="color-picker-item">
-              <div class="color-picker-info">
-                <span class="color-picker-title">Color 3: Texto Principal</span>
-                <span class="color-picker-desc">Variable: --svc-color-3</span>
-              </div>
-              <div class="color-picker-controls">
-                <input type="color" id="svcColor3" class="color-input" value="#1e293b">
-                <input type="text" id="svcHex3" class="hex-input" value="#1E293B" maxlength="7">
-              </div>
-            </div>
-
-            <div class="color-picker-item">
-              <div class="color-picker-info">
-                <span class="color-picker-title">Color 4: Primario / Íconos</span>
-                <span class="color-picker-desc">Variable: --svc-color-4</span>
-              </div>
-              <div class="color-picker-controls">
-                <input type="color" id="svcColor4" class="color-input" value="#c5a059">
-                <input type="text" id="svcHex4" class="hex-input" value="#C5A059" maxlength="7">
-              </div>
-            </div>
-
-            <div class="color-picker-item">
-              <div class="color-picker-info">
-                <span class="color-picker-title">Color 5: Destaque / Hover</span>
-                <span class="color-picker-desc">Variable: --svc-color-5</span>
-              </div>
-              <div class="color-picker-controls">
-                <input type="color" id="svcColor5" class="color-input" value="#0f172a">
-                <input type="text" id="svcHex5" class="hex-input" value="#0F172A" maxlength="7">
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Gestión de Múltiples Estilos Guardados -->
-        <div class="admin-card">
-          <div class="card-header">
-            <h3><i class="fas fa-bookmark"></i> Estilos Guardados</h3>
-            <p>Guarda la combinación actual (colores, fuente y tamaños) para usarla más adelante</p>
-          </div>
-
-          <div class="save-style-form">
-            <input type="text" id="styleNameInput" class="form-input" placeholder="Nombre del estilo (ej: Dorado Elegante)">
-            <button class="btn-primary btn-save-style" id="btnSaveNewStyle">
-              <i class="fas fa-plus-circle"></i> Guardar Estilo Actual
-            </button>
-          </div>
-
-          <!-- Lista de Estilos Guardados -->
-          <div class="saved-styles-container" id="savedStylesContainer">
-            <span class="saved-styles-title">Historial de Estilos:</span>
             <div class="saved-styles-list" id="savedStylesList">
-              <p class="empty-styles-text">No hay estilos guardados previamente.</p>
+              <p class="empty-styles-text">No hay estilos guardados todavía.</p>
             </div>
-          </div>
+
+            <div class="lib-pagination hidden" id="libPagination"></div>
+
+          </section>
+
         </div>
 
-        <!-- Acciones Globales del Panel (Ubicación Independiente) -->
-        <div class="admin-card global-actions-card">
-          <button class="btn-primary btn-save-palette" id="btnSavePalette">
-            <i class="fas fa-save"></i> Aplicar y Activar Estilo Actual
+        <!-- Barra de acción fija -->
+        <div class="ed-actionbar">
+          <button class="btn-primary ed-apply" id="btnSavePalette">
+            <i class="fas fa-check-circle"></i> Aplicar cambios al sitio
           </button>
-
-          <button class="btn-reset-palette" id="btnResetPalette">
-            <i class="fas fa-undo"></i> Restablecer Todo por Defecto
+          <button class="ed-secondary-action" id="btnResetPalette">
+            <i class="fas fa-undo"></i> Restablecer todo por defecto
           </button>
-
-          <!-- Notificación de Guardado -->
           <div class="save-toast hidden" id="saveToast">
             <i class="fas fa-check-circle"></i> ¡Configuración guardada exitosamente!
           </div>
@@ -260,125 +246,22 @@
 
       </div>
 
-      <!-- Columna Derecha: Vista Previa en Tiempo Real DE TODA LA PÁGINA -->
+      <!-- ================================================================
+           Columna Derecha: Vista Previa en Tiempo Real (página real, scroll)
+           ================================================================ -->
       <div class="admin-preview-panel">
         <div class="preview-header">
-          <h3><i class="fas fa-eye"></i> Vista Previa en Tiempo Real (Toda la Página)</h3>
+          <h3><i class="fas fa-eye"></i> Vista Previa en Tiempo Real</h3>
           <span class="badge-live"><i class="fas fa-circle"></i> En Vivo</span>
         </div>
 
         <div class="admin-preview-container">
-          <div class="preview-full-page-box">
-            
-            <!-- 1. Header Vista Previa -->
-            <header class="header mini-header">
-              <div class="container header-container">
-                <a href="#" class="logo">
-                  <div class="logo-icon"><i class="fas fa-balance-scale"></i></div>
-                  <div>ODA <span>LEGAL</span></div>
-                </a>
-                <nav>
-                  <ul class="nav-menu">
-                    <li><a href="#" class="nav-link active">Inicio</a></li>
-                    <li><a href="#" class="nav-link">Servicios</a></li>
-                    <li><a href="#" class="nav-link">Galería</a></li>
-                    <li><a href="#" class="nav-link">Contacto</a></li>
-                  </ul>
-                </nav>
-                <div class="header-actions">
-                  <span class="btn-primary" style="padding:0.4rem 1rem;"><i class="fas fa-phone-alt"></i> Consulta</span>
-                </div>
-              </div>
-            </header>
-
-            <!-- 2. Hero/Banner Vista Previa -->
-            <section class="hero mini-hero">
-              <div class="hero-overlay"></div>
-              <div class="container hero-grid">
-                <div class="hero-content">
-                  <div class="hero-badge"><i class="fas fa-award"></i> Firma Legal</div>
-                  <h1 class="hero-title">Defensa Legal <span>Estratégica</span></h1>
-                  <p class="hero-description">Asesoría jurídica integral y representación de alto nivel para particulares y empresas.</p>
-                  <div class="hero-actions">
-                    <span class="btn-primary"><i class="fas fa-calendar-check"></i> Agendar</span>
-                    <span class="btn-secondary"><i class="fas fa-gavel"></i> Servicios</span>
-                  </div>
-                </div>
-                <div class="hero-card">
-                  <img src="assets/images/attorney.png" alt="Abogado" class="hero-profile-img">
-                  <h3 class="hero-card-name">Lic. Carlos A. Mendoza</h3>
-                  <p class="hero-card-subtitle">Abogado Senior & Socio Fundador</p>
-                </div>
-              </div>
-            </section>
-
-            <!-- 3. Sección de Servicios Vista Previa -->
-            <section class="services-section">
-              <div class="container">
-                <div class="section-header">
-                  <span class="section-tag">Especialidades</span>
-                  <h2 class="section-title">Nuestras Áreas de Práctica</h2>
-                  <p class="section-subtitle">Soluciones jurídicas personalizadas con excelencia, ética y compromiso profesional.</p>
-                </div>
-
-                <div class="services-grid">
-                  <div class="service-card">
-                    <div class="service-icon"><i class="fas fa-gavel"></i></div>
-                    <h3 class="service-title">Derecho Civil y Familia</h3>
-                    <p class="service-description">Asesoría en divorcios, herencias y contratos con ética profesional.</p>
-                    <span class="service-link">Consultar Área <i class="fas fa-arrow-right"></i></span>
-                  </div>
-
-                  <div class="service-card">
-                    <div class="service-icon"><i class="fas fa-shield-alt"></i></div>
-                    <h3 class="service-title">Derecho Penal</h3>
-                    <p class="service-description">Defensa jurídica rigurosa en procesos penales y querellas.</p>
-                    <span class="service-link">Consultar Área <i class="fas fa-arrow-right"></i></span>
-                  </div>
-
-                  <div class="service-card">
-                    <div class="service-icon"><i class="fas fa-building"></i></div>
-                    <h3 class="service-title">Derecho Corporativo</h3>
-                    <p class="service-description">Constitución de sociedades y gobierno corporativo.</p>
-                    <span class="service-link">Consultar Área <i class="fas fa-arrow-right"></i></span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- 4. Galería Vista Previa -->
-            <section class="gallery-section">
-              <div class="container">
-                <div class="section-header">
-                  <span class="section-tag">Galería</span>
-                  <h2 class="section-title">Instalaciones & Equipo</h2>
-                </div>
-                <div class="gallery-grid">
-                  <div class="gallery-item">
-                    <img src="assets/images/hero.png" alt="Despacho" class="gallery-img">
-                  </div>
-                  <div class="gallery-item">
-                    <img src="assets/images/meeting.png" alt="Reunión" class="gallery-img">
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- 5. Footer Vista Previa -->
-            <footer class="footer">
-              <div class="container">
-                <div class="footer-bottom">
-                  <p>&copy; 2026 ODA Legal. Todos los derechos reservados.</p>
-                </div>
-              </div>
-            </footer>
-
-          </div>
+          <iframe id="previewFrame" class="preview-frame" src="index.html" title="Vista previa del sitio completo"></iframe>
         </div>
 
         <div class="preview-actions">
-          <a href="index.html" class="btn-primary btn-lg">
-            <i class="fas fa-check-circle"></i> Ir al Sitio Principal
+          <a href="index.html" target="_blank" class="btn-primary btn-lg">
+            <i class="fas fa-external-link-alt"></i> Abrir sitio en pestaña nueva
           </a>
         </div>
       </div>

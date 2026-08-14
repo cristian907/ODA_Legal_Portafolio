@@ -195,4 +195,67 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // --------------------------------------------------------------------------
+  // Vista Previa en Vivo desde el panel /admin (cuando esta página se carga
+  // dentro de un <iframe>). El panel envía la configuración por postMessage,
+  // lo que permite previsualizar cambios NO guardados y funciona incluso en
+  // file:// (donde el acceso directo al documento del iframe está bloqueado).
+  // --------------------------------------------------------------------------
+  function applyPreviewFont(dataUrl) {
+    let fontStyle = document.getElementById('customFontStyle');
+    if (dataUrl) {
+      if (!fontStyle) {
+        fontStyle = document.createElement('style');
+        fontStyle.id = 'customFontStyle';
+        document.head.appendChild(fontStyle);
+      }
+      fontStyle.textContent = `
+        @font-face {
+          font-family: 'CustomUploadedFont';
+          src: url('${dataUrl}') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+      `;
+      document.documentElement.style.setProperty('--font-main', "'CustomUploadedFont', sans-serif");
+    } else {
+      if (fontStyle) fontStyle.remove();
+      document.documentElement.style.setProperty('--font-main', "'Plus Jakarta Sans', sans-serif");
+    }
+  }
+
+  function applyPreviewConfig(cfg) {
+    const root = document.documentElement;
+
+    if (cfg.theme) {
+      root.setAttribute('data-theme', cfg.theme);
+      if (themeToggleIcon) {
+        themeToggleIcon.className = cfg.theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+      }
+    }
+
+    if (cfg.palette) {
+      root.style.setProperty('--svc-color-1', cfg.palette.c1);
+      root.style.setProperty('--svc-color-2', cfg.palette.c2);
+      root.style.setProperty('--svc-color-3', cfg.palette.c3);
+      root.style.setProperty('--svc-color-4', cfg.palette.c4);
+      root.style.setProperty('--svc-color-5', cfg.palette.c5);
+    }
+
+    if (cfg.sizes) {
+      root.style.setProperty('--size-titles', `${cfg.sizes.titles}px`);
+      root.style.setProperty('--size-subtitles', `${cfg.sizes.subtitles}px`);
+      root.style.setProperty('--size-body', `${cfg.sizes.body}px`);
+    }
+
+    applyPreviewFont(cfg.fontDataUrl);
+  }
+
+  window.addEventListener('message', (e) => {
+    const data = e.data;
+    if (data && data.type === 'oda-preview') {
+      applyPreviewConfig(data);
+    }
+  });
+
 });
