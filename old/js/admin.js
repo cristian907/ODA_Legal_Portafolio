@@ -1,70 +1,73 @@
 /* ==========================================================================
-   ODA LEGAL PORTAFOLIO - JAVASCRIPT ADMIN (REDISEÑO)
-   Editor con pestañas (Editor / Biblioteca), barra de acción única, edición
-   con banner inline, tamaños con slider+número sincronizados, y biblioteca
-   de estilos con buscador + paginación (4 por página).
+   ODA LEGAL PORTAFOLIO - JAVASCRIPT ADMIN
+   Arquitectura: 3 vistas (General / Biblioteca / Editor-modo).
+   El sitio soporta DOS modos con estilo propio: hay un slot activo CLARO y un
+   slot activo OSCURO. Al alternar en el sitio, cada modo muestra su estilo
+   (colores + tamaños + fuente). El "modo por defecto" decide con cuál abre.
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Paleta Predeterminada por Defecto (5 Colores)
+  // ------------------------------------------------------------------------
+  // Constantes
+  // ------------------------------------------------------------------------
   const defaultPalettes = {
-    light: {
-      c1: '#E4EDF7',
-      c2: '#ffffff',
-      c3: '#1e293b',
-      c4: '#c5a059',
-      c5: '#0f172a'
-    },
-    dark: {
-      c1: '#0f172a',
-      c2: '#1e293b',
-      c3: '#f8fafc',
-      c4: '#d4af37',
-      c5: '#e5be48'
-    }
+    light: { c1: '#E4EDF7', c2: '#FFFFFF', c3: '#1E293B', c4: '#C5A059', c5: '#0F172A' },
+    dark:  { c1: '#0F172A', c2: '#1E293B', c3: '#F8FAFC', c4: '#D4AF37', c5: '#E5BE48' }
   };
 
-  // Tamaños por defecto y límites ampliados (px)
   const sizeBounds = {
-    titles: { default: 40, min: 16, max: 140 },
+    titles:    { default: 40, min: 16, max: 140 },
     subtitles: { default: 20, min: 12, max: 80 },
-    body: { default: 16, min: 8, max: 40 }
+    body:      { default: 16, min: 8,  max: 40 }
   };
 
-  const PAGE_SIZE = 4; // Estilos por página en la biblioteca
+  const DEFAULT_SIZES = { titles: 40, subtitles: 20, body: 16 };
+  const PAGE_SIZE = 4;
 
   function clamp(val, min, max) {
     if (isNaN(val)) return min;
     return Math.min(Math.max(val, min), max);
   }
 
-  // Escapar HTML para evitar inyección desde nombres de estilo / fuente
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     })[c]);
   }
 
+  function swatchesHtml(palette) {
+    return ['c1', 'c2', 'c3', 'c4', 'c5']
+      .map((k) => `<span style="background:${escapeHtml(palette[k])}"></span>`)
+      .join('');
+  }
+
   // ------------------------------------------------------------------------
   // Estado
   // ------------------------------------------------------------------------
-  let currentTheme = localStorage.getItem('oda_theme') || 'light';
-  let activePalette = JSON.parse(localStorage.getItem(`oda_palette_${currentTheme}`)) || { ...defaultPalettes[currentTheme] };
-  let currentFontDataUrl = localStorage.getItem('oda_custom_font') || null;
-  let currentFontName = localStorage.getItem('oda_font_name') || null;
-  let activeStyleId = localStorage.getItem('oda_active_style_id') || null;
-  let editingStyleId = null; // ID del estilo en edición
-
-  let activeSizes = {
-    titles: clamp(parseInt(localStorage.getItem('oda_size_titles')) || sizeBounds.titles.default, sizeBounds.titles.min, sizeBounds.titles.max),
-    subtitles: clamp(parseInt(localStorage.getItem('oda_size_subtitles')) || sizeBounds.subtitles.default, sizeBounds.subtitles.min, sizeBounds.subtitles.max),
-    body: clamp(parseInt(localStorage.getItem('oda_size_body')) || sizeBounds.body.default, sizeBounds.body.min, sizeBounds.body.max)
-  };
-
   let savedStyles = JSON.parse(localStorage.getItem('oda_saved_styles')) || [];
+  let activeLightId = localStorage.getItem('oda_active_style_id_light') || null;
+  let activeDarkId = localStorage.getItem('oda_active_style_id_dark') || null;
+  let themeDefault = localStorage.getItem('oda_theme_default') || 'light';
+  let allowThemeToggle = localStorage.getItem('oda_theme_allow_toggle') !== 'false';
 
-  // Estado de la biblioteca (paginación + búsqueda)
+  // Migración desde el modelo antiguo de un solo estilo activo
+  (function migrateLegacyActive() {
+    const legacy = localStorage.getItem('oda_active_style_id');
+    if (legacy && !activeLightId && !activeDarkId) {
+      const s = savedStyles.find((x) => x.id === legacy);
+      if (s) {
+        if (s.theme === 'dark') activeDarkId = s.id; else activeLightId = s.id;
+        persistAppliedForTheme(s.theme);
+      }
+    }
+    localStorage.removeItem('oda_active_style_id');
+  })();
+
+  let view = 'general';          // 'general' | 'library' | 'editor'
+  let editorReturnView = 'general';
+  let draft = null;              // estilo en construcción/edición (o null)
+
   let currentLibPage = 1;
   let librarySearch = '';
 
@@ -76,76 +79,165 @@ document.addEventListener('DOMContentLoaded', () => {
   const adminLoginForm = document.getElementById('adminLoginForm');
   const btnLogout = document.getElementById('btnLogout');
 
-  // Pestañas
-  const tabEditorBtn = document.getElementById('tabEditorBtn');
+  const mainTabs = document.getElementById('mainTabs');
+  const tabGeneralBtn = document.getElementById('tabGeneralBtn');
   const tabLibraryBtn = document.getElementById('tabLibraryBtn');
-  const paneEditor = document.getElementById('paneEditor');
-  const paneLibrary = document.getElementById('paneLibrary');
+  const viewGeneral = document.getElementById('viewGeneral');
+  const viewLibrary = document.getElementById('viewLibrary');
+  const viewEditor = document.getElementById('viewEditor');
   const libCount = document.getElementById('libCount');
 
-  // Tema, fuente, tamaños, acciones
+  // General
+  const btnDefaultLight = document.getElementById('btnDefaultLight');
+  const btnDefaultDark = document.getElementById('btnDefaultDark');
+  const allowToggleChk = document.getElementById('allowToggleChk');
+  const allowToggleHint = document.getElementById('allowToggleHint');
+  const activeStyleBoxLight = document.getElementById('activeStyleBoxLight');
+  const activeStyleBoxDark = document.getElementById('activeStyleBoxDark');
+  const btnCreateStyleGeneral = document.getElementById('btnCreateStyleGeneral');
+  const btnResetAll = document.getElementById('btnResetAll');
+
+  // Biblioteca
+  const btnCreateStyleLibrary = document.getElementById('btnCreateStyleLibrary');
+  const styleSearchInput = document.getElementById('styleSearchInput');
+  const savedStylesList = document.getElementById('savedStylesList');
+  const libPagination = document.getElementById('libPagination');
+
+  // Editor
+  const btnBackFromEditor = document.getElementById('btnBackFromEditor');
+  const editorTitle = document.getElementById('editorTitle');
+  const draftNameInput = document.getElementById('draftNameInput');
   const btnThemeLight = document.getElementById('btnThemeLight');
   const btnThemeDark = document.getElementById('btnThemeDark');
   const fontFileInput = document.getElementById('fontFileInput');
+  const fontDropzone = document.getElementById('fontDropzone');
   const fontStatusTag = document.getElementById('fontStatusTag');
   const btnResetFont = document.getElementById('btnResetFont');
 
-  const sizeTitlesInput = document.getElementById('sizeTitlesInput');
-  const sizeSubtitlesInput = document.getElementById('sizeSubtitlesInput');
-  const sizeBodyInput = document.getElementById('sizeBodyInput');
-  const sizeTitlesRange = document.getElementById('sizeTitlesRange');
-  const sizeSubtitlesRange = document.getElementById('sizeSubtitlesRange');
-  const sizeBodyRange = document.getElementById('sizeBodyRange');
+  const editorActionbar = document.getElementById('editorActionbar');
+  const btnSaveDraft = document.getElementById('btnSaveDraft');
+  const saveDraftLabel = document.getElementById('saveDraftLabel');
+  const btnCancelDraft = document.getElementById('btnCancelDraft');
 
-  const btnSavePalette = document.getElementById('btnSavePalette');
-  const btnResetPalette = document.getElementById('btnResetPalette');
   const saveToast = document.getElementById('saveToast');
+  const draftNameError = document.getElementById('draftNameError');
 
-  // Biblioteca
-  const styleNameInput = document.getElementById('styleNameInput');
-  const btnSaveNewStyle = document.getElementById('btnSaveNewStyle');
-  const savedStylesList = document.getElementById('savedStylesList');
-  const styleSearchInput = document.getElementById('styleSearchInput');
-  const libPagination = document.getElementById('libPagination');
+  // Modal de confirmación
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmTitle = document.getElementById('confirmTitle');
+  const confirmMsg = document.getElementById('confirmMsg');
+  const confirmIcon = document.getElementById('confirmIcon');
+  const confirmOk = document.getElementById('confirmOk');
+  const confirmCancel = document.getElementById('confirmCancel');
 
-  // Banner de edición
-  const editingBanner = document.getElementById('editingBanner');
-  const editingNameInput = document.getElementById('editingNameInput');
-  const btnUpdateStyle = document.getElementById('btnUpdateStyle');
-  const btnCancelEdit = document.getElementById('btnCancelEdit');
-
-  // Color pickers & hex inputs
   const colorElements = {
-    c1: { picker: document.getElementById('svcColor1'), hex: document.getElementById('svcHex1') },
-    c2: { picker: document.getElementById('svcColor2'), hex: document.getElementById('svcHex2') },
-    c3: { picker: document.getElementById('svcColor3'), hex: document.getElementById('svcHex3') },
-    c4: { picker: document.getElementById('svcColor4'), hex: document.getElementById('svcHex4') },
-    c5: { picker: document.getElementById('svcColor5'), hex: document.getElementById('svcHex5') }
+    c1: { picker: document.getElementById('svcColor1'), hex: document.getElementById('svcHex1'), err: document.getElementById('svcHexErr1') },
+    c2: { picker: document.getElementById('svcColor2'), hex: document.getElementById('svcHex2'), err: document.getElementById('svcHexErr2') },
+    c3: { picker: document.getElementById('svcColor3'), hex: document.getElementById('svcHex3'), err: document.getElementById('svcHexErr3') },
+    c4: { picker: document.getElementById('svcColor4'), hex: document.getElementById('svcHex4'), err: document.getElementById('svcHexErr4') },
+    c5: { picker: document.getElementById('svcColor5'), hex: document.getElementById('svcHex5'), err: document.getElementById('svcHexErr5') }
   };
 
-  // Vista previa (iframe de la página real). pushPreview está hoisted, por eso
-  // el listener de 'load' puede referenciarlo antes de su definición.
-  const previewFrame = document.getElementById('previewFrame');
-  if (previewFrame) previewFrame.addEventListener('load', pushPreview);
+  const sizeConfigs = [
+    { key: 'titles',    num: document.getElementById('sizeTitlesInput'),    range: document.getElementById('sizeTitlesRange') },
+    { key: 'subtitles', num: document.getElementById('sizeSubtitlesInput'), range: document.getElementById('sizeSubtitlesRange') },
+    { key: 'body',      num: document.getElementById('sizeBodyInput'),      range: document.getElementById('sizeBodyRange') }
+  ];
 
-  function pushPreview() {
-    if (!previewFrame || !previewFrame.contentWindow) return;
-    previewFrame.contentWindow.postMessage({
-      type: 'oda-preview',
-      theme: currentTheme,
-      palette: { ...activePalette },
-      sizes: { ...activeSizes },
-      fontDataUrl: currentFontDataUrl,
-      fontName: currentFontName
-    }, '*');
+  const previewFrame = document.getElementById('previewFrame');
+  if (previewFrame) previewFrame.addEventListener('load', () => pushPreview());
+
+  // ------------------------------------------------------------------------
+  // Validación inline (colores + nombre)
+  // ------------------------------------------------------------------------
+  const HEX_RE = /^#([0-9A-F]{3}){1,2}$/i;
+  const NAME_RE = /^[\p{L}\p{N} _-]+$/u;
+
+  // Pinta/limpia el error de un campo. msg === null limpia el estado.
+  function setFieldError(inputEl, msgEl, msg) {
+    if (inputEl) inputEl.classList.toggle('is-invalid', !!msg);
+    if (inputEl) inputEl.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    if (msgEl) {
+      msgEl.textContent = msg || '';
+      msgEl.classList.toggle('hidden', !msg);
+    }
   }
 
-  // Configuración de los 3 tamaños (número + slider comparten estado)
-  const sizeConfigs = [
-    { key: 'titles', num: sizeTitlesInput, range: sizeTitlesRange, cssVar: '--size-titles' },
-    { key: 'subtitles', num: sizeSubtitlesInput, range: sizeSubtitlesRange, cssVar: '--size-subtitles' },
-    { key: 'body', num: sizeBodyInput, range: sizeBodyRange, cssVar: '--size-body' }
-  ];
+  // Regla del nombre del estilo: opcional, pero si se escribe debe ser válido.
+  function validateStyleName(value) {
+    const name = (value || '').trim();
+    if (!name) return { ok: true, message: null };
+    if (name.length < 2) return { ok: false, message: 'Usa al menos 2 caracteres.' };
+    if (name.length > 40) return { ok: false, message: 'Máximo 40 caracteres.' };
+    if (!NAME_RE.test(name)) return { ok: false, message: 'Solo letras, números, espacios, guion y guion bajo.' };
+    const currentId = draft ? draft.id : null;
+    const dup = savedStyles.some((s) => s.id !== currentId && s.name.toLowerCase() === name.toLowerCase());
+    if (dup) return { ok: false, message: 'Ya existe un estilo con ese nombre.' };
+    return { ok: true, message: null };
+  }
+
+  // ------------------------------------------------------------------------
+  // Modal de confirmación (reemplaza confirm() nativo). Devuelve Promise<bool>.
+  // ------------------------------------------------------------------------
+  let confirmState = null; // { resolve, lastFocus }
+
+  function closeConfirm(result) {
+    if (!confirmState) return;
+    const { resolve, lastFocus } = confirmState;
+    confirmState = null;
+    if (confirmModal) confirmModal.classList.remove('show');
+    document.removeEventListener('keydown', onConfirmKeydown);
+    // Espera el fade-out antes de ocultar del todo
+    setTimeout(() => { if (confirmModal && !confirmState) confirmModal.classList.add('hidden'); }, 200);
+    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+    resolve(result);
+  }
+
+  function onConfirmKeydown(e) {
+    if (!confirmState) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeConfirm(false); return; }
+    if (e.key === 'Tab') {
+      // Foco atrapado entre Cancelar y Confirmar
+      const focusables = [confirmCancel, confirmOk].filter(Boolean);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+
+  function showConfirm({ title = 'Confirmar', message = '', confirmLabel = 'Confirmar', cancelLabel = 'Cancelar', variant = 'default' } = {}) {
+    return new Promise((resolve) => {
+      if (!confirmModal) { resolve(window.confirm(String(message).replace(/<[^>]*>/g, ''))); return; }
+      // Si hay un modal abierto, ciérralo como cancelado antes de abrir el nuevo
+      if (confirmState) closeConfirm(false);
+
+      if (confirmTitle) confirmTitle.textContent = title;
+      if (confirmMsg) confirmMsg.innerHTML = message; // message ya viene escapado por el llamador
+      if (confirmOk) {
+        confirmOk.textContent = confirmLabel;
+        confirmOk.classList.toggle('danger', variant === 'danger');
+      }
+      if (confirmCancel) confirmCancel.textContent = cancelLabel;
+      if (confirmIcon) confirmIcon.classList.toggle('is-danger', variant === 'danger');
+
+      confirmState = { resolve, lastFocus: document.activeElement };
+      confirmModal.classList.remove('hidden');
+      void confirmModal.offsetWidth; // reflow para la transición
+      confirmModal.classList.add('show');
+      document.addEventListener('keydown', onConfirmKeydown);
+      if (confirmOk) confirmOk.focus();
+    });
+  }
+
+  if (confirmOk) confirmOk.addEventListener('click', () => closeConfirm(true));
+  if (confirmCancel) confirmCancel.addEventListener('click', () => closeConfirm(false));
+  if (confirmModal) {
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) closeConfirm(false); // click en el backdrop
+    });
+  }
 
   // ------------------------------------------------------------------------
   // Login / Dashboard
@@ -160,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showDashboard();
     });
   }
-
   if (btnLogout) {
     btnLogout.addEventListener('click', () => {
       sessionStorage.removeItem('oda_admin_logged_in');
@@ -176,212 +267,202 @@ document.addEventListener('DOMContentLoaded', () => {
   function showDashboard() {
     adminLoginScreen.classList.add('hidden');
     adminDashboardScreen.classList.remove('hidden');
-    applyTheme(currentTheme);
-    applyFontSizes(activeSizes);
-    if (currentFontDataUrl) {
-      applyCustomFont(currentFontDataUrl, currentFontName || 'Fuente Personalizada');
-    }
-    showEditorTab();
+    setView('general');
+    applyPolicyUI();
+    renderActiveSlots();
     renderSavedStyles();
     pushPreview();
   }
 
   // ------------------------------------------------------------------------
-  // Pestañas
+  // Navegación entre vistas
   // ------------------------------------------------------------------------
-  function activateTab(which) {
-    const editorActive = which === 'editor';
-    if (paneEditor) paneEditor.classList.toggle('active', editorActive);
-    if (paneLibrary) paneLibrary.classList.toggle('active', !editorActive);
-    if (tabEditorBtn) {
-      tabEditorBtn.classList.toggle('active', editorActive);
-      tabEditorBtn.setAttribute('aria-selected', String(editorActive));
-    }
-    if (tabLibraryBtn) {
-      tabLibraryBtn.classList.toggle('active', !editorActive);
-      tabLibraryBtn.setAttribute('aria-selected', String(!editorActive));
+  function setView(v) {
+    view = v;
+    const inEditor = v === 'editor';
+    mainTabs.classList.toggle('hidden', inEditor);
+    editorActionbar.classList.toggle('hidden', !inEditor);
+    viewGeneral.classList.toggle('active', v === 'general');
+    viewLibrary.classList.toggle('active', v === 'library');
+    viewEditor.classList.toggle('active', inEditor);
+    if (!inEditor) {
+      tabGeneralBtn.classList.toggle('active', v === 'general');
+      tabGeneralBtn.setAttribute('aria-selected', String(v === 'general'));
+      tabLibraryBtn.classList.toggle('active', v === 'library');
+      tabLibraryBtn.setAttribute('aria-selected', String(v === 'library'));
     }
   }
-  function showEditorTab() { activateTab('editor'); }
-  function showLibraryTab() { activateTab('library'); }
 
-  if (tabEditorBtn) tabEditorBtn.addEventListener('click', showEditorTab);
-  if (tabLibraryBtn) tabLibraryBtn.addEventListener('click', showLibraryTab);
+  if (tabGeneralBtn) tabGeneralBtn.addEventListener('click', () => { setView('general'); pushPreview(); });
+  if (tabLibraryBtn) tabLibraryBtn.addEventListener('click', () => { setView('library'); pushPreview(); });
 
   // ------------------------------------------------------------------------
-  // Tamaños de texto (slider + número sincronizados, con clamp)
+  // Config por tema (sitio = slot activo de ese tema, o fábrica)
   // ------------------------------------------------------------------------
-  function applyFontSizes(sizes) {
-    activeSizes.titles = clamp(sizes.titles, sizeBounds.titles.min, sizeBounds.titles.max);
-    activeSizes.subtitles = clamp(sizes.subtitles, sizeBounds.subtitles.min, sizeBounds.subtitles.max);
-    activeSizes.body = clamp(sizes.body, sizeBounds.body.min, sizeBounds.body.max);
+  function activeStyleForTheme(theme) {
+    const id = theme === 'dark' ? activeDarkId : activeLightId;
+    return savedStyles.find((x) => x.id === id) || null;
+  }
 
-    sizeConfigs.forEach((cfg) => {
-      const v = activeSizes[cfg.key];
-      document.documentElement.style.setProperty(cfg.cssVar, `${v}px`);
-      if (cfg.num) cfg.num.value = v;
-      if (cfg.range) cfg.range.value = v;
-    });
+  function getConfigForTheme(theme) {
+    const s = activeStyleForTheme(theme);
+    if (s) {
+      return { theme, palette: { ...s.palette }, sizes: { ...s.sizes }, fontDataUrl: s.fontDataUrl || null, fontName: s.fontName || null };
+    }
+    return { theme, palette: { ...defaultPalettes[theme] }, sizes: { ...DEFAULT_SIZES }, fontDataUrl: null, fontName: null };
+  }
+
+  // Escribe el estilo aplicado de un tema en las claves que lee el sitio
+  function persistAppliedForTheme(theme) {
+    const c = getConfigForTheme(theme);
+    localStorage.setItem(`oda_applied_${theme}`, JSON.stringify({
+      palette: c.palette, sizes: c.sizes, fontDataUrl: c.fontDataUrl, fontName: c.fontName
+    }));
+    const id = theme === 'dark' ? activeDarkId : activeLightId;
+    if (id) localStorage.setItem(`oda_active_style_id_${theme}`, id);
+    else localStorage.removeItem(`oda_active_style_id_${theme}`);
+  }
+
+  // Aplica un estilo a su slot y lo vuelve el modo por defecto
+  function applyStyleToSite(style) {
+    if (style.theme === 'dark') activeDarkId = style.id; else activeLightId = style.id;
+    themeDefault = style.theme;
+    localStorage.setItem('oda_theme_default', themeDefault);
+    localStorage.setItem('oda_theme', themeDefault); // el sitio abre en este modo
+    persistAppliedForTheme(style.theme);
+    reconcileSlots();
+  }
+
+  // Cada slot solo puede contener un estilo de su propio tema. Si un id apunta
+  // a un estilo que ya no existe o cambió de tema, se libera ese slot.
+  function reconcileSlots() {
+    const l = savedStyles.find((s) => s.id === activeLightId);
+    if (activeLightId && (!l || l.theme !== 'light')) { activeLightId = null; persistAppliedForTheme('light'); }
+    const d = savedStyles.find((s) => s.id === activeDarkId);
+    if (activeDarkId && (!d || d.theme !== 'dark')) { activeDarkId = null; persistAppliedForTheme('dark'); }
+  }
+
+  // ------------------------------------------------------------------------
+  // Vista previa: borrador si editas; si no, el modo por defecto
+  // ------------------------------------------------------------------------
+  function pushPreview(cfg) {
+    if (!previewFrame || !previewFrame.contentWindow) return;
+    const c = cfg || (view === 'editor' && draft ? draft : getConfigForTheme(themeDefault));
+    previewFrame.contentWindow.postMessage({
+      type: 'oda-preview',
+      theme: c.theme,
+      palette: c.palette,
+      sizes: c.sizes,
+      fontDataUrl: c.fontDataUrl,
+      fontName: c.fontName,
+      // Al editar, se bloquea el modo en la preview (evita perder el borrador al alternar)
+      allowToggle: view === 'editor' ? false : allowThemeToggle
+    }, '*');
+  }
+
+  // ------------------------------------------------------------------------
+  // GENERAL: modo por defecto + permitir cambiar (persisten al instante)
+  // ------------------------------------------------------------------------
+  function applyPolicyUI() {
+    if (btnDefaultLight) btnDefaultLight.classList.toggle('active', themeDefault !== 'dark');
+    if (btnDefaultDark) btnDefaultDark.classList.toggle('active', themeDefault === 'dark');
+    if (allowToggleChk) allowToggleChk.checked = allowThemeToggle;
+    if (allowToggleHint) {
+      allowToggleHint.textContent = allowThemeToggle
+        ? 'El botón claro/oscuro aparece en el sitio.'
+        : 'El sitio queda forzado al modo por defecto; el botón se oculta.';
+    }
+  }
+
+  function setThemeDefault(mode) {
+    themeDefault = mode;
+    localStorage.setItem('oda_theme_default', mode);
+    localStorage.setItem('oda_theme', mode);
+    applyPolicyUI();
+    renderActiveSlots();
     pushPreview();
   }
+  if (btnDefaultLight) btnDefaultLight.addEventListener('click', () => setThemeDefault('light'));
+  if (btnDefaultDark) btnDefaultDark.addEventListener('click', () => setThemeDefault('dark'));
 
-  sizeConfigs.forEach((cfg) => {
-    const b = sizeBounds[cfg.key];
-
-    function setValue(v, { updateNum = true, updateRange = true } = {}) {
-      activeSizes[cfg.key] = v;
-      document.documentElement.style.setProperty(cfg.cssVar, `${v}px`);
-      if (updateNum && cfg.num) cfg.num.value = v;
-      if (updateRange && cfg.range) cfg.range.value = v;
+  if (allowToggleChk) {
+    allowToggleChk.addEventListener('change', () => {
+      allowThemeToggle = allowToggleChk.checked;
+      localStorage.setItem('oda_theme_allow_toggle', String(allowThemeToggle));
+      applyPolicyUI();
+      renderActiveSlots();
       pushPreview();
-    }
-
-    if (cfg.range) {
-      cfg.range.addEventListener('input', (e) => {
-        setValue(clamp(parseInt(e.target.value), b.min, b.max), { updateRange: false });
-      });
-    }
-
-    if (cfg.num) {
-      cfg.num.addEventListener('input', (e) => {
-        let raw = parseInt(e.target.value);
-        if (isNaN(raw)) return; // permitir campo vacío mientras se escribe
-        if (raw > b.max) { raw = b.max; e.target.value = b.max; }
-        setValue(raw, { updateNum: false });
-      });
-      cfg.num.addEventListener('blur', (e) => {
-        let raw = parseInt(e.target.value);
-        if (isNaN(raw) || raw < b.min) raw = b.min;
-        if (raw > b.max) raw = b.max;
-        setValue(raw);
-      });
-    }
-  });
-
-  // ------------------------------------------------------------------------
-  // Fuente única (.ttf)
-  // ------------------------------------------------------------------------
-  function applyCustomFont(dataUrl, fontName) {
-    let fontStyle = document.getElementById('customFontStyle');
-    if (!fontStyle) {
-      fontStyle = document.createElement('style');
-      fontStyle.id = 'customFontStyle';
-      document.head.appendChild(fontStyle);
-    }
-    fontStyle.textContent = `
-      @font-face {
-        font-family: 'CustomUploadedFont';
-        src: url('${dataUrl}') format('truetype');
-        font-weight: normal;
-        font-style: normal;
-      }
-    `;
-    document.documentElement.style.setProperty('--font-main', "'CustomUploadedFont', sans-serif");
-    if (fontStatusTag) fontStatusTag.textContent = fontName;
-    pushPreview();
-  }
-
-  function resetToDefaultFont() {
-    const fontStyle = document.getElementById('customFontStyle');
-    if (fontStyle) fontStyle.remove();
-    document.documentElement.style.setProperty('--font-main', "'Plus Jakarta Sans', sans-serif");
-    currentFontDataUrl = null;
-    currentFontName = null;
-    localStorage.removeItem('oda_custom_font');
-    localStorage.removeItem('oda_font_name');
-    if (fontFileInput) fontFileInput.value = '';
-    if (fontStatusTag) fontStatusTag.textContent = 'Plus Jakarta Sans (por defecto)';
-    pushPreview();
-  }
-
-  if (fontFileInput) {
-    fontFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (!file.name.toLowerCase().endsWith('.ttf')) {
-        alert('Selecciona un archivo de fuente válido con extensión .ttf');
-        fontFileInput.value = '';
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        currentFontDataUrl = evt.target.result;
-        currentFontName = file.name;
-        applyCustomFont(currentFontDataUrl, currentFontName);
-      };
-      reader.readAsDataURL(file);
     });
   }
 
-  if (btnResetFont) btnResetFont.addEventListener('click', resetToDefaultFont);
-
   // ------------------------------------------------------------------------
-  // Tema y paleta
+  // GENERAL: slots de estilo activo (claro y oscuro)
   // ------------------------------------------------------------------------
-  function applyTheme(theme) {
-    currentTheme = theme;
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('oda_theme', theme);
-
-    if (btnThemeLight) btnThemeLight.classList.toggle('active', theme !== 'dark');
-    if (btnThemeDark) btnThemeDark.classList.toggle('active', theme === 'dark');
-
-    const savedPalette = JSON.parse(localStorage.getItem(`oda_palette_${theme}`));
-    activePalette = savedPalette || { ...defaultPalettes[theme] };
-    updateUIAndPreview(activePalette);
+  function renderActiveSlots() {
+    renderSlot('light', activeStyleBoxLight, themeDefault === 'light');
+    renderSlot('dark', activeStyleBoxDark, themeDefault === 'dark');
   }
 
-  function updateUIAndPreview(palette) {
-    activePalette = { ...palette };
-    document.documentElement.style.setProperty('--svc-color-1', palette.c1);
-    document.documentElement.style.setProperty('--svc-color-2', palette.c2);
-    document.documentElement.style.setProperty('--svc-color-3', palette.c3);
-    document.documentElement.style.setProperty('--svc-color-4', palette.c4);
-    document.documentElement.style.setProperty('--svc-color-5', palette.c5);
+  function renderSlot(theme, container, isDefault) {
+    if (!container) return;
+    // Solo se atenúa el modo secundario cuando el sitio está FORZADO (el visitante
+    // no puede alternar). Si puede alternar, ambos modos se usan → ambos normales.
+    container.classList.toggle('ed-slot-muted', !isDefault && !allowThemeToggle);
 
-    Object.keys(colorElements).forEach((key) => {
-      const colorVal = palette[key];
-      if (colorElements[key].picker) colorElements[key].picker.value = colorVal;
-      if (colorElements[key].hex) colorElements[key].hex.value = colorVal.toUpperCase();
-    });
-    pushPreview();
+    const icon = theme === 'dark' ? '🌙' : '☀️';
+    const label = theme === 'dark' ? 'Oscuro' : 'Claro';
+    const defBadge = isDefault
+      ? '<span class="ed-default-badge"><i class="fas fa-star"></i> Por defecto</span>'
+      : '';
+    const s = activeStyleForTheme(theme);
+
+    if (!s) {
+      container.innerHTML = `
+        <div class="ed-slot-empty">
+          <div class="ed-slot-head">${icon} <strong>${label}</strong> ${defBadge} · sin estilo (usa fábrica)</div>
+          <div class="ed-active-swatches">${swatchesHtml(defaultPalettes[theme])}</div>
+          <button class="btn-load-style ed-slot-create" data-theme="${theme}"><i class="fas fa-plus"></i> Crear estilo ${label.toLowerCase()}</button>
+        </div>`;
+      const btn = container.querySelector('.ed-slot-create');
+      if (btn) btn.addEventListener('click', () => openEditor(null, 'general', theme));
+      return;
+    }
+
+    const fontLabel = s.fontName ? s.fontName : 'Fuente Estándar';
+    container.innerHTML = `
+      <div class="saved-style-card is-active">
+        <div class="saved-style-info">
+          <div class="saved-style-header">
+            <span class="saved-style-tag">${icon} ${label.toUpperCase()}</span>
+            ${defBadge}
+            <span class="saved-style-name">${escapeHtml(s.name)}</span>
+          </div>
+          <div class="saved-style-details">
+            <span class="font-meta" title="${escapeHtml(fontLabel)}"><i class="fas fa-font"></i> ${escapeHtml(fontLabel)}</span>
+            <span class="sizes-meta"><i class="fas fa-text-height"></i> T:${s.sizes.titles} S:${s.sizes.subtitles} P:${s.sizes.body}</span>
+          </div>
+          <div class="saved-style-swatches">${swatchesHtml(s.palette)}</div>
+        </div>
+        <div class="saved-style-actions">
+          <button class="btn-edit-style" data-id="${s.id}"><i class="fas fa-pen"></i> Editar</button>
+          <button class="btn-load-style" data-theme="${theme}"><i class="fas fa-random"></i> Cambiar</button>
+        </div>
+      </div>`;
+
+    const editBtn = container.querySelector('.btn-edit-style');
+    if (editBtn) editBtn.addEventListener('click', () => openEditor(s, 'general'));
+    const changeBtn = container.querySelector('.btn-load-style');
+    if (changeBtn) changeBtn.addEventListener('click', () => { setView('library'); pushPreview(); });
   }
 
-  if (btnThemeLight) btnThemeLight.addEventListener('click', () => applyTheme('light'));
-  if (btnThemeDark) btnThemeDark.addEventListener('click', () => applyTheme('dark'));
-
-  // Sincronía picker <-> hex
-  Object.keys(colorElements).forEach((key) => {
-    const picker = colorElements[key].picker;
-    const hexInput = colorElements[key].hex;
-
-    if (picker) {
-      picker.addEventListener('input', (e) => {
-        const hexVal = e.target.value.toUpperCase();
-        if (hexInput) hexInput.value = hexVal;
-        activePalette[key] = hexVal;
-        document.documentElement.style.setProperty(`--svc-color-${key.slice(1)}`, hexVal);
-        pushPreview();
-      });
-    }
-
-    if (hexInput) {
-      hexInput.addEventListener('input', (e) => {
-        let val = e.target.value.trim();
-        if (!val.startsWith('#')) val = '#' + val;
-        if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
-          if (picker) picker.value = val;
-          activePalette[key] = val;
-          document.documentElement.style.setProperty(`--svc-color-${key.slice(1)}`, val);
-          pushPreview();
-        }
-      });
-    }
-  });
+  if (btnCreateStyleGeneral) btnCreateStyleGeneral.addEventListener('click', () => openEditor(null, 'general'));
+  if (btnCreateStyleLibrary) btnCreateStyleLibrary.addEventListener('click', () => openEditor(null, 'library'));
 
   // ------------------------------------------------------------------------
-  // Biblioteca: filtrado, paginación y render
+  // BIBLIOTECA: filtrado, paginación y render
   // ------------------------------------------------------------------------
+  function isActive(id) { return id === activeLightId || id === activeDarkId; }
+
   function getFilteredStyles() {
     const term = librarySearch.trim().toLowerCase();
     if (!term) return savedStyles;
@@ -390,7 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderSavedStyles() {
     if (!savedStylesList) return;
-
     if (libCount) libCount.textContent = savedStyles.length;
 
     const filtered = getFilteredStyles();
@@ -398,10 +478,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentLibPage > totalPages) currentLibPage = totalPages;
     if (currentLibPage < 1) currentLibPage = 1;
 
-    // Vacíos
     if (filtered.length === 0) {
       savedStylesList.innerHTML = savedStyles.length === 0
-        ? '<p class="empty-styles-text">No hay estilos guardados todavía.</p>'
+        ? '<p class="empty-styles-text">No hay estilos guardados todavía. Crea el primero con “Crear estilo nuevo”.</p>'
         : `<p class="empty-styles-text">Ningún estilo coincide con "${escapeHtml(librarySearch)}".</p>`;
       renderPagination(1);
       return;
@@ -411,70 +490,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
     savedStylesList.innerHTML = '';
-    pageItems.forEach((styleItem) => {
+    pageItems.forEach((s) => {
       const itemEl = document.createElement('div');
-      const isActive = styleItem.id === activeStyleId;
-      const isEditing = styleItem.id === editingStyleId;
+      const active = isActive(s.id);
+      itemEl.className = `saved-style-card ${active ? 'is-active' : ''}`;
 
-      itemEl.className = `saved-style-card ${isActive ? 'is-active ' : ''}${isEditing ? 'is-editing' : ''}`;
-
-      const themeIcon = styleItem.theme === 'dark' ? '🌙' : '☀️';
-      const fontLabel = styleItem.fontName ? styleItem.fontName : 'Fuente Estándar';
-      const activeBadgeHtml = isActive ? '<span class="badge-active-style"><i class="fas fa-check-circle"></i> ACTIVO</span>' : '';
-      const editingBadgeHtml = isEditing ? '<span class="saved-style-tag" style="background:rgba(197,160,89,0.25); color:#e5be48;"><i class="fas fa-pen"></i> EDITANDO</span>' : '';
+      const themeIcon = s.theme === 'dark' ? '🌙' : '☀️';
+      const fontLabel = s.fontName ? s.fontName : 'Fuente Estándar';
+      const activeBadge = active ? '<span class="badge-active-style"><i class="fas fa-check-circle"></i> ACTIVO</span>' : '';
 
       itemEl.innerHTML = `
         <div class="saved-style-info">
           <div class="saved-style-header">
-            <span class="saved-style-name">${escapeHtml(styleItem.name)}</span>
-            <span class="saved-style-tag">${themeIcon} ${escapeHtml(styleItem.theme.toUpperCase())}</span>
-            ${activeBadgeHtml}
-            ${editingBadgeHtml}
+            <span class="saved-style-name">${escapeHtml(s.name)}</span>
+            <span class="saved-style-tag">${themeIcon} ${escapeHtml(s.theme.toUpperCase())}</span>
+            ${activeBadge}
           </div>
           <div class="saved-style-details">
             <span class="font-meta" title="${escapeHtml(fontLabel)}"><i class="fas fa-font"></i> ${escapeHtml(fontLabel)}</span>
-            <span class="sizes-meta"><i class="fas fa-text-height"></i> T:${styleItem.sizes.titles}px S:${styleItem.sizes.subtitles}px P:${styleItem.sizes.body}px</span>
+            <span class="sizes-meta"><i class="fas fa-text-height"></i> T:${s.sizes.titles}px S:${s.sizes.subtitles}px P:${s.sizes.body}px</span>
           </div>
-          <div class="saved-style-swatches">
-            <span style="background:${escapeHtml(styleItem.palette.c1)}"></span>
-            <span style="background:${escapeHtml(styleItem.palette.c2)}"></span>
-            <span style="background:${escapeHtml(styleItem.palette.c3)}"></span>
-            <span style="background:${escapeHtml(styleItem.palette.c4)}"></span>
-            <span style="background:${escapeHtml(styleItem.palette.c5)}"></span>
-          </div>
+          <div class="saved-style-swatches">${swatchesHtml(s.palette)}</div>
         </div>
         <div class="saved-style-actions">
-          <button class="btn-load-style" data-id="${styleItem.id}" title="Activar este estilo"><i class="fas fa-download"></i> Cargar</button>
-          <button class="btn-edit-style" data-id="${styleItem.id}" title="Editar este estilo"><i class="fas fa-pen"></i> Editar</button>
-          <button class="btn-delete-style" data-id="${styleItem.id}" title="Borrar este estilo"><i class="fas fa-trash-alt"></i> Borrar</button>
+          <button class="btn-load-style" data-id="${s.id}" title="Aplicar como estilo del modo ${s.theme === 'dark' ? 'oscuro' : 'claro'}"><i class="fas fa-check"></i> Activar</button>
+          <button class="btn-edit-style" data-id="${s.id}" title="Editar este estilo"><i class="fas fa-pen"></i> Editar</button>
+          <button class="btn-delete-style" data-id="${s.id}" title="Borrar este estilo"><i class="fas fa-trash-alt"></i> Borrar</button>
         </div>
       `;
-
       savedStylesList.appendChild(itemEl);
     });
 
-    // Handlers por ID (robusto ante filtrado/paginación)
     savedStylesList.querySelectorAll('.btn-load-style').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const style = savedStyles.find((s) => s.id === btn.dataset.id);
-        if (style) {
-          exitEditMode(false);
-          loadStyleConfiguration(style);
-        }
+        const s = savedStyles.find((x) => x.id === btn.dataset.id);
+        if (s) activateStyle(s);
       });
     });
-
     savedStylesList.querySelectorAll('.btn-edit-style').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const style = savedStyles.find((s) => s.id === btn.dataset.id);
-        if (style) enterEditMode(style);
+        const s = savedStyles.find((x) => x.id === btn.dataset.id);
+        if (s) openEditor(s, 'library');
       });
     });
-
     savedStylesList.querySelectorAll('.btn-delete-style').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const style = savedStyles.find((s) => s.id === btn.dataset.id);
-        if (style) deleteStyle(style);
+        const s = savedStyles.find((x) => x.id === btn.dataset.id);
+        if (s) deleteStyle(s);
       });
     });
 
@@ -489,7 +551,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     libPagination.classList.remove('hidden');
-
     let html = `<button class="lib-page-btn" data-page="prev" ${currentLibPage === 1 ? 'disabled' : ''} aria-label="Anterior">‹</button>`;
     for (let p = 1; p <= totalPages; p++) {
       html += `<button class="lib-page-btn ${p === currentLibPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
@@ -517,233 +578,352 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
-  // Cargar / editar / borrar estilos
+  // Activar / borrar estilos
   // ------------------------------------------------------------------------
-  function loadStyleConfiguration(styleObj, notify = true) {
-    activeStyleId = styleObj.id;
-    localStorage.setItem('oda_active_style_id', activeStyleId);
-
-    applyTheme(styleObj.theme);
-    updateUIAndPreview(styleObj.palette);
-    localStorage.setItem(`oda_palette_${styleObj.theme}`, JSON.stringify(styleObj.palette));
-
-    if (styleObj.fontDataUrl) {
-      currentFontDataUrl = styleObj.fontDataUrl;
-      currentFontName = styleObj.fontName;
-      applyCustomFont(styleObj.fontDataUrl, styleObj.fontName);
-      localStorage.setItem('oda_custom_font', styleObj.fontDataUrl);
-      localStorage.setItem('oda_font_name', styleObj.fontName);
-    } else {
-      resetToDefaultFont();
-    }
-
-    applyFontSizes(styleObj.sizes);
-    localStorage.setItem('oda_size_titles', styleObj.sizes.titles);
-    localStorage.setItem('oda_size_subtitles', styleObj.sizes.subtitles);
-    localStorage.setItem('oda_size_body', styleObj.sizes.body);
-
+  function activateStyle(s) {
+    applyStyleToSite(s);
+    applyPolicyUI();
+    renderActiveSlots();
     renderSavedStyles();
-    if (notify) showToast(`<i class="fas fa-magic"></i> Estilo "${escapeHtml(styleObj.name)}" activado en el sitio`);
+    pushPreview();
+    const modo = s.theme === 'dark' ? 'oscuro' : 'claro';
+    showToast(`<i class="fas fa-check-circle"></i> "${escapeHtml(s.name)}" activado como estilo del modo ${modo}`);
   }
 
-  function enterEditMode(style) {
-    editingStyleId = style.id;
-    loadStyleConfiguration(style, false); // carga los valores en los controles
-    if (editingBanner) editingBanner.classList.remove('hidden');
-    if (editingNameInput) editingNameInput.value = style.name;
-    showEditorTab();
-    if (editingNameInput) editingNameInput.focus();
+  async function deleteStyle(s) {
+    const wasActive = isActive(s.id);
+    const safeName = escapeHtml(s.name);
+    const message = wasActive
+      ? `<strong>"${safeName}"</strong> está activo en el modo ${s.theme === 'dark' ? 'oscuro' : 'claro'}. Si lo borras, ese modo vuelve a los valores de fábrica.`
+      : `¿Seguro que quieres borrar el estilo <strong>"${safeName}"</strong>? Esta acción no se puede deshacer.`;
+    const ok = await showConfirm({
+      title: 'Borrar estilo',
+      message,
+      confirmLabel: 'Borrar',
+      variant: 'danger'
+    });
+    if (!ok) return;
+
+    savedStyles = savedStyles.filter((x) => x.id !== s.id);
+    localStorage.setItem('oda_saved_styles', JSON.stringify(savedStyles));
+
+    if (s.id === activeLightId) { activeLightId = null; persistAppliedForTheme('light'); }
+    if (s.id === activeDarkId) { activeDarkId = null; persistAppliedForTheme('dark'); }
+
+    renderActiveSlots();
     renderSavedStyles();
-    showToast(`<i class="fas fa-pen"></i> Editando "${escapeHtml(style.name)}". Ajusta y pulsa Guardar.`);
-  }
-
-  function exitEditMode(rerender = true) {
-    editingStyleId = null;
-    if (editingBanner) editingBanner.classList.add('hidden');
-    if (rerender) renderSavedStyles();
-  }
-
-  function deleteStyle(style) {
-    const isActive = style.id === activeStyleId;
-    const idx = savedStyles.findIndex((s) => s.id === style.id);
-    if (idx === -1) return;
-
-    if (isActive) {
-      const ok = confirm(`⚠️ ATENCIÓN: "${style.name}" es el ESTILO ACTIVO en el sitio.\n\nSi lo eliminas, el portal se restablecerá a los valores por defecto.\n\n¿Deseas continuar?`);
-      if (!ok) return;
-      savedStyles.splice(idx, 1);
-      localStorage.setItem('oda_saved_styles', JSON.stringify(savedStyles));
-      activeStyleId = null;
-      localStorage.removeItem('oda_active_style_id');
-      if (style.id === editingStyleId) exitEditMode(false);
-      executeFullResetToDefaults();
-      renderSavedStyles();
-      showToast('<i class="fas fa-trash-alt"></i> Estilo activo eliminado. Portal restablecido por defecto.');
-    } else {
-      const ok = confirm(`¿Borrar el estilo "${style.name}"?`);
-      if (!ok) return;
-      savedStyles.splice(idx, 1);
-      localStorage.setItem('oda_saved_styles', JSON.stringify(savedStyles));
-      if (style.id === editingStyleId) exitEditMode(false);
-      renderSavedStyles();
-      showToast(`<i class="fas fa-trash-alt"></i> Estilo "${escapeHtml(style.name)}" eliminado`);
-    }
+    pushPreview();
+    showToast(`<i class="fas fa-trash-alt"></i> Estilo "${escapeHtml(s.name)}" eliminado`);
   }
 
   // ------------------------------------------------------------------------
-  // Guardar estilo nuevo (Biblioteca)
+  // EDITOR (modo): trabajar sobre un borrador
   // ------------------------------------------------------------------------
-  if (btnSaveNewStyle) {
-    btnSaveNewStyle.addEventListener('click', () => {
-      const inputVal = styleNameInput ? styleNameInput.value.trim() : '';
-      const name = inputVal || `Estilo ${currentTheme === 'dark' ? 'Oscuro' : 'Claro'} #${savedStyles.length + 1}`;
+  function openEditor(style, returnView, presetTheme) {
+    editorReturnView = returnView || 'general';
 
-      if (savedStyles.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
-        alert(`Ya existe un estilo con el nombre "${name}". Elige otro nombre.`);
-        return;
-      }
-
-      const newStyleId = `style_${Date.now()}`;
-      const newStyleObj = {
-        id: newStyleId,
-        name,
-        theme: currentTheme,
-        palette: { ...activePalette },
-        fontDataUrl: currentFontDataUrl,
-        fontName: currentFontName,
-        sizes: { ...activeSizes }
+    if (style) {
+      draft = {
+        id: style.id, name: style.name, theme: style.theme,
+        palette: { ...style.palette }, sizes: { ...style.sizes },
+        fontDataUrl: style.fontDataUrl || null, fontName: style.fontName || null
       };
-
-      activeStyleId = newStyleId;
-      localStorage.setItem('oda_active_style_id', activeStyleId);
-
-      savedStyles.unshift(newStyleObj);
-      localStorage.setItem('oda_saved_styles', JSON.stringify(savedStyles));
-
-      persistActiveConfig();
-
-      if (styleNameInput) styleNameInput.value = '';
-      currentLibPage = 1;      // ver el recién creado (va al inicio)
-      librarySearch = '';
-      if (styleSearchInput) styleSearchInput.value = '';
-      renderSavedStyles();
-
-      showToast(`<i class="fas fa-bookmark"></i> Estilo "${escapeHtml(name)}" guardado y activado`);
-    });
-  }
-
-  // ------------------------------------------------------------------------
-  // Actualizar estilo en edición (banner)
-  // ------------------------------------------------------------------------
-  if (btnUpdateStyle) {
-    btnUpdateStyle.addEventListener('click', () => {
-      if (!editingStyleId) return;
-      const idx = savedStyles.findIndex((s) => s.id === editingStyleId);
-      if (idx === -1) return;
-
-      const nameToUse = (editingNameInput && editingNameInput.value.trim()) || savedStyles[idx].name;
-
-      if (savedStyles.some((s, i) => i !== idx && s.name.toLowerCase() === nameToUse.toLowerCase())) {
-        alert(`Ya existe otro estilo con el nombre "${nameToUse}". Elige un nombre diferente.`);
-        return;
-      }
-
-      savedStyles[idx] = {
-        id: editingStyleId,
-        name: nameToUse,
-        theme: currentTheme,
-        palette: { ...activePalette },
-        fontDataUrl: currentFontDataUrl,
-        fontName: currentFontName,
-        sizes: { ...activeSizes }
-      };
-
-      activeStyleId = editingStyleId;
-      localStorage.setItem('oda_active_style_id', activeStyleId);
-      localStorage.setItem('oda_saved_styles', JSON.stringify(savedStyles));
-      persistActiveConfig();
-
-      exitEditMode(false);
-      renderSavedStyles();
-      showToast(`<i class="fas fa-check-circle"></i> Estilo "${escapeHtml(nameToUse)}" actualizado`);
-    });
-  }
-
-  if (btnCancelEdit) btnCancelEdit.addEventListener('click', () => exitEditMode());
-
-  // ------------------------------------------------------------------------
-  // Aplicar cambios al sitio (barra de acción)
-  // ------------------------------------------------------------------------
-  function persistActiveConfig() {
-    localStorage.setItem(`oda_palette_${currentTheme}`, JSON.stringify(activePalette));
-    localStorage.setItem('oda_size_titles', activeSizes.titles);
-    localStorage.setItem('oda_size_subtitles', activeSizes.subtitles);
-    localStorage.setItem('oda_size_body', activeSizes.body);
-    if (currentFontDataUrl) {
-      localStorage.setItem('oda_custom_font', currentFontDataUrl);
-      localStorage.setItem('oda_font_name', currentFontName);
+      editorTitle.textContent = 'Editar estilo';
+      saveDraftLabel.textContent = 'Guardar cambios';
     } else {
-      localStorage.removeItem('oda_custom_font');
-      localStorage.removeItem('oda_font_name');
+      const theme = presetTheme || 'light';
+      draft = {
+        id: null, name: '', theme,
+        palette: { ...defaultPalettes[theme] }, sizes: { ...DEFAULT_SIZES },
+        fontDataUrl: null, fontName: null
+      };
+      editorTitle.textContent = 'Nuevo estilo';
+      saveDraftLabel.textContent = 'Guardar estilo';
     }
+
+    draftNameInput.value = draft.name;
+    setFieldError(draftNameInput, draftNameError, null);
+    Object.keys(colorElements).forEach((key) => setFieldError(colorElements[key].hex, colorElements[key].err, null));
+    updateThemeButtons();
+    populateColors();
+    populateSizes();
+    updateFontStatus();
+
+    setView('editor');
+    pushPreview();
   }
 
-  if (btnSavePalette) {
-    btnSavePalette.addEventListener('click', () => {
-      persistActiveConfig();
-      showToast('<i class="fas fa-check-circle"></i> ¡Cambios aplicados al sitio principal!');
-    });
-  }
-
-  // ------------------------------------------------------------------------
-  // Restablecer todo
-  // ------------------------------------------------------------------------
-  if (btnResetPalette) {
-    btnResetPalette.addEventListener('click', () => {
-      const ok = confirm('¿Restablecer la configuración activa (colores, fuente y tamaños) a los valores por defecto?');
-      if (ok) {
-        executeFullResetToDefaults();
-        showToast('<i class="fas fa-undo"></i> Configuración restablecida por defecto');
-      }
-    });
-  }
-
-  function executeFullResetToDefaults() {
-    activeStyleId = null;
-    exitEditMode(false);
-    localStorage.removeItem('oda_active_style_id');
-
-    const defaultPal = defaultPalettes[currentTheme];
-    updateUIAndPreview(defaultPal);
-    localStorage.setItem(`oda_palette_${currentTheme}`, JSON.stringify(defaultPal));
-
-    applyFontSizes({
-      titles: sizeBounds.titles.default,
-      subtitles: sizeBounds.subtitles.default,
-      body: sizeBounds.body.default
-    });
-    localStorage.removeItem('oda_size_titles');
-    localStorage.removeItem('oda_size_subtitles');
-    localStorage.removeItem('oda_size_body');
-
-    resetToDefaultFont();
+  function closeEditor() {
+    draft = null;
+    setView(editorReturnView);
+    renderActiveSlots();
     renderSavedStyles();
+    pushPreview();
+  }
+
+  function updateThemeButtons() {
+    if (!draft) return;
+    if (btnThemeLight) btnThemeLight.classList.toggle('active', draft.theme !== 'dark');
+    if (btnThemeDark) btnThemeDark.classList.toggle('active', draft.theme === 'dark');
+  }
+
+  function populateColors() {
+    if (!draft) return;
+    Object.keys(colorElements).forEach((key) => {
+      const v = draft.palette[key];
+      if (colorElements[key].picker) colorElements[key].picker.value = v;
+      if (colorElements[key].hex) colorElements[key].hex.value = v.toUpperCase();
+    });
+  }
+
+  function populateSizes() {
+    if (!draft) return;
+    sizeConfigs.forEach((cfg) => {
+      const v = draft.sizes[cfg.key];
+      if (cfg.num) cfg.num.value = v;
+      if (cfg.range) cfg.range.value = v;
+    });
+  }
+
+  function updateFontStatus() {
+    if (fontStatusTag) fontStatusTag.textContent = (draft && draft.fontName) ? draft.fontName : 'Plus Jakarta Sans (por defecto)';
+    if (fontFileInput) fontFileInput.value = '';
+  }
+
+  // Tema del estilo: al cambiarlo, carga los colores por defecto de ese tema
+  function setDraftTheme(theme) {
+    if (!draft) return;
+    draft.theme = theme;
+    draft.palette = { ...defaultPalettes[theme] };
+    updateThemeButtons();
+    populateColors();
+    pushPreview();
+  }
+  if (btnThemeLight) btnThemeLight.addEventListener('click', () => setDraftTheme('light'));
+  if (btnThemeDark) btnThemeDark.addEventListener('click', () => setDraftTheme('dark'));
+
+  // Colores
+  Object.keys(colorElements).forEach((key) => {
+    const picker = colorElements[key].picker;
+    const hexInput = colorElements[key].hex;
+    const hexErr = colorElements[key].err;
+    if (picker) {
+      picker.addEventListener('input', (e) => {
+        if (!draft) return;
+        const hexVal = e.target.value.toUpperCase();
+        if (hexInput) hexInput.value = hexVal;
+        setFieldError(hexInput, hexErr, null); // el selector nativo siempre da un hex válido
+        draft.palette[key] = hexVal;
+        pushPreview();
+      });
+    }
+    if (hexInput) {
+      hexInput.addEventListener('input', (e) => {
+        if (!draft) return;
+        let val = e.target.value.trim();
+        if (val && !val.startsWith('#')) val = '#' + val;
+        if (HEX_RE.test(val)) {
+          setFieldError(hexInput, hexErr, null);
+          if (picker) picker.value = val;
+          draft.palette[key] = val;
+          pushPreview();
+        } else {
+          setFieldError(hexInput, hexErr, 'Color inválido. Usa un hex como #3366FF.');
+        }
+      });
+      // Al salir del campo, restaura el último color válido si quedó inválido
+      hexInput.addEventListener('blur', () => {
+        if (!draft) return;
+        if (hexInput.classList.contains('is-invalid')) {
+          hexInput.value = String(draft.palette[key]).toUpperCase();
+          setFieldError(hexInput, hexErr, null);
+        }
+      });
+    }
+  });
+
+  // Nombre del estilo: validación en vivo
+  if (draftNameInput) {
+    draftNameInput.addEventListener('input', () => {
+      const { message } = validateStyleName(draftNameInput.value);
+      setFieldError(draftNameInput, draftNameError, message);
+    });
+  }
+
+  // Tamaños (número + slider sincronizados)
+  sizeConfigs.forEach((cfg) => {
+    const b = sizeBounds[cfg.key];
+    function setValue(v, { updateNum = true, updateRange = true } = {}) {
+      if (!draft) return;
+      draft.sizes[cfg.key] = v;
+      if (updateNum && cfg.num) cfg.num.value = v;
+      if (updateRange && cfg.range) cfg.range.value = v;
+      pushPreview();
+    }
+    if (cfg.range) {
+      cfg.range.addEventListener('input', (e) => {
+        setValue(clamp(parseInt(e.target.value), b.min, b.max), { updateRange: false });
+      });
+    }
+    if (cfg.num) {
+      cfg.num.addEventListener('input', (e) => {
+        let raw = parseInt(e.target.value);
+        if (isNaN(raw)) return;
+        if (raw > b.max) { raw = b.max; e.target.value = b.max; }
+        setValue(raw, { updateNum: false });
+      });
+      cfg.num.addEventListener('blur', (e) => {
+        let raw = parseInt(e.target.value);
+        if (isNaN(raw) || raw < b.min) raw = b.min;
+        if (raw > b.max) raw = b.max;
+        setValue(raw);
+      });
+    }
+  });
+
+  // Fuente: carga (compartida por el selector y arrastrar-soltar)
+  function handleFontFile(file) {
+    if (!draft || !file) return;
+    if (!file.name.toLowerCase().endsWith('.ttf')) {
+      showToast('<i class="fas fa-triangle-exclamation"></i> Selecciona un archivo de fuente válido (.ttf)', 'error');
+      if (fontFileInput) fontFileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      draft.fontDataUrl = evt.target.result;
+      draft.fontName = file.name;
+      if (fontStatusTag) fontStatusTag.textContent = file.name;
+      pushPreview();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (fontFileInput) {
+    fontFileInput.addEventListener('change', (e) => {
+      handleFontFile(e.target.files[0]);
+    });
+  }
+
+  // Arrastrar y soltar sobre la zona de carga
+  if (fontDropzone) {
+    ['dragenter', 'dragover'].forEach((type) => {
+      fontDropzone.addEventListener(type, (e) => {
+        e.preventDefault();
+        if (draft) fontDropzone.classList.add('is-dragover');
+      });
+    });
+    ['dragleave', 'dragend', 'drop'].forEach((type) => {
+      fontDropzone.addEventListener(type, () => fontDropzone.classList.remove('is-dragover'));
+    });
+    fontDropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      handleFontFile(file);
+    });
+  }
+  if (btnResetFont) {
+    btnResetFont.addEventListener('click', () => {
+      if (!draft) return;
+      draft.fontDataUrl = null;
+      draft.fontName = null;
+      updateFontStatus();
+      pushPreview();
+    });
+  }
+
+  // Guardar / cancelar
+  if (btnSaveDraft) btnSaveDraft.addEventListener('click', saveDraft);
+  if (btnCancelDraft) btnCancelDraft.addEventListener('click', closeEditor);
+  if (btnBackFromEditor) btnBackFromEditor.addEventListener('click', closeEditor);
+
+  function saveDraft() {
+    if (!draft) return;
+    const typed = draftNameInput ? draftNameInput.value.trim() : '';
+
+    const nameCheck = validateStyleName(typed);
+    if (!nameCheck.ok) {
+      setFieldError(draftNameInput, draftNameError, nameCheck.message);
+      if (draftNameInput) draftNameInput.focus();
+      return;
+    }
+
+    const name = typed || `Estilo ${draft.theme === 'dark' ? 'Oscuro' : 'Claro'} #${savedStyles.length + 1}`;
+    draft.name = name;
+
+    if (draft.id) {
+      const idx = savedStyles.findIndex((s) => s.id === draft.id);
+      if (idx !== -1) savedStyles[idx] = { ...draft };
+    } else {
+      draft.id = `style_${Date.now()}`;
+      savedStyles.unshift({ ...draft });
+      currentLibPage = 1;
+    }
+
+    localStorage.setItem('oda_saved_styles', JSON.stringify(savedStyles));
+    // Al guardar, el estilo se activa en el slot de su tema
+    applyStyleToSite(savedStyles.find((s) => s.id === draft.id));
+
+    const savedName = draft.name;
+    draft = null;
+    applyPolicyUI();
+    setView(editorReturnView);
+    renderActiveSlots();
+    renderSavedStyles();
+    pushPreview();
+    showToast(`<i class="fas fa-check-circle"></i> Estilo "${escapeHtml(savedName)}" guardado y activado`);
+  }
+
+  // ------------------------------------------------------------------------
+  // Restablecer todo (ambos modos a fábrica; conserva la biblioteca)
+  // ------------------------------------------------------------------------
+  if (btnResetAll) {
+    btnResetAll.addEventListener('click', async () => {
+      const ok = await showConfirm({
+        title: 'Restablecer todo',
+        message: '¿Restablecer el sitio a los valores de fábrica en <strong>ambos modos</strong>? Se desactivarán los estilos actuales. Tus estilos guardados se conservan.',
+        confirmLabel: 'Restablecer',
+        variant: 'danger'
+      });
+      if (!ok) return;
+
+      activeLightId = null;
+      activeDarkId = null;
+      themeDefault = 'light';
+      allowThemeToggle = true;
+
+      localStorage.setItem('oda_theme_default', 'light');
+      localStorage.setItem('oda_theme', 'light');
+      localStorage.setItem('oda_theme_allow_toggle', 'true');
+      persistAppliedForTheme('light');
+      persistAppliedForTheme('dark');
+
+      applyPolicyUI();
+      renderActiveSlots();
+      renderSavedStyles();
+      pushPreview();
+      showToast('<i class="fas fa-undo"></i> Sitio restablecido a los valores de fábrica');
+    });
   }
 
   // ------------------------------------------------------------------------
   // Toast
   // ------------------------------------------------------------------------
   let toastTimer = null;
-  function showToast(htmlMsg) {
+  function showToast(htmlMsg, type = 'success') {
     if (!saveToast) return;
     saveToast.innerHTML = htmlMsg;
+    saveToast.classList.remove('is-error', 'is-warn');
+    if (type === 'error') saveToast.classList.add('is-error');
+    else if (type === 'warn') saveToast.classList.add('is-warn');
     saveToast.classList.remove('hidden');
+    void saveToast.offsetWidth;
     saveToast.classList.add('show');
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       saveToast.classList.remove('show');
       setTimeout(() => saveToast.classList.add('hidden'), 300);
-    }, 2500);
+    }, type === 'error' ? 3500 : 2500);
   }
 
 });

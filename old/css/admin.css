@@ -98,6 +98,120 @@
 }
 
 /* --------------------------------------------------------------------------
+   Editor como modo: cabecera, volver, título, CTA y estilo activo
+   -------------------------------------------------------------------------- */
+.ed-editor-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.admin-body .ed-back {
+  appearance: none;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.82rem !important;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0;
+  transition: color var(--transition-fast);
+}
+.admin-body .ed-back:hover { color: var(--accent-gold); }
+
+.ed-editor-title {
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 0.95rem !important;
+}
+
+.ed-cta { width: 100%; margin-bottom: 0.6rem; }
+
+.admin-body .ed-cancel { color: #94a3b8; }
+.admin-body .ed-cancel:hover { color: #fca5a5; border-color: #ef4444; }
+
+/* Slots de estilo activo por modo (claro / oscuro) */
+.ed-slot {
+  margin-bottom: 0.6rem;
+  transition: opacity var(--transition-normal), filter var(--transition-normal);
+}
+.ed-slot:last-child { margin-bottom: 0; }
+
+/* El modo que NO es por defecto se ve atenuado (secundario). Sigue siendo
+   editable: al pasar el cursor o enfocarlo, recupera su presencia completa. */
+.ed-slot-muted {
+  opacity: 0.45;
+  filter: grayscale(0.35);
+}
+.ed-slot-muted:hover,
+.ed-slot-muted:focus-within {
+  opacity: 1;
+  filter: none;
+}
+
+/* Distintivo del modo por defecto */
+.ed-default-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.62rem !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #e5be48;
+  background: rgba(197, 160, 89, 0.15);
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+}
+.ed-default-badge i { font-size: 0.6rem; }
+
+.ed-slot-empty {
+  border: 1px dashed var(--ed-border);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+.ed-slot-head {
+  font-size: 0.82rem !important;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+.admin-body .ed-slot-create {
+  width: auto;
+  margin-top: 0.6rem;
+  padding: 0.4rem 0.7rem !important;
+  font-size: 0.76rem !important;
+}
+
+/* Estado vacío del estilo activo */
+.ed-active-empty {
+  font-size: 0.82rem !important;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+.ed-active-empty .ed-active-swatches {
+  display: flex;
+  gap: 4px;
+  margin-top: 0.6rem;
+}
+.ed-active-empty .ed-active-swatches span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: inline-block;
+}
+
+/* --------------------------------------------------------------------------
    Secciones planas (sin cajas) separadas por hairline + eyebrow
    -------------------------------------------------------------------------- */
 .ed-section {
@@ -153,6 +267,79 @@
   box-shadow: 0 2px 8px rgba(197, 160, 89, 0.35);
 }
 
+/* Texto de ayuda bajo un control */
+.ed-hint {
+  display: block;
+  font-size: 0.72rem !important;
+  color: #64748b;
+  margin-top: 0.5rem;
+  line-height: 1.45;
+}
+
+/* --------------------------------------------------------------------------
+   Política de tema — modo por defecto + interruptor "permitir cambiar"
+   -------------------------------------------------------------------------- */
+.ed-policy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ed-segmented-sm { padding: 2px; flex: none; }
+.admin-body .ed-segmented-sm .ed-seg {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem !important;
+}
+
+.ed-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  cursor: pointer;
+}
+
+.ed-switch-text { display: flex; flex-direction: column; }
+.ed-switch-text .ed-hint { margin-top: 0.2rem; }
+
+.ed-switch { position: relative; flex: none; }
+.ed-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ed-switch-track {
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: #334155;
+  transition: background var(--transition-fast);
+  position: relative;
+}
+
+.ed-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform var(--transition-fast);
+}
+
+.ed-switch input:checked + .ed-switch-track { background: var(--accent-gold); }
+.ed-switch input:checked + .ed-switch-track .ed-switch-thumb { transform: translateX(18px); }
+.ed-switch input:focus-visible + .ed-switch-track {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
 /* --------------------------------------------------------------------------
    Colores — filas simples (sin exponer el nombre de la variable CSS)
    -------------------------------------------------------------------------- */
@@ -184,6 +371,35 @@
 .ed-color-controls .hex-input { width: 84px; }
 
 /* --------------------------------------------------------------------------
+   Validación inline (errores de campo + estado inválido)
+   -------------------------------------------------------------------------- */
+/* La fila de color permite una segunda línea para el mensaje de error */
+.ed-color-row { flex-wrap: wrap; }
+.ed-color-row .ed-field-error {
+  flex-basis: 100%;
+  text-align: right;
+}
+
+.admin-body .ed-field-error {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: #fca5a5;
+}
+.admin-body .ed-field-error.hidden { display: none; }
+
+/* Estado inválido: el borde/glow rojo reemplaza el dorado de foco */
+.admin-body .hex-input.is-invalid,
+.admin-body .form-input.is-invalid,
+.admin-body .hex-input.is-invalid:focus,
+.admin-body .form-input.is-invalid:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
    Tipografía — carga de fuente
    -------------------------------------------------------------------------- */
 .ed-field { margin-bottom: 1.1rem; }
@@ -196,14 +412,68 @@
   margin-bottom: 0.4rem;
 }
 
+/* El input nativo se oculta; el <label.ed-file-btn> es el disparador visible */
 .admin-body .ed-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.admin-body .ed-file-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   width: 100%;
-  font-size: 0.8rem !important;
+  padding: 0.7rem 0.85rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed #334155;
+  border-radius: 8px;
   color: #94a3b8;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--ed-border);
-  border-radius: 6px;
-  padding: 0.5rem;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+.admin-body .ed-file-btn:hover {
+  border-color: var(--accent-gold);
+  background: rgba(197, 160, 89, 0.06);
+  color: #cbd5e1;
+}
+/* Foco accesible: el label recibe el foco vía el input oculto hermano */
+.admin-body .ed-file:focus-visible + .ed-file-btn,
+.admin-body .ed-file-btn:focus-visible {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.25);
+}
+/* Estado al arrastrar un archivo encima */
+.admin-body .ed-file-btn.is-dragover {
+  border-style: solid;
+  border-color: var(--accent-gold);
+  background: rgba(197, 160, 89, 0.12);
+  color: #f1f5f9;
+}
+
+.admin-body .ed-file-btn-icon {
+  font-size: 1rem;
+  color: var(--accent-gold);
+  flex: none;
+}
+.admin-body .ed-file-btn-text {
+  font-size: 0.82rem !important;
+  font-weight: 600;
+  color: inherit;
+}
+.admin-body .ed-file-btn-text strong { color: var(--accent-gold); font-weight: 700; }
+.admin-body .ed-file-btn-hint {
+  margin-left: auto;
+  font-size: 0.72rem !important;
+  color: #64748b;
+  flex: none;
 }
 
 .ed-font-status {
@@ -462,7 +732,124 @@
   border-color: #ef4444;
 }
 
-.ed-actionbar .save-toast { margin-top: 0; }
+/* Toast flotante (no depende de la barra de acción, no empuja el layout) */
+.admin-body .save-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%) translateY(8px);
+  margin: 0;
+  z-index: 3000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.admin-body .save-toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Variantes de toast (error / advertencia) */
+.admin-body .save-toast.is-error {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+}
+.admin-body .save-toast.is-warn {
+  background: rgba(197, 160, 89, 0.15);
+  border-color: rgba(197, 160, 89, 0.45);
+  color: #e5be48;
+}
+
+/* --------------------------------------------------------------------------
+   Modal de confirmación (reemplaza confirm() nativo)
+   -------------------------------------------------------------------------- */
+.admin-body .ed-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(3, 6, 12, 0.66);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.admin-body .ed-modal-overlay.show { opacity: 1; }
+.admin-body .ed-modal-overlay.hidden { display: none; }
+
+.admin-body .ed-modal {
+  width: 100%;
+  max-width: 380px;
+  background: #121824;
+  border: 1px solid var(--ed-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  transform: translateY(10px) scale(0.98);
+  transition: transform 0.2s ease;
+}
+.admin-body .ed-modal-overlay.show .ed-modal { transform: translateY(0) scale(1); }
+
+.admin-body .ed-modal-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.9rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  color: var(--accent-gold);
+  background: rgba(197, 160, 89, 0.12);
+}
+.admin-body .ed-modal-icon.is-danger {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.14);
+}
+
+.admin-body .ed-modal-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.admin-body .ed-modal-msg {
+  margin: 0 0 1.4rem;
+  font-size: var(--ed-fs-value);
+  line-height: 1.5;
+  color: #94a3b8;
+}
+.admin-body .ed-modal-msg strong { color: #e2e8f0; font-weight: 600; }
+
+.admin-body .ed-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+.admin-body .ed-modal-actions .ed-secondary-action { margin: 0; }
+
+/* Confirmar destructivo: rojo sólido en lugar del degradado dorado */
+.admin-body .ed-modal-confirm.danger {
+  background: #ef4444;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+.admin-body .ed-modal-confirm.danger:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-body .ed-modal-overlay,
+  .admin-body .ed-modal,
+  .admin-body .save-toast,
+  .admin-body .ed-modal-confirm.danger:hover {
+    transition: none;
+    transform: none;
+  }
+  .admin-body .ed-modal-overlay.show .ed-modal { transform: none; }
+}
 
 /* --------------------------------------------------------------------------
    Vista previa: iframe de la página real, scrolleable de arriba a abajo

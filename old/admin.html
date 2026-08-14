@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | ODA Legal</title>
-  <meta name="description" content="Panel de administración, gestión de múltiples estilos guardados, fuentes .TTF y paleta HEX de ODA Legal.">
+  <meta name="description" content="Panel de administración: configuración general, biblioteca de estilos y editor de ODA Legal.">
 
   <!-- FontAwesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Stylesheet base (tokens + sitio) -->
   <link rel="stylesheet" href="css/styles.css">
-  <!-- Stylesheet del panel rediseñado (se carga después para sobrescribir) -->
+  <!-- Stylesheet del panel -->
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-body">
@@ -89,14 +89,14 @@
     <main class="admin-main-container">
 
       <!-- ================================================================
-           Columna Izquierda: EDITOR (pestañas + barra de acción fija)
+           Columna Izquierda: PANEL (General / Biblioteca / Editor)
            ================================================================ -->
       <div class="admin-controls-panel">
 
-        <!-- Pestañas -->
-        <div class="ed-tabs" role="tablist">
-          <button class="ed-tab active" id="tabEditorBtn" role="tab" aria-selected="true">
-            <i class="fas fa-sliders-h"></i> Editor
+        <!-- Pestañas (ocultas en modo Editor) -->
+        <div class="ed-tabs" id="mainTabs" role="tablist">
+          <button class="ed-tab active" id="tabGeneralBtn" role="tab" aria-selected="true">
+            <i class="fas fa-sliders-h"></i> General
           </button>
           <button class="ed-tab" id="tabLibraryBtn" role="tab" aria-selected="false">
             <i class="fas fa-bookmark"></i> Biblioteca
@@ -107,26 +107,98 @@
         <!-- Región desplazable -->
         <div class="ed-content">
 
-          <!-- ===================== PESTAÑA: EDITOR ===================== -->
-          <section class="ed-pane active" id="paneEditor" role="tabpanel">
+          <!-- ===================== VISTA: GENERAL ===================== -->
+          <section class="ed-pane active" id="viewGeneral">
 
-            <!-- Banner de edición (visible solo al editar un estilo guardado) -->
-            <div class="ed-editing-banner hidden" id="editingBanner">
-              <i class="fas fa-pen"></i>
-              <input type="text" id="editingNameInput" placeholder="Nombre del estilo" aria-label="Nombre del estilo en edición">
-              <div class="ed-banner-actions">
-                <button class="ed-banner-save" id="btnUpdateStyle" title="Guardar cambios en este estilo">Guardar</button>
-                <button class="ed-banner-cancel" id="btnCancelEdit" title="Salir de edición">Cancelar</button>
+            <!-- Apariencia del sitio (política global) -->
+            <div class="ed-section">
+              <span class="ed-eyebrow">Apariencia del sitio</span>
+
+              <div class="ed-policy-row">
+                <span class="ed-color-label">Modo por defecto</span>
+                <div class="ed-segmented ed-segmented-sm">
+                  <button class="ed-seg active" id="btnDefaultLight"><i class="fas fa-sun"></i> Claro</button>
+                  <button class="ed-seg" id="btnDefaultDark"><i class="fas fa-moon"></i> Oscuro</button>
+                </div>
+              </div>
+
+              <label class="ed-switch-row" for="allowToggleChk">
+                <span class="ed-switch-text">
+                  <span class="ed-color-label">Permitir que el visitante cambie de modo</span>
+                  <span class="ed-hint" id="allowToggleHint">El botón claro/oscuro aparece en el sitio.</span>
+                </span>
+                <span class="ed-switch">
+                  <input type="checkbox" id="allowToggleChk" checked>
+                  <span class="ed-switch-track"><span class="ed-switch-thumb"></span></span>
+                </span>
+              </label>
+            </div>
+
+            <!-- Estilos activos por modo (uno claro y uno oscuro) -->
+            <div class="ed-section">
+              <span class="ed-eyebrow">Estilos activos por modo</span>
+              <div id="activeStyleBoxLight" class="ed-slot"><!-- render por JS --></div>
+              <div id="activeStyleBoxDark" class="ed-slot"><!-- render por JS --></div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="ed-section">
+              <button class="btn-primary ed-cta" id="btnCreateStyleGeneral">
+                <i class="fas fa-plus-circle"></i> Crear estilo nuevo
+              </button>
+              <button class="ed-secondary-action" id="btnResetAll">
+                <i class="fas fa-undo"></i> Restablecer todo por defecto
+              </button>
+            </div>
+
+          </section>
+
+          <!-- ===================== VISTA: BIBLIOTECA ===================== -->
+          <section class="ed-pane" id="viewLibrary">
+
+            <button class="btn-primary ed-cta" id="btnCreateStyleLibrary">
+              <i class="fas fa-plus-circle"></i> Crear estilo nuevo
+            </button>
+
+            <div class="lib-toolbar">
+              <span class="ed-eyebrow">Estilos guardados</span>
+              <div class="lib-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="styleSearchInput" placeholder="Buscar..." aria-label="Buscar estilos">
               </div>
             </div>
 
-            <!-- Tema -->
+            <div class="saved-styles-list" id="savedStylesList">
+              <p class="empty-styles-text">No hay estilos guardados todavía.</p>
+            </div>
+
+            <div class="lib-pagination hidden" id="libPagination"></div>
+
+          </section>
+
+          <!-- ===================== VISTA: EDITOR (modo) ===================== -->
+          <section class="ed-pane" id="viewEditor">
+
+            <div class="ed-editor-head">
+              <button class="ed-back" id="btnBackFromEditor"><i class="fas fa-arrow-left"></i> Volver</button>
+              <span class="ed-editor-title" id="editorTitle">Nuevo estilo</span>
+            </div>
+
+            <!-- Nombre -->
             <div class="ed-section">
-              <span class="ed-eyebrow">Tema</span>
+              <span class="ed-eyebrow">Nombre</span>
+              <input type="text" id="draftNameInput" class="form-input" placeholder="Nombre del estilo (opcional)" maxlength="40" autocomplete="off" aria-describedby="draftNameError">
+              <span class="ed-field-error hidden" id="draftNameError" role="alert"></span>
+            </div>
+
+            <!-- Tema del estilo -->
+            <div class="ed-section">
+              <span class="ed-eyebrow">Tema del estilo</span>
               <div class="ed-segmented">
                 <button class="ed-seg active" id="btnThemeLight"><i class="fas fa-sun"></i> Claro</button>
                 <button class="ed-seg" id="btnThemeDark"><i class="fas fa-moon"></i> Oscuro</button>
               </div>
+              <span class="ed-hint">Define si el estilo es claro u oscuro; al activarlo, el sitio abre en ese modo.</span>
             </div>
 
             <!-- Colores -->
@@ -137,36 +209,41 @@
                   <span class="ed-color-label">Fondo de sección</span>
                   <div class="ed-color-controls">
                     <input type="color" id="svcColor1" class="color-input" value="#e4edf7">
-                    <input type="text" id="svcHex1" class="hex-input" value="#E4EDF7" maxlength="7">
+                    <input type="text" id="svcHex1" class="hex-input" value="#E4EDF7" maxlength="7" aria-describedby="svcHexErr1">
                   </div>
+                  <span class="ed-field-error hidden" id="svcHexErr1" role="alert"></span>
                 </div>
                 <div class="ed-color-row">
                   <span class="ed-color-label">Fondo de tarjetas</span>
                   <div class="ed-color-controls">
                     <input type="color" id="svcColor2" class="color-input" value="#ffffff">
-                    <input type="text" id="svcHex2" class="hex-input" value="#FFFFFF" maxlength="7">
+                    <input type="text" id="svcHex2" class="hex-input" value="#FFFFFF" maxlength="7" aria-describedby="svcHexErr2">
                   </div>
+                  <span class="ed-field-error hidden" id="svcHexErr2" role="alert"></span>
                 </div>
                 <div class="ed-color-row">
                   <span class="ed-color-label">Texto principal</span>
                   <div class="ed-color-controls">
                     <input type="color" id="svcColor3" class="color-input" value="#1e293b">
-                    <input type="text" id="svcHex3" class="hex-input" value="#1E293B" maxlength="7">
+                    <input type="text" id="svcHex3" class="hex-input" value="#1E293B" maxlength="7" aria-describedby="svcHexErr3">
                   </div>
+                  <span class="ed-field-error hidden" id="svcHexErr3" role="alert"></span>
                 </div>
                 <div class="ed-color-row">
                   <span class="ed-color-label">Primario / Íconos</span>
                   <div class="ed-color-controls">
                     <input type="color" id="svcColor4" class="color-input" value="#c5a059">
-                    <input type="text" id="svcHex4" class="hex-input" value="#C5A059" maxlength="7">
+                    <input type="text" id="svcHex4" class="hex-input" value="#C5A059" maxlength="7" aria-describedby="svcHexErr4">
                   </div>
+                  <span class="ed-field-error hidden" id="svcHexErr4" role="alert"></span>
                 </div>
                 <div class="ed-color-row">
                   <span class="ed-color-label">Destaque / Hover</span>
                   <div class="ed-color-controls">
                     <input type="color" id="svcColor5" class="color-input" value="#0f172a">
-                    <input type="text" id="svcHex5" class="hex-input" value="#0F172A" maxlength="7">
+                    <input type="text" id="svcHex5" class="hex-input" value="#0F172A" maxlength="7" aria-describedby="svcHexErr5">
                   </div>
+                  <span class="ed-field-error hidden" id="svcHexErr5" role="alert"></span>
                 </div>
               </div>
             </div>
@@ -176,8 +253,13 @@
               <span class="ed-eyebrow">Tipografía</span>
 
               <div class="ed-field">
-                <label class="ed-field-label" for="fontFileInput"><i class="fas fa-font"></i> Fuente personalizada (.ttf)</label>
+                <span class="ed-field-label"><i class="fas fa-font"></i> Fuente personalizada (.ttf)</span>
                 <input type="file" id="fontFileInput" class="ed-file" accept=".ttf">
+                <label class="ed-file-btn" for="fontFileInput" id="fontDropzone">
+                  <i class="fas fa-cloud-arrow-up ed-file-btn-icon"></i>
+                  <span class="ed-file-btn-text">Elegir archivo <strong>.ttf</strong></span>
+                  <span class="ed-file-btn-hint">o arrástralo aquí</span>
+                </label>
                 <div class="ed-font-status">
                   <span id="fontStatusTag">Plus Jakarta Sans (por defecto)</span>
                   <button type="button" class="ed-inline-reset" id="btnResetFont" title="Usar fuente por defecto">
@@ -205,49 +287,40 @@
 
           </section>
 
-          <!-- ===================== PESTAÑA: BIBLIOTECA ===================== -->
-          <section class="ed-pane" id="paneLibrary" role="tabpanel">
-
-            <button class="btn-primary ed-save-current" id="btnSaveNewStyle">
-              <i class="fas fa-plus-circle"></i> Guardar estilo actual
-            </button>
-            <input type="text" id="styleNameInput" class="form-input ed-style-name" placeholder="Nombre del estilo (opcional)">
-
-            <div class="lib-toolbar">
-              <span class="ed-eyebrow">Estilos guardados</span>
-              <div class="lib-search">
-                <i class="fas fa-search"></i>
-                <input type="text" id="styleSearchInput" placeholder="Buscar..." aria-label="Buscar estilos">
-              </div>
-            </div>
-
-            <div class="saved-styles-list" id="savedStylesList">
-              <p class="empty-styles-text">No hay estilos guardados todavía.</p>
-            </div>
-
-            <div class="lib-pagination hidden" id="libPagination"></div>
-
-          </section>
-
         </div>
 
-        <!-- Barra de acción fija -->
-        <div class="ed-actionbar">
-          <button class="btn-primary ed-apply" id="btnSavePalette">
-            <i class="fas fa-check-circle"></i> Aplicar cambios al sitio
+        <!-- Barra de acción (solo visible en modo Editor) -->
+        <div class="ed-actionbar hidden" id="editorActionbar">
+          <button class="btn-primary ed-apply" id="btnSaveDraft">
+            <i class="fas fa-check-circle"></i> <span id="saveDraftLabel">Guardar estilo</span>
           </button>
-          <button class="ed-secondary-action" id="btnResetPalette">
-            <i class="fas fa-undo"></i> Restablecer todo por defecto
+          <button class="ed-secondary-action ed-cancel" id="btnCancelDraft">
+            Cancelar
           </button>
-          <div class="save-toast hidden" id="saveToast">
-            <i class="fas fa-check-circle"></i> ¡Configuración guardada exitosamente!
+        </div>
+
+        <!-- Toast global -->
+        <div class="save-toast hidden" id="saveToast">
+          <i class="fas fa-check-circle"></i> Guardado
+        </div>
+
+        <!-- Modal de confirmación -->
+        <div class="ed-modal-overlay hidden" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMsg">
+          <div class="ed-modal" role="document">
+            <div class="ed-modal-icon" id="confirmIcon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></div>
+            <h2 class="ed-modal-title" id="confirmTitle">Confirmar</h2>
+            <p class="ed-modal-msg" id="confirmMsg"></p>
+            <div class="ed-modal-actions">
+              <button type="button" class="ed-secondary-action ed-modal-cancel" id="confirmCancel">Cancelar</button>
+              <button type="button" class="btn-primary ed-modal-confirm" id="confirmOk">Confirmar</button>
+            </div>
           </div>
         </div>
 
       </div>
 
       <!-- ================================================================
-           Columna Derecha: Vista Previa en Tiempo Real (página real, scroll)
+           Columna Derecha: Vista Previa en Tiempo Real (página real)
            ================================================================ -->
       <div class="admin-preview-panel">
         <div class="preview-header">
