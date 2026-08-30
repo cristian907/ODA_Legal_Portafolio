@@ -1,0 +1,22 @@
+# Archivos de Cálculo KLM y scripts asociados
+calculo_klm_cv.xlsx
+calculo_klm_cv.txt
+build_excel.py
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+
+# Sistema Operativo y Editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+
+# Directorios de artefactos y temporales
+.tempmediaStorage/
+scratch/

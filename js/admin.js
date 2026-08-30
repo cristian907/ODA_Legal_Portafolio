@@ -6,7 +6,15 @@
    (colores + tamaños + fuente). El "modo por defecto" decide con cuál abre.
    ========================================================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
+function onReady(fn) {
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    setTimeout(fn, 0);
+  } else {
+    document.addEventListener('DOMContentLoaded', fn);
+  }
+}
+
+onReady(() => {
 
   // ------------------------------------------------------------------------
   // Constantes
@@ -70,7 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('oda_active_style_id');
   })();
 
-  let view = 'general';          // 'general' | 'library' | 'editor'
+  let activeModule = 'styles';   // 'styles' | 'cv'
+  let view = 'general';          // 'general' | 'library' | 'editor' | 'cv'
   let editorReturnView = 'general';
   let draft = null;              // estilo en construcción/edición (o null)
 
@@ -89,9 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainTabs = document.getElementById('mainTabs');
   const tabGeneralBtn = document.getElementById('tabGeneralBtn');
   const tabLibraryBtn = document.getElementById('tabLibraryBtn');
+  const navModuleStyles = document.getElementById('navModuleStyles');
+  const navModuleCv = document.getElementById('navModuleCv');
   const viewGeneral = document.getElementById('viewGeneral');
   const viewLibrary = document.getElementById('viewLibrary');
   const viewEditor = document.getElementById('viewEditor');
+  const viewCv = document.getElementById('viewCv');
+  const sitePreviewContainer = document.getElementById('sitePreviewContainer');
+  const cvPreviewContainer = document.getElementById('cvPreviewContainer');
   const libCount = document.getElementById('libCount');
 
   // General
@@ -247,33 +261,89 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------------------
+  // Navegación entre vistas y módulos (Header: Estilos vs Creación de CV)
+  // ------------------------------------------------------------------------
+  function setModule(mod) {
+    activeModule = mod;
+    if (navModuleStyles) navModuleStyles.classList.toggle('active', mod === 'styles');
+    if (navModuleCv) navModuleCv.classList.toggle('active', mod === 'cv');
+
+    if (mod === 'styles') {
+      setView(draft ? 'editor' : (view === 'library' ? 'library' : 'general'));
+    } else if (mod === 'cv') {
+      setView('cv');
+    }
+  }
+
+  function setView(v) {
+    view = v;
+    const inEditor = v === 'editor';
+    const inCv = v === 'cv';
+
+    if (inCv) {
+      activeModule = 'cv';
+      if (adminDashboardScreen) adminDashboardScreen.classList.add('module-cv');
+      if (navModuleStyles) navModuleStyles.classList.remove('active');
+      if (navModuleCv) navModuleCv.classList.add('active');
+    } else {
+      activeModule = 'styles';
+      if (adminDashboardScreen) adminDashboardScreen.classList.remove('module-cv');
+      if (navModuleStyles) navModuleStyles.classList.add('active');
+      if (navModuleCv) navModuleCv.classList.remove('active');
+    }
+
+    // Las pestañas del sidebar (General/Biblioteca) solo se ven en el módulo de estilos cuando no se está en el editor
+    mainTabs.classList.toggle('hidden', inEditor || inCv);
+    editorActionbar.classList.toggle('hidden', !inEditor);
+
+    if (viewGeneral) viewGeneral.classList.toggle('active', v === 'general');
+    if (viewLibrary) viewLibrary.classList.toggle('active', v === 'library');
+    if (viewEditor) viewEditor.classList.toggle('active', inEditor);
+    if (viewCv) viewCv.classList.toggle('active', inCv);
+
+    if (!inEditor && !inCv) {
+      if (tabGeneralBtn) {
+        tabGeneralBtn.classList.toggle('active', v === 'general');
+        tabGeneralBtn.setAttribute('aria-selected', String(v === 'general'));
+      }
+      if (tabLibraryBtn) {
+        tabLibraryBtn.classList.toggle('active', v === 'library');
+        tabLibraryBtn.setAttribute('aria-selected', String(v === 'library'));
+      }
+    }
+
+    // Conmutar entre la vista previa del sitio y la vista previa del CV
+    if (sitePreviewContainer && cvPreviewContainer) {
+      if (inCv) {
+        sitePreviewContainer.classList.add('hidden');
+        cvPreviewContainer.classList.remove('hidden');
+        if (window.cvWizard && typeof window.cvWizard.autoFit === 'function') {
+          setTimeout(() => {
+            window.cvWizard.autoFit();
+            window.cvWizard.renderPreview();
+          }, 60);
+        }
+      } else {
+        sitePreviewContainer.classList.remove('hidden');
+        cvPreviewContainer.classList.add('hidden');
+        pushPreview();
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------------
   // Login / Dashboard
   // ------------------------------------------------------------------------
-  const isLoggedIn = sessionStorage.getItem('oda_admin_logged_in') === 'true';
-  if (isLoggedIn) { showDashboard(); } else { showLogin(); }
-
-  if (adminLoginForm) {
-    adminLoginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      sessionStorage.setItem('oda_admin_logged_in', 'true');
-      showDashboard();
-    });
-  }
-  if (btnLogout) {
-    btnLogout.addEventListener('click', () => {
-      sessionStorage.removeItem('oda_admin_logged_in');
-      showLogin();
-    });
-  }
+  const btnLoginSubmit = document.getElementById('btnLoginSubmit');
 
   function showLogin() {
-    adminLoginScreen.classList.remove('hidden');
-    adminDashboardScreen.classList.add('hidden');
+    if (adminLoginScreen) adminLoginScreen.classList.remove('hidden');
+    if (adminDashboardScreen) adminDashboardScreen.classList.add('hidden');
   }
 
   function showDashboard() {
-    adminLoginScreen.classList.add('hidden');
-    adminDashboardScreen.classList.remove('hidden');
+    if (adminLoginScreen) adminLoginScreen.classList.add('hidden');
+    if (adminDashboardScreen) adminDashboardScreen.classList.remove('hidden');
     setView('general');
     applyPolicyUI();
     renderActiveSlots();
@@ -281,27 +351,93 @@ document.addEventListener('DOMContentLoaded', () => {
     pushPreview();
   }
 
-  // ------------------------------------------------------------------------
-  // Navegación entre vistas
-  // ------------------------------------------------------------------------
-  function setView(v) {
-    view = v;
-    const inEditor = v === 'editor';
-    mainTabs.classList.toggle('hidden', inEditor);
-    editorActionbar.classList.toggle('hidden', !inEditor);
-    viewGeneral.classList.toggle('active', v === 'general');
-    viewLibrary.classList.toggle('active', v === 'library');
-    viewEditor.classList.toggle('active', inEditor);
-    if (!inEditor) {
-      tabGeneralBtn.classList.toggle('active', v === 'general');
-      tabGeneralBtn.setAttribute('aria-selected', String(v === 'general'));
-      tabLibraryBtn.classList.toggle('active', v === 'library');
-      tabLibraryBtn.setAttribute('aria-selected', String(v === 'library'));
+  function handleLogin(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    try {
+      sessionStorage.setItem('oda_admin_logged_in', 'true');
+    } catch (err) {
+      console.warn('Storage warning:', err);
     }
+    showDashboard();
   }
 
-  if (tabGeneralBtn) tabGeneralBtn.addEventListener('click', () => { setView('general'); pushPreview(); });
-  if (tabLibraryBtn) tabLibraryBtn.addEventListener('click', () => { setView('library'); pushPreview(); });
+  const isLoggedIn = sessionStorage.getItem('oda_admin_logged_in') === 'true';
+  if (isLoggedIn) { showDashboard(); } else { showLogin(); }
+
+  if (adminLoginForm) {
+    adminLoginForm.addEventListener('submit', handleLogin);
+  }
+  if (btnLoginSubmit) {
+    btnLoginSubmit.addEventListener('click', handleLogin);
+  }
+  if (btnLogout) {
+    btnLogout.addEventListener('click', (e) => {
+      e.preventDefault();
+      try {
+        sessionStorage.removeItem('oda_admin_logged_in');
+      } catch (err) {}
+      showLogin();
+    });
+  }
+
+  if (navModuleStyles) navModuleStyles.addEventListener('click', (e) => { e.preventDefault(); setModule('styles'); });
+  if (navModuleCv) navModuleCv.addEventListener('click', (e) => { e.preventDefault(); setModule('cv'); });
+
+  if (tabGeneralBtn) tabGeneralBtn.addEventListener('click', (e) => { e.preventDefault(); setView('general'); pushPreview(); });
+  if (tabLibraryBtn) tabLibraryBtn.addEventListener('click', (e) => { e.preventDefault(); setView('library'); pushPreview(); });
+
+  // Delegación global de clicks para máxima robustez
+  document.addEventListener('click', (e) => {
+    const btnLogSubmit = e.target.closest('#btnLoginSubmit');
+    if (btnLogSubmit) {
+      e.preventDefault();
+      handleLogin(e);
+      return;
+    }
+    const btnLogOut = e.target.closest('#btnLogout');
+    if (btnLogOut) {
+      e.preventDefault();
+      try { sessionStorage.removeItem('oda_admin_logged_in'); } catch (err) {}
+      showLogin();
+      return;
+    }
+    const btnModStyles = e.target.closest('#navModuleStyles');
+    if (btnModStyles) {
+      e.preventDefault();
+      setModule('styles');
+      return;
+    }
+    const btnModCv = e.target.closest('#navModuleCv');
+    if (btnModCv) {
+      e.preventDefault();
+      setModule('cv');
+      return;
+    }
+    const btnGen = e.target.closest('#tabGeneralBtn');
+    if (btnGen) {
+      e.preventDefault();
+      setView('general');
+      pushPreview();
+      return;
+    }
+    const btnLib = e.target.closest('#tabLibraryBtn');
+    if (btnLib) {
+      e.preventDefault();
+      setView('library');
+      pushPreview();
+      return;
+    }
+  });
+
+  // Exponer a nivel global para llamadas directas
+  window.adminApp = {
+    setModule,
+    setView,
+    showDashboard,
+    showLogin,
+    get activeModule() { return activeModule; },
+    get view() { return view; }
+  };
 
   // ------------------------------------------------------------------------
   // Config por tema (sitio = slot activo de ese tema, o fábrica)

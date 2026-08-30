@@ -18,12 +18,65 @@
 }
 
 /* --------------------------------------------------------------------------
-   Layout de las dos columnas (editor más estrecho, con scroll interno propio)
+   Selector de Módulos en el Header Superior (Estilos vs Creación de CV)
+   -------------------------------------------------------------------------- */
+.admin-nav-modules {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem;
+  border-radius: 8px;
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  margin-left: 1.5rem;
+}
+
+.nav-module-btn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 0.42rem 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.nav-module-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-module-btn.active {
+  background: linear-gradient(135deg, #c5a059 0%, #b38e44 100%);
+  color: #0f172a;
+  font-weight: 800;
+  box-shadow: 0 2px 10px rgba(197, 160, 89, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   Layout de las dos columnas con PROPORCIÓN CONSTANTE al redimensionar
+   - Estilos: 32% (sidebar de configuración) / 68% (vista previa interactiva)
+   - Creación de CV: 45% (sidebar wizard) / 55% (vista previa A4)
    -------------------------------------------------------------------------- */
 .admin-main-container {
-  grid-template-columns: 440px 1fr;
+  display: grid;
+  grid-template-columns: 32% 68%;
   height: calc(100vh - 70px);
   min-height: 0;
+  width: 100%;
+  transition: grid-template-columns 0.25s ease;
+}
+
+/* Proporción constante específica para el módulo de Creación de CV */
+.admin-dashboard-screen.module-cv .admin-main-container,
+.admin-main-container.cv-mode {
+  grid-template-columns: 45% 55%;
 }
 
 .admin-controls-panel {
@@ -860,11 +913,22 @@
 }
 
 /* --------------------------------------------------------------------------
-   Vista previa: iframe de la página real, scrolleable de arriba a abajo
+   Vista previa: iframe de la página real o Vista previa del CV A4
    -------------------------------------------------------------------------- */
 .admin-preview-panel {
-  min-height: 0;          /* permite que el iframe se encoja dentro del flex */
-  overflow: hidden;       /* el scroll ocurre DENTRO del iframe, no en el panel */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;          /* permite que los contenedores se encojan dentro del grid */
+  overflow: hidden;
+}
+
+.site-preview-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
 }
 
 .admin-preview-container {
@@ -884,11 +948,12 @@
 }
 
 /* --------------------------------------------------------------------------
-   Responsivo: apilar columnas; el editor crece de forma natural
+   Responsivo: Mantiene la proporción en pantallas medianas y grandes.
+   Solo apila en dispositivos móviles estrechos (< 768px).
    -------------------------------------------------------------------------- */
-@media (max-width: 1200px) {
+@media (max-width: 768px) {
   .admin-main-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     height: auto;
   }
   .admin-controls-panel {
@@ -897,7 +962,7 @@
   }
   .ed-content { overflow: visible; }
 
-  /* Al apilar, el iframe necesita una altura fija para poder scrollear */
+  /* Al apilar en móviles, el iframe necesita una altura fija para poder scrollear */
   .admin-preview-panel { overflow: visible; }
-  .admin-preview-container { flex: none; height: 640px; }
+  .admin-preview-container { flex: none; height: 550px; }
 }

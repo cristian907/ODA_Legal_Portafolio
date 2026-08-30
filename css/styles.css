@@ -969,10 +969,9 @@ img {
   font-size: 0.95rem !important;
 }
 
-/* Ancho Ampliado para la Columna de Controles */
+/* Contenedor Principal del Panel de Administración */
 .admin-main-container {
   display: grid;
-  grid-template-columns: 560px 1fr;
   flex-grow: 1;
   min-height: calc(100vh - 70px);
 }
@@ -1685,7 +1684,7 @@ img {
 /* --------------------------------------------------------------------------
    Media Queries & Responsividad
    -------------------------------------------------------------------------- */
-@media (max-width: 1200px) {
+@media (max-width: 768px) {
   .admin-main-container {
     grid-template-columns: 1fr;
   }
