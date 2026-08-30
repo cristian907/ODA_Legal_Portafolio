@@ -1,0 +1,1122 @@
+/* ==========================================================================
+   PLANTILLA DE CURRÍCULUM VITAE (1 PÁGINA A4) & ESTILOS DEL WIZARD CV
+   ESTILO ALINEADO CON EL DISEÑO DE ODA LEGAL (AZUL NOCHE & DORADO)
+   ========================================================================== */
+
+:root {
+  --cv-dark-bg: #0f172a;             /* Azul noche profundo de ODA Legal */
+  --cv-dark-card: #1e293b;           /* Superficie oscura */
+  --cv-accent-gold: #c5a059;          /* Dorado de acento principal */
+  --cv-accent-gold-hover: #b38e44;    /* Dorado hover */
+  --cv-accent-gold-light: rgba(197, 160, 89, 0.18);
+  --cv-accent-gold-glow: rgba(197, 160, 89, 0.35);
+  --cv-text-white: #ffffff;
+  --cv-text-light: #e2e8f0;
+  --cv-text-dark: #0f172a;
+  --cv-text-muted: #64748b;
+  --cv-light-bg: #ffffff;
+  --cv-light-surface: #f8fafc;
+  --cv-gray-track: #e2e8f0;
+  --cv-border-color: #cbd5e1;
+  --cv-border-gold: rgba(197, 160, 89, 0.4);
+  --cv-radius: 6px;
+  --cv-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ==========================================================================
+   1. CONTENEDOR DE VISTA PREVIA DEL CV (PANEL DERECHO)
+   ========================================================================== */
+.cv-preview-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #080c14;
+  overflow: hidden;
+  position: relative;
+}
+
+.cv-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1.15rem;
+  background: #0f172a;
+  border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+  flex-shrink: 0;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+.cv-toolbar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.cv-toolbar-title i {
+  color: var(--cv-accent-gold);
+}
+
+.cv-toolbar-badge {
+  font-size: 0.68rem;
+  background: var(--cv-accent-gold-light);
+  color: #e5be48;
+  border: 1px solid rgba(197, 160, 89, 0.3);
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.cv-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-cv-action {
+  appearance: none;
+  border: 1px solid #1e293b;
+  background: #131d31;
+  color: #cbd5e1;
+  padding: 0.42rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.btn-cv-action:hover {
+  background: #1e293b;
+  color: #ffffff;
+  border-color: var(--cv-accent-gold);
+}
+
+.btn-cv-action.primary {
+  background: linear-gradient(135deg, var(--cv-accent-gold) 0%, #b38e44 100%);
+  color: #0f172a;
+  border: 1px solid var(--cv-accent-gold);
+  font-weight: 700;
+}
+
+.btn-cv-action.primary:hover {
+  background: linear-gradient(135deg, #d4af37 0%, var(--cv-accent-gold) 100%);
+  box-shadow: 0 4px 14px var(--cv-accent-gold-glow);
+  transform: translateY(-1px);
+}
+
+.btn-cv-action.success {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.btn-cv-action.success:hover {
+  background: #059669;
+}
+
+/* Área de scroll de la hoja */
+.cv-preview-viewport {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1.5rem 1rem;
+  background: #080c14;
+}
+
+/* ==========================================================================
+   2. HOJA DE CURRÍCULUM A4 (1 PÁGINA EXACTA) - ESTILO ODA LEGAL
+   ========================================================================== */
+.cv-paper-sheet {
+  width: 794px;
+  min-width: 794px;
+  max-width: 794px;
+  height: 1122px;
+  min-height: 1122px;
+  max-height: 1122px;
+  background: var(--cv-light-bg);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: var(--cv-font);
+  color: var(--cv-text-dark);
+  overflow: hidden;
+  position: relative;
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+  border: 1px solid rgba(197, 160, 89, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   CABECERA SUPERIOR (AZUL NOCHE & DORADO ODA LEGAL)
+   -------------------------------------------------------------------------- */
+.cv-header-dark {
+  background: linear-gradient(135deg, #0f172a 0%, #17233c 100%);
+  color: var(--cv-text-white);
+  padding: 26px 32px 22px 32px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-bottom: 3px solid var(--cv-accent-gold);
+  position: relative;
+}
+
+.cv-header-dark::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 240px;
+  height: 100%;
+  background: radial-gradient(circle at 100% 0%, rgba(197, 160, 89, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cv-header-top {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 28px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.cv-photo-card {
+  width: 165px;
+  height: 165px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1e293b;
+  border: 2.5px solid var(--cv-accent-gold);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cv-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.cv-photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.cv-photo-placeholder i {
+  font-size: 2.8rem;
+  color: var(--cv-accent-gold);
+}
+
+.cv-name-role {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cv-name-first {
+  font-size: 30px;
+  font-weight: 300;
+  color: #f1f5f9;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.cv-name-last {
+  font-size: 44px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  line-height: 1.05;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+}
+
+.cv-job-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--cv-accent-gold);
+  letter-spacing: 1px;
+  margin: 0;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Fila inferior de cabecera: Perfil + Contacto */
+.cv-header-bottom {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 32px;
+  align-items: flex-start;
+  padding-top: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.cv-profile-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cv-profile-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--cv-accent-gold);
+  margin: 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cv-profile-text {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--cv-text-light);
+  margin: 0;
+  text-align: justify;
+}
+
+.cv-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cv-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  color: #f1f5f9;
+  word-break: break-word;
+}
+
+.cv-contact-icon {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  background-color: var(--cv-accent-gold);
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* --------------------------------------------------------------------------
+   CUERPO INFERIOR (2 COLUMNAS, FONDO BLANCO ELEGANTE)
+   -------------------------------------------------------------------------- */
+.cv-body-white {
+  background-color: var(--cv-light-bg);
+  padding: 22px 32px 24px 32px;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 59% 37%;
+  gap: 4%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.cv-col-left,
+.cv-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Banner de título de sección oscuro con acento dorado */
+.cv-section-banner {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 4px solid var(--cv-accent-gold);
+  text-transform: uppercase;
+}
+
+/* Bloques de experiencia y educación */
+.cv-section-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.cv-timeline-item {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.cv-item-check {
+  margin-top: 2px;
+  color: var(--cv-accent-gold);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cv-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cv-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.cv-item-company {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cv-item-dates {
+  font-size: 11px;
+  font-weight: 700;
+  color: #b38e44;
+  white-space: nowrap;
+}
+
+.cv-item-desc {
+  font-size: 10px;
+  line-height: 1.38;
+  color: #475569;
+  margin: 0;
+  text-align: justify;
+}
+
+/* Bloque de Idiomas */
+.cv-languages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.cv-lang-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cv-lang-icon {
+  color: var(--cv-accent-gold);
+  font-size: 14px;
+}
+
+/* Bloque de Competencias (Barras doradas horizontales 1-5 niveles) */
+.cv-competencies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.cv-comp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cv-comp-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+.cv-comp-bar-track {
+  flex: 1;
+  max-width: 130px;
+  height: 8px;
+  background-color: var(--cv-gray-track);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cv-comp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cv-accent-gold) 0%, #d4af37 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+/* Bloque de Habilidades (5 puntos / dots dorados) */
+.cv-skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.cv-skill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cv-skill-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 105px;
+}
+
+.cv-skill-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cv-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--cv-gray-track);
+  transition: background-color 0.2s ease;
+}
+
+.cv-dot.filled {
+  background: linear-gradient(135deg, var(--cv-accent-gold) 0%, #d4af37 100%);
+  box-shadow: 0 1px 3px rgba(197, 160, 89, 0.4);
+}
+
+/* ==========================================================================
+   3. ESTILOS DEL WIZARD (PANEL IZQUIERDO - ODA LEGAL)
+   ========================================================================== */
+.cv-wizard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Stepper horizontal superior */
+.cv-stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 0.5rem 0.25rem 0.85rem;
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.cv-stepper-track {
+  position: absolute;
+  top: 32px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: #1e293b;
+  z-index: 1;
+}
+
+.cv-stepper-progress {
+  position: absolute;
+  top: 32px;
+  left: 20px;
+  height: 2px;
+  background: var(--cv-accent-gold);
+  z-index: 2;
+  transition: width 0.3s ease;
+}
+
+.cv-step-node {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.cv-step-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 2px solid #334155;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cv-step-node.active .cv-step-circle {
+  background: var(--cv-accent-gold);
+  border-color: #e5be48;
+  color: #0f172a;
+  font-weight: 800;
+  box-shadow: 0 0 12px var(--cv-accent-gold-glow);
+}
+
+.cv-step-node.completed .cv-step-circle {
+  background: #10b981;
+  border-color: #34d399;
+  color: #ffffff;
+}
+
+.cv-step-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.cv-step-node.active .cv-step-label {
+  color: var(--cv-accent-gold);
+  font-weight: 700;
+}
+
+.cv-step-node.completed .cv-step-label {
+  color: #cbd5e1;
+}
+
+/* Tarjeta del paso actual */
+.cv-step-pane {
+  display: none;
+  animation: edFade 0.2s ease;
+}
+
+.cv-step-pane.active {
+  display: block;
+}
+
+.cv-step-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.cv-step-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cv-step-title i {
+  color: var(--cv-accent-gold);
+}
+
+.cv-quick-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.btn-wizard-ghost {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  color: #cbd5e1;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-wizard-ghost:hover {
+  background: var(--cv-accent-gold-light);
+  color: #e5be48;
+  border-color: var(--cv-accent-gold);
+}
+
+/* Grupos y formularios dentro del Wizard */
+.cv-form-group {
+  margin-bottom: 0.85rem;
+}
+
+.cv-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.cv-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 0.35rem;
+}
+
+.cv-label .required {
+  color: var(--cv-accent-gold);
+  margin-left: 2px;
+}
+
+.cv-input,
+.cv-textarea,
+.cv-select {
+  width: 100%;
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: #f3f4f6;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cv-input:focus,
+.cv-textarea:focus,
+.cv-select:focus {
+  outline: none;
+  border-color: var(--cv-accent-gold);
+  box-shadow: 0 0 0 2px var(--cv-accent-gold-light);
+}
+
+.cv-input.is-invalid,
+.cv-textarea.is-invalid {
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.cv-error-text {
+  font-size: 0.7rem;
+  color: #f87171;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.cv-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+/* Sección de Foto en el Wizard */
+.cv-photo-uploader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #111827;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px dashed rgba(197, 160, 89, 0.3);
+}
+
+.cv-photo-thumb-preview {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background: #1f2937;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cv-accent-gold);
+}
+
+.cv-photo-thumb-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cv-photo-thumb-preview i {
+  color: var(--cv-accent-gold);
+  font-size: 1.5rem;
+}
+
+.cv-photo-ctrls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.cv-file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #1f2937;
+  color: #e5e7eb;
+  padding: 0.35rem 0.65rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+  border: 1px solid #374151;
+  transition: all 0.2s ease;
+}
+
+.cv-file-btn:hover {
+  background: #374151;
+  color: #ffffff;
+  border-color: var(--cv-accent-gold);
+}
+
+/* Tarjetas dinámicas agregables (Experiencia / Educación) */
+.cv-item-editor-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.65rem;
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.cv-item-editor-card:hover {
+  border-color: rgba(197, 160, 89, 0.3);
+}
+
+.cv-card-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.cv-card-delete-btn:hover {
+  color: #ef4444;
+}
+
+.btn-add-item {
+  width: 100%;
+  appearance: none;
+  background: var(--cv-accent-gold-light);
+  border: 1px dashed var(--cv-accent-gold);
+  color: #e5be48;
+  padding: 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btn-add-item:hover {
+  background: rgba(197, 160, 89, 0.25);
+  color: #ffffff;
+  box-shadow: 0 2px 8px var(--cv-accent-gold-glow);
+}
+
+/* Control visual de nivel 1-5 */
+.cv-level-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.cv-level-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cv-level-btn.active {
+  background: var(--cv-accent-gold);
+  border-color: #e5be48;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+/* Chips de Idiomas */
+.cv-lang-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.cv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #1f2937;
+  color: #f3f4f6;
+  padding: 0.25rem 0.6rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(197, 160, 89, 0.3);
+}
+
+.cv-chip-remove {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0;
+}
+
+.cv-chip-remove:hover {
+  color: #ef4444;
+}
+
+/* Barra de navegación inferior del Wizard */
+.cv-wizard-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 0 0;
+  margin-top: 1rem;
+  border-top: 1px solid var(--ed-border);
+  gap: 0.5rem;
+}
+
+.btn-wizard-nav {
+  appearance: none;
+  border: none;
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.btn-wizard-nav.prev {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.btn-wizard-nav.prev:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+.btn-wizard-nav.next {
+  background: linear-gradient(135deg, var(--cv-accent-gold) 0%, #b38e44 100%);
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.btn-wizard-nav.next:hover {
+  background: linear-gradient(135deg, #d4af37 0%, var(--cv-accent-gold) 100%);
+  box-shadow: 0 2px 10px var(--cv-accent-gold-glow);
+  transform: translateY(-1px);
+}
+
+.btn-wizard-nav.finish {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.btn-wizard-nav.finish:hover {
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Pantalla de Finalización del CV */
+.cv-completed-card {
+  background: rgba(197, 160, 89, 0.08);
+  border: 1px solid var(--cv-border-gold);
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.cv-completed-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cv-accent-gold) 0%, #b38e44 100%);
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 0.75rem;
+  box-shadow: 0 4px 12px var(--cv-accent-gold-glow);
+}
+
+.cv-completed-card h3 {
+  color: #ffffff;
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
+}
+
+.cv-completed-card p {
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.cv-completed-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ==========================================================================
+   4. MODAL DE APLICAR CV
+   ========================================================================== */
+.cv-apply-modal-content {
+  text-align: left;
+}
+
+.cv-apply-summary {
+  background: #0f172a;
+  border-radius: 6px;
+  padding: 0.85rem;
+  margin: 0.85rem 0;
+  border: 1px solid rgba(197, 160, 89, 0.25);
+}
+
+.cv-apply-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.cv-apply-row:last-child {
+  border-bottom: none;
+}
+
+.cv-apply-label {
+  color: #94a3b8;
+}
+
+.cv-apply-val {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   5. REGLAS DE IMPRESIÓN Y EXPORTACIÓN A PDF (@media print)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .cv-paper-sheet,
+  .cv-paper-sheet * {
+    visibility: visible;
+  }
+
+  .cv-paper-sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
