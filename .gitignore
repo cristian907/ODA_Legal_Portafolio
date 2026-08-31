@@ -20,3 +20,14 @@ Thumbs.db
 # Directorios de artefactos y temporales
 .tempmediaStorage/
 scratch/
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# Tooling caches
+.atl/
+.codegraph/
