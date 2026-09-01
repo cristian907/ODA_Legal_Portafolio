@@ -42,7 +42,7 @@ const progress = computed(
           node.step === currentStep
             ? 'border-[#c5a059] bg-[#c5a059] text-[#0f172a]'
             : node.step < currentStep
-              ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#e5be48]'
+              ? 'border-[#c5a059] bg-[#0b0f17] text-[#c5a059]'
               : 'border-[#1e293b] bg-[#0b0f17] text-slate-500'
         "
       >
@@ -51,7 +51,7 @@ const progress = computed(
       </span>
       <span
         class="text-[0.7rem] font-medium"
-        :class="node.step === currentStep ? 'text-white' : 'text-slate-500'"
+        :class="node.step === currentStep ? 'text-white' : node.step < currentStep ? 'text-slate-300' : 'text-slate-500'"
       >
         {{ node.label }}
       </span>

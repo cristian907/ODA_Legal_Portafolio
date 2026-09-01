@@ -1,56 +1,84 @@
 /**
- * Export an A4 sheet element to a single-page PDF.
+ * Export A4 sheet pages to a multi-page PDF.
  *
- * html2pdf.js (with jsPDF + html2canvas) is ~500kB, so it is dynamically
- * imported only when a PDF is actually requested — keeping the admin bundle lean.
+ * Strategy: render each .cv-paper-page INDIVIDUALLY via dom-to-image-more → jsPDF.
+ * We use dom-to-image-more because html2canvas has fundamental bugs with font metrics 
+ * (ascent/descent calculation) that cause text to shift downwards by several pixels
+ * depending on line-height and font-family combinations. dom-to-image-more uses
+ * SVG <foreignObject> to render the DOM using the browser's own native rendering engine,
+ * which guarantees pixel-perfect accuracy for text positioning.
  */
 export function usePdfExport() {
   async function exportSheet(sheet: HTMLElement | null, filename: string): Promise<void> {
     if (!sheet) return
-    const { default: html2pdf } = await import('html2pdf.js')
 
-    const saved = {
-      transform: sheet.style.transform,
-      boxShadow: sheet.style.boxShadow,
-      border: sheet.style.border,
+    // Dynamic imports
+    const [{ default: domtoimage }, { default: jsPDF }] = await Promise.all([
+      import('dom-to-image-more'),
+      import('jspdf'),
+    ])
+
+    // Wait for webfonts
+    if (document.fonts) {
+      await document.fonts.ready
     }
+
+    const pageEls = Array.from(sheet.querySelectorAll<HTMLElement>('.cv-paper-page'))
+    if (pageEls.length === 0) return
+
+    // Save & prepare the viewport so nothing is clipped
     const viewport = sheet.closest<HTMLElement>('.cv-preview-viewport')
-    const savedOverflow = viewport ? viewport.style.overflow : null
-    if (viewport) viewport.style.overflow = 'vear:qsible'
+    const saved = {
+      sheetTransform: sheet.style.transform,
+      viewportOverflow: viewport?.style.overflow ?? '',
+      viewportScrollTop: viewport?.scrollTop ?? 0,
+    }
 
     sheet.style.transform = 'none'
-    sheet.style.boxShadow = 'none'
-    sheet.style.border = 'none'
-    sheet.classList.add('is-exporting-pdf')
-
-    const restore = (): void => {
-      sheet.style.transform = saved.transform
-      sheet.style.boxShadow = saved.boxShadow
-      sheet.style.border = saved.border
-      sheet.classList.remove('is-exporting-pdf')
-      if (viewport) viewport.style.overflow = savedOverflow || ''
+    if (viewport) {
+      viewport.style.overflow = 'visible'
+      viewport.scrollTop = 0
     }
 
     try {
-      await html2pdf()
-        .set({
-          margin: 0,
-          filename,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, logging: false },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
+      const pdfW = 210
+      const pdfH = 297
+
+      for (let i = 0; i < pageEls.length; i++) {
+        const pageEl = pageEls[i]
+
+        if (i > 0) pdf.addPage()
+
+        // Render this single page element with dom-to-image-more.
+        // It uses native browser rendering via SVG, avoiding the html2canvas text shift bug.
+        // We scale by 2 for higher resolution (Retina-like quality).
+        const scale = 2
+        const imgData = await domtoimage.toJpeg(pageEl, {
+          quality: 0.98,
+          width: 794 * scale,
+          height: 1122 * scale,
+          style: {
+            transform: `scale(${scale})`,
+            transformOrigin: 'top left',
+            width: '794px',
+            height: '1122px',
+          },
+          bgcolor: '#ffffff',
+          cacheBust: true, // Prevents issues with cached fonts/images across renders
         })
-        .from(sheet)
-        .toPdf()
-        .get('pdf')
-        .then((pdf) => {
-          while (pdf.internal.getNumberOfPages() > 1) {
-            pdf.deletePage(pdf.internal.getNumberOfPages())
-          }
-        })
-        .save()
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH, `page_${i}`, 'FAST')
+      }
+
+      pdf.save(filename)
     } finally {
-      restore()
+      // Restore viewport
+      sheet.style.transform = saved.sheetTransform
+      if (viewport) {
+        viewport.style.overflow = saved.viewportOverflow
+        viewport.scrollTop = saved.viewportScrollTop
+      }
     }
   }
 

@@ -76,6 +76,15 @@ export const useCvStore = defineStore('cv', () => {
       setFieldError('languages', result.error.issues[0].message)
       return false
     }
+
+    const isDuplicate = cvData.value.languages.some(
+      (lang) => lang.name.trim().toLowerCase() === trimmedName.toLowerCase(),
+    )
+    if (isDuplicate) {
+      setFieldError('languages', 'Este idioma ya ha sido agregado.')
+      return false
+    }
+
     setFieldError('languages', null)
     cvData.value.languages.push({ id: createItemId('lang'), name: trimmedName })
     return true
