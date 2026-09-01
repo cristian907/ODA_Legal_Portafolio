@@ -337,6 +337,10 @@
   font-weight: bold;
 }
 
+.is-exporting-pdf .cv-contact-icon i {
+  transform: translateY(-4px);
+}
+
 /* --------------------------------------------------------------------------
    CUERPO INFERIOR (2 COLUMNAS, FONDO BLANCO ELEGANTE)
    -------------------------------------------------------------------------- */
@@ -481,8 +485,6 @@
   font-weight: 600;
   color: #1e293b;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 100px;
 }
 
@@ -522,8 +524,6 @@
   font-weight: 600;
   color: #1e293b;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 105px;
 }
 

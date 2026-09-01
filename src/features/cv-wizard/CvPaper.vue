@@ -19,6 +19,17 @@ const photoSrc = computed(() => {
 })
 
 const compPercent = (level: number) => Math.min(100, Math.max(20, level * 20))
+
+// Only show contact rows the user actually filled in; empty fields are dropped
+// from the CV instead of falling back to placeholder text.
+const contactItems = computed(() =>
+  [
+    { icon: 'fa-phone-alt', value: p.value.phone },
+    { icon: 'fa-envelope', value: p.value.email },
+    { icon: 'fa-globe', value: p.value.website },
+    { icon: 'fa-map-marker-alt', value: p.value.location },
+  ].filter((item) => item.value?.trim()),
+)
 </script>
 
 <template>
@@ -46,21 +57,9 @@ const compPercent = (level: number) => Math.min(100, Math.max(20, level * 20))
           <p class="cv-profile-text">{{ p.profile || 'Resumen del perfil profesional...' }}</p>
         </div>
         <ul class="cv-contact-list">
-          <li class="cv-contact-item">
-            <span class="cv-contact-icon"><i class="fas fa-phone-alt"></i></span>
-            <span>{{ p.phone || '+00 000 000000' }}</span>
-          </li>
-          <li class="cv-contact-item">
-            <span class="cv-contact-icon"><i class="fas fa-envelope"></i></span>
-            <span>{{ p.email || 'correo@ejemplo.com' }}</span>
-          </li>
-          <li class="cv-contact-item">
-            <span class="cv-contact-icon"><i class="fas fa-globe"></i></span>
-            <span>{{ p.website || 'www.misitio.com' }}</span>
-          </li>
-          <li class="cv-contact-item">
-            <span class="cv-contact-icon"><i class="fas fa-map-marker-alt"></i></span>
-            <span>{{ p.location || 'Ciudad, País' }}</span>
+          <li v-for="item in contactItems" :key="item.icon" class="cv-contact-item">
+            <span class="cv-contact-icon"><i class="fas" :class="item.icon"></i></span>
+            <span>{{ item.value }}</span>
           </li>
         </ul>
       </div>

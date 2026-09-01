@@ -24,11 +24,13 @@ export function usePdfExport() {
     sheet.style.transform = 'none'
     sheet.style.boxShadow = 'none'
     sheet.style.border = 'none'
+    sheet.classList.add('is-exporting-pdf')
 
     const restore = (): void => {
       sheet.style.transform = saved.transform
       sheet.style.boxShadow = saved.boxShadow
       sheet.style.border = saved.border
+      sheet.classList.remove('is-exporting-pdf')
       if (viewport) viewport.style.overflow = savedOverflow || ''
     }
 

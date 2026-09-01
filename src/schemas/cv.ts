@@ -13,6 +13,20 @@ export const personalSchema = z.object({
     .string()
     .trim()
     .pipe(z.union([z.literal(''), z.email('Introduce un correo válido.')])),
+  // Phone is optional too: empty passes; otherwise it must match the default
+  // example shape "+34-91-1234-567" — a "+" and hyphen-separated digit groups
+  // of 2-2-4-3. Any digits are allowed; only the structure is fixed.
+  phone: z
+    .string()
+    .trim()
+    .pipe(
+      z.union([
+        z.literal(''),
+        z
+          .string()
+          .regex(/^\+\d{2}-\d{2}-\d{4}-\d{3}$/, 'Usa el formato +34-91-1234-567.'),
+      ]),
+    ),
 })
 
 /**

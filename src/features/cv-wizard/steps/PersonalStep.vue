@@ -130,7 +130,14 @@ const photoThumb = computed(() => {
     <div class="grid grid-cols-2 gap-3">
       <label class="flex flex-col gap-1 text-sm text-slate-300">
         <span><i class="fas fa-phone-alt"></i> Teléfono</span>
-        <input v-model="p.phone" type="text" :class="[inputClass, 'border-[#1e293b]']" placeholder="+34-91-1234-567" />
+        <input
+          v-model="p.phone"
+          type="text"
+          :class="[inputClass, cv.errors.phone ? 'border-red-500' : 'border-[#1e293b]']"
+          placeholder="+34-91-1234-567"
+          @blur="cv.validateField(1, 'phone')"
+        />
+        <span v-if="cv.errors.phone" class="text-xs text-red-400">{{ cv.errors.phone }}</span>
       </label>
       <label class="flex flex-col gap-1 text-sm text-slate-300">
         <span><i class="fas fa-envelope"></i> Correo</span>
