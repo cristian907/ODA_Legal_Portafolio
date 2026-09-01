@@ -5,10 +5,8 @@
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat&logo=vite&logoColor=white)](https://vite.dev/)
 [![Pinia](https://img.shields.io/badge/Pinia-2-FFD859?style=flat&logo=vuedotjs&logoColor=black)](https://pinia.vuejs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-
 Aplicación web integral para la firma jurídica **ODA Legal**, que combina un **portafolio web corporativo de alto impacto visual** y un **panel de administración avanzado** con un módulo interactivo para la **creación y exportación de Currículum Vitae profesional en formato A4**.
 
-Migrada de HTML/CSS/JS vanilla a una **SPA Vue 3** modular y escalable, conservando el 100 % de la funcionalidad y los datos guardados por el usuario (`localStorage`).
 
 ---
 

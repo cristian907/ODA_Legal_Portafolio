@@ -1,7 +1,6 @@
 import type { Palette, PaletteKey, Sizes, SizeKey, ThemeName } from '@/types/theme'
 
 // Unified factory palettes + size bounds.
-// Previously duplicated across js/main.js and js/admin.js — now a single source.
 
 export const DEFAULT_PALETTES: Record<ThemeName, Palette> = {
   light: { c1: '#e4edf7', c2: '#ffffff', c3: '#1e293b', c4: '#c5a059', c5: '#0f172a' },

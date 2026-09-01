@@ -1,7 +1,6 @@
 import type { CvData } from '@/types/cv'
 
 // Default CV used when there is nothing persisted yet (and for "load sample").
-// Ported verbatim from the legacy js/cv-wizard.js SAMPLE_CV_DATA.
 export const SAMPLE_CV_DATA: CvData = {
   personal: {
     firstName: 'Alejandro',

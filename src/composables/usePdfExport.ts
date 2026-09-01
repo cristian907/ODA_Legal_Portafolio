@@ -1,8 +1,5 @@
 /**
  * Export an A4 sheet element to a single-page PDF.
- * Ports the legacy downloadCvAsPdf() exactly: strips transform/border/shadow
- * (which distort html2canvas capture and cause a blank 2nd page) and lifts the
- * viewport's overflow clip, then restores everything afterwards.
  *
  * html2pdf.js (with jsPDF + html2canvas) is ~500kB, so it is dynamically
  * imported only when a PDF is actually requested — keeping the admin bundle lean.
@@ -19,7 +16,7 @@ export function usePdfExport() {
     }
     const viewport = sheet.closest<HTMLElement>('.cv-preview-viewport')
     const savedOverflow = viewport ? viewport.style.overflow : null
-    if (viewport) viewport.style.overflow = 'visible'
+    if (viewport) viewport.style.overflow = 'vear:qsible'
 
     sheet.style.transform = 'none'
     sheet.style.boxShadow = 'none'

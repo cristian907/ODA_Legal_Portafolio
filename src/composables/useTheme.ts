@@ -17,8 +17,7 @@ export function setThemeAttribute(theme: ThemeName): void {
 }
 
 /** Apply a { c1..c5 } palette to the CSS custom properties. */
-export function applyPalette(palette: Palette | null | undefined): void {
-  if (!palette) return
+export function applyPalette(palette: Palette): void {
   const style = root().style
   ;(Object.keys(PALETTE_VARS) as (keyof Palette)[]).forEach((key) => {
     if (palette[key]) style.setProperty(PALETTE_VARS[key], palette[key])
@@ -26,8 +25,7 @@ export function applyPalette(palette: Palette | null | undefined): void {
 }
 
 /** Apply { titles, subtitles, body } sizes (numbers → px). */
-export function applySizes(sizes: Sizes | null | undefined): void {
-  if (!sizes) return
+export function applySizes(sizes: Sizes): void {
   const style = root().style
   ;(Object.keys(SIZE_VARS) as (keyof Sizes)[]).forEach((key) => {
     if (sizes[key] != null) style.setProperty(SIZE_VARS[key], `${sizes[key]}px`)
@@ -38,7 +36,7 @@ export function applySizes(sizes: Sizes | null | undefined): void {
  * Inject (or remove) an uploaded font as @font-face and point --font-main at it.
  * Passing a falsy dataUrl restores the fallback font.
  */
-export function applyFont(dataUrl: string | null | undefined): void {
+export function applyFont(dataUrl: string | null): void {
   const doc = document
   let styleEl = doc.getElementById(FONT_STYLE_ID) as HTMLStyleElement | null
 
@@ -58,8 +56,7 @@ export function applyFont(dataUrl: string | null | undefined): void {
 }
 
 /** Apply a full resolved config { palette, sizes, fontDataUrl } at once. */
-export function applyResolvedStyle(config: ThemeConfig | null | undefined): void {
-  if (!config) return
+export function applyResolvedStyle(config: ThemeConfig): void {
   applyPalette(config.palette)
   applySizes(config.sizes)
   applyFont(config.fontDataUrl)

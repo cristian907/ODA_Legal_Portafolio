@@ -14,8 +14,6 @@ interface ConfirmState extends Required<ConfirmOptions> {
   open: boolean
 }
 
-// Promise-based confirmation dialog (replaces window.confirm and the legacy
-// custom modal). A single <ConfirmModal> host reads this state.
 const state = reactive<ConfirmState>({
   open: false,
   title: 'Confirmar',

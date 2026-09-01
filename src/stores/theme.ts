@@ -28,34 +28,23 @@ function toThemeName(value: string | null, fallback: ThemeName = 'light'): Theme
   return value === 'dark' || value === 'light' ? value : fallback
 }
 
-/**
- * Theme store — the reactive heart of the live theming system.
- *
- * Replaces the legacy admin.js module state + the iframe/postMessage preview:
- * the editor mutates reactive state here, and the live preview reads it
- * directly (no cross-document messaging).
- */
 export const useThemeStore = defineStore('theme', () => {
-  // ---- Site-facing state -------------------------------------------------
   const currentTheme = ref<ThemeName>('light')
   const themeDefault = ref<ThemeName>('light')
   const allowToggle = ref(true)
   const appliedLight = ref<AppliedConfig | null>(null)
   const appliedDark = ref<AppliedConfig | null>(null)
 
-  // ---- Editor state ------------------------------------------------------
   const savedStyles = ref<SavedStyle[]>([])
   const activeLightId = ref<string | null>(null)
   const activeDarkId = ref<string | null>(null)
   const draft = ref<SavedStyle | null>(null)
 
-  // Library UI state
   const librarySearch = ref('')
   const libraryThemeFilter = ref<LibraryFilter>('all')
   const libraryPage = ref(1)
   const PAGE_SIZE = 4
 
-  // ---- Config resolution -------------------------------------------------
   function factoryConfig(theme: ThemeName): ThemeConfig {
     return {
       theme,
@@ -67,19 +56,19 @@ export const useThemeStore = defineStore('theme', () => {
   }
 
   function activeStyleForTheme(theme: ThemeName): SavedStyle | null {
-    const id = theme === 'dark' ? activeDarkId.value : activeLightId.value
-    return savedStyles.value.find((s) => s.id === id) || null
+    const activeId = theme === 'dark' ? activeDarkId.value : activeLightId.value
+    return savedStyles.value.find((style) => style.id === activeId) || null
   }
 
   function getConfigForTheme(theme: ThemeName): ThemeConfig {
-    const s = activeStyleForTheme(theme)
-    if (s) {
+    const activeStyle = activeStyleForTheme(theme)
+    if (activeStyle) {
       return {
         theme,
-        palette: { ...s.palette },
-        sizes: { ...s.sizes },
-        fontDataUrl: s.fontDataUrl || null,
-        fontName: s.fontName || null,
+        palette: { ...activeStyle.palette },
+        sizes: { ...activeStyle.sizes },
+        fontDataUrl: activeStyle.fontDataUrl || null,
+        fontName: activeStyle.fontName || null,
       }
     }
     const applied = theme === 'dark' ? appliedDark.value : appliedLight.value
@@ -91,39 +80,38 @@ export const useThemeStore = defineStore('theme', () => {
     draft.value ? draft.value : getConfigForTheme(themeDefault.value),
   )
 
-  // ---- Persistence -------------------------------------------------------
   function persistSavedStyles(): void {
     writeJSON(STORAGE_KEYS.SAVED_STYLES, savedStyles.value)
   }
 
   function persistAppliedForTheme(theme: ThemeName): void {
-    const c = getConfigForTheme(theme)
+    const config = getConfigForTheme(theme)
     const applied: AppliedConfig = {
-      palette: c.palette,
-      sizes: c.sizes,
-      fontDataUrl: c.fontDataUrl,
-      fontName: c.fontName,
+      palette: config.palette,
+      sizes: config.sizes,
+      fontDataUrl: config.fontDataUrl,
+      fontName: config.fontName,
     }
-    const key = theme === 'dark' ? STORAGE_KEYS.APPLIED_DARK : STORAGE_KEYS.APPLIED_LIGHT
-    writeJSON(key, applied)
+    const appliedKey = theme === 'dark' ? STORAGE_KEYS.APPLIED_DARK : STORAGE_KEYS.APPLIED_LIGHT
+    writeJSON(appliedKey, applied)
     if (theme === 'dark') appliedDark.value = applied
     else appliedLight.value = applied
 
-    const id = theme === 'dark' ? activeDarkId.value : activeLightId.value
-    const idKey = theme === 'dark' ? STORAGE_KEYS.ACTIVE_STYLE_DARK : STORAGE_KEYS.ACTIVE_STYLE_LIGHT
-    if (id) writeRaw(idKey, id)
-    else removeKey(idKey)
+    const activeId = theme === 'dark' ? activeDarkId.value : activeLightId.value
+    const activeIdKey = theme === 'dark' ? STORAGE_KEYS.ACTIVE_STYLE_DARK : STORAGE_KEYS.ACTIVE_STYLE_LIGHT
+    if (activeId) writeRaw(activeIdKey, activeId)
+    else removeKey(activeIdKey)
   }
 
   /** Each slot may only hold a style of its own theme; free stale slots. */
   function reconcileSlots(): void {
-    const l = savedStyles.value.find((s) => s.id === activeLightId.value)
-    if (activeLightId.value && (!l || l.theme !== 'light')) {
+    const lightStyle = savedStyles.value.find((style) => style.id === activeLightId.value)
+    if (activeLightId.value && (!lightStyle || lightStyle.theme !== 'light')) {
       activeLightId.value = null
       persistAppliedForTheme('light')
     }
-    const d = savedStyles.value.find((s) => s.id === activeDarkId.value)
-    if (activeDarkId.value && (!d || d.theme !== 'dark')) {
+    const darkStyle = savedStyles.value.find((style) => style.id === activeDarkId.value)
+    if (activeDarkId.value && (!darkStyle || darkStyle.theme !== 'dark')) {
       activeDarkId.value = null
       persistAppliedForTheme('dark')
     }
@@ -140,13 +128,11 @@ export const useThemeStore = defineStore('theme', () => {
     reconcileSlots()
   }
 
-  // ---- Applying tokens to the document (site side) -----------------------
   function applyCurrent(): void {
     setThemeAttribute(currentTheme.value)
     applyResolvedStyle(getConfigForTheme(currentTheme.value))
   }
 
-  // ---- Init paths --------------------------------------------------------
   function initFromStorage(): void {
     loadEditorState()
     themeDefault.value = toThemeName(readRaw(STORAGE_KEYS.THEME_DEFAULT, 'light'))
@@ -169,24 +155,9 @@ export const useThemeStore = defineStore('theme', () => {
     themeDefault.value = toThemeName(readRaw(STORAGE_KEYS.THEME_DEFAULT, 'light'))
     allowToggle.value = readRaw(STORAGE_KEYS.THEME_ALLOW_TOGGLE, 'true') !== 'false'
 
-    migrateLegacyActive()
     reconcileSlots()
   }
 
-  function migrateLegacyActive(): void {
-    const legacy = readRaw(STORAGE_KEYS.LEGACY_ACTIVE_STYLE, null)
-    if (legacy && !activeLightId.value && !activeDarkId.value) {
-      const s = savedStyles.value.find((x) => x.id === legacy)
-      if (s) {
-        if (s.theme === 'dark') activeDarkId.value = s.id
-        else activeLightId.value = s.id
-        persistAppliedForTheme(s.theme)
-      }
-    }
-    removeKey(STORAGE_KEYS.LEGACY_ACTIVE_STYLE)
-  }
-
-  // ---- Visitor toggle ----------------------------------------------------
   function toggleTheme(): void {
     if (!allowToggle.value) return
     currentTheme.value = currentTheme.value === 'dark' ? 'light' : 'dark'
@@ -194,7 +165,6 @@ export const useThemeStore = defineStore('theme', () => {
     applyCurrent()
   }
 
-  // ---- Policy (general view) ---------------------------------------------
   function setThemeDefault(mode: ThemeName): void {
     themeDefault.value = mode
     writeRaw(STORAGE_KEYS.THEME_DEFAULT, mode)
@@ -206,18 +176,17 @@ export const useThemeStore = defineStore('theme', () => {
     writeRaw(STORAGE_KEYS.THEME_ALLOW_TOGGLE, String(value))
   }
 
-  // ---- Library helpers ---------------------------------------------------
   const isActive = (id: string | null): boolean =>
     id !== null && (id === activeLightId.value || id === activeDarkId.value)
 
   const filteredStyles = computed<SavedStyle[]>(() => {
-    let list = savedStyles.value
+    let styles = savedStyles.value
     if (libraryThemeFilter.value !== 'all') {
-      list = list.filter((s) => s.theme === libraryThemeFilter.value)
+      styles = styles.filter((style) => style.theme === libraryThemeFilter.value)
     }
-    const term = librarySearch.value.trim().toLowerCase()
-    if (term) list = list.filter((s) => s.name.toLowerCase().includes(term))
-    return list
+    const searchTerm = librarySearch.value.trim().toLowerCase()
+    if (searchTerm) styles = styles.filter((style) => style.name.toLowerCase().includes(searchTerm))
+    return styles
   })
 
   const totalLibraryPages = computed(() =>
@@ -225,12 +194,11 @@ export const useThemeStore = defineStore('theme', () => {
   )
 
   const pagedStyles = computed<SavedStyle[]>(() => {
-    const page = Math.min(libraryPage.value, totalLibraryPages.value)
-    const start = (page - 1) * PAGE_SIZE
-    return filteredStyles.value.slice(start, start + PAGE_SIZE)
+    const currentPage = Math.min(libraryPage.value, totalLibraryPages.value)
+    const startIndex = (currentPage - 1) * PAGE_SIZE
+    return filteredStyles.value.slice(startIndex, startIndex + PAGE_SIZE)
   })
 
-  // ---- Name validation ---------------------------------------------------
   function validateStyleName(value: string): NameValidation {
     const name = (value || '').trim()
     if (!name) return { ok: true, message: null }
@@ -238,15 +206,14 @@ export const useThemeStore = defineStore('theme', () => {
     if (name.length > 40) return { ok: false, message: 'Máximo 40 caracteres.' }
     if (!STYLE_NAME_RE.test(name))
       return { ok: false, message: 'Solo letras, números, espacios, guiones y numeral (#).' }
-    const currentId = draft.value ? draft.value.id : null
-    const dup = savedStyles.value.some(
-      (s) => s.id !== currentId && s.name.toLowerCase() === name.toLowerCase(),
+    const editingStyleId = draft.value ? draft.value.id : null
+    const hasDuplicateName = savedStyles.value.some(
+      (style) => style.id !== editingStyleId && style.name.toLowerCase() === name.toLowerCase(),
     )
-    if (dup) return { ok: false, message: 'Ya existe un estilo con ese nombre.' }
+    if (hasDuplicateName) return { ok: false, message: 'Ya existe un estilo con ese nombre.' }
     return { ok: true, message: null }
   }
 
-  // ---- Draft lifecycle ---------------------------------------------------
   function openDraft(style: SavedStyle | null = null, presetTheme: ThemeName = 'light'): void {
     if (style) {
       draft.value = {
@@ -288,29 +255,34 @@ export const useThemeStore = defineStore('theme', () => {
     message?: string | null
   }
 
+  function defaultStyleName(theme: ThemeName): string {
+    const themeLabel = theme === 'dark' ? 'Oscuro' : 'Claro'
+    return `Estilo ${themeLabel} #${savedStyles.value.length + 1}`
+  }
+
+  function upsertDraftIntoLibrary(draftStyle: SavedStyle): void {
+    if (draftStyle.id) {
+      const existingIndex = savedStyles.value.findIndex((style) => style.id === draftStyle.id)
+      if (existingIndex !== -1) savedStyles.value[existingIndex] = { ...draftStyle }
+      return
+    }
+    draftStyle.id = `style_${Date.now()}`
+    savedStyles.value.unshift({ ...draftStyle })
+    libraryPage.value = 1
+  }
+
   /** Persists + activates on success. */
   function saveDraft(typedName: string): SaveResult {
     if (!draft.value) return { ok: false, message: 'No hay borrador activo.' }
-    const check = validateStyleName(typedName)
-    if (!check.ok) return check
+    const nameCheck = validateStyleName(typedName)
+    if (!nameCheck.ok) return nameCheck
 
-    const name =
-      (typedName || '').trim() ||
-      `Estilo ${draft.value.theme === 'dark' ? 'Oscuro' : 'Claro'} #${savedStyles.value.length + 1}`
-    draft.value.name = name
-
-    if (draft.value.id) {
-      const idx = savedStyles.value.findIndex((s) => s.id === draft.value!.id)
-      if (idx !== -1) savedStyles.value[idx] = { ...draft.value }
-    } else {
-      draft.value.id = `style_${Date.now()}`
-      savedStyles.value.unshift({ ...draft.value })
-      libraryPage.value = 1
-    }
+    draft.value.name = (typedName || '').trim() || defaultStyleName(draft.value.theme)
+    upsertDraftIntoLibrary(draft.value)
 
     persistSavedStyles()
-    const saved = savedStyles.value.find((s) => s.id === draft.value!.id)
-    if (saved) applyStyleToSite(saved)
+    const savedStyle = savedStyles.value.find((style) => style.id === draft.value!.id)
+    if (savedStyle) applyStyleToSite(savedStyle)
     const savedName = draft.value.name
     draft.value = null
     return { ok: true, name: savedName }
@@ -322,7 +294,7 @@ export const useThemeStore = defineStore('theme', () => {
   }
 
   function deleteStyle(style: SavedStyle): void {
-    savedStyles.value = savedStyles.value.filter((s) => s.id !== style.id)
+    savedStyles.value = savedStyles.value.filter((saved) => saved.id !== style.id)
     persistSavedStyles()
     if (style.id === activeLightId.value) {
       activeLightId.value = null

@@ -6,7 +6,7 @@ import { readJSON, writeJSON } from '@/composables/useLocalStorage'
 import { personalSchema, dateRangeSchema } from '@/schemas/cv'
 import type { CvData } from '@/types/cv'
 
-function emptyCv(): CvData {
+function createEmptyCv(): CvData {
   return {
     personal: {
       firstName: '',
@@ -27,78 +27,74 @@ function emptyCv(): CvData {
   }
 }
 
-function clone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj)) as T
+function deepClone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T
+}
+
+function createItemId(prefix: string): string {
+  return `${prefix}_${Date.now()}`
 }
 
 export const useCvStore = defineStore('cv', () => {
-  // Load persisted CV, or seed with the sample (matches legacy loadCvData()).
   const cvData = ref<CvData>(
-    readJSON<CvData | null>(STORAGE_KEYS.CV_DATA, null) || clone(SAMPLE_CV_DATA),
+    readJSON<CvData | null>(STORAGE_KEYS.CV_DATA, null) || deepClone(SAMPLE_CV_DATA),
   )
   const currentStep = ref(1)
 
-  // Validation errors, keyed by field name (step 1) or item id (steps 2-3).
-  // The store owns this so both the wizard and the step components read it
-  // directly, without prop-drilling.
+  // The store owns the errors so the wizard and every step component read them
+  // directly, without prop-drilling. Keyed by field name (step 1) or item id
+  // (steps 2-3).
   const errors = ref<Record<string, string>>({})
 
-  // Auto-persist on every change (deep), like the legacy per-input saveCvData().
-  watch(cvData, (v) => writeJSON(STORAGE_KEYS.CV_DATA, v), { deep: true })
+  watch(cvData, (data) => writeJSON(STORAGE_KEYS.CV_DATA, data), { deep: true })
 
-  // ---- Quick actions -----------------------------------------------------
   function loadSample(): void {
-    cvData.value = clone(SAMPLE_CV_DATA)
+    cvData.value = deepClone(SAMPLE_CV_DATA)
   }
   function clearForm(): void {
-    cvData.value = emptyCv()
+    cvData.value = createEmptyCv()
   }
 
-  // ---- Experience --------------------------------------------------------
   function addExperience(): void {
-    cvData.value.experience.push({ id: `exp_${Date.now()}`, title: '', startDate: '', endDate: '', desc: '' })
+    cvData.value.experience.push({ id: createItemId('exp'), title: '', startDate: '', endDate: '', desc: '' })
   }
   function removeExperience(id: string): void {
-    cvData.value.experience = cvData.value.experience.filter((x) => x.id !== id)
+    cvData.value.experience = cvData.value.experience.filter((entry) => entry.id !== id)
   }
 
-  // ---- Education ---------------------------------------------------------
   function addEducation(): void {
-    cvData.value.education.push({ id: `edu_${Date.now()}`, institution: '', degree: '', startDate: '', endDate: '' })
+    cvData.value.education.push({ id: createItemId('edu'), institution: '', degree: '', startDate: '', endDate: '' })
   }
   function removeEducation(id: string): void {
-    cvData.value.education = cvData.value.education.filter((x) => x.id !== id)
+    cvData.value.education = cvData.value.education.filter((entry) => entry.id !== id)
   }
 
-  // ---- Languages ---------------------------------------------------------
   function addLanguage(name: string): void {
-    const v = (name || '').trim()
-    if (!v) return
-    cvData.value.languages.push({ id: `lang_${Date.now()}`, name: v })
+    const trimmedName = (name || '').trim()
+    if (!trimmedName) return
+    cvData.value.languages.push({ id: createItemId('lang'), name: trimmedName })
   }
   function removeLanguage(id: string): void {
-    cvData.value.languages = cvData.value.languages.filter((x) => x.id !== id)
+    cvData.value.languages = cvData.value.languages.filter((entry) => entry.id !== id)
   }
 
-  // ---- Competencies / Skills (name + level 1..5) -------------------------
   function addCompetency(name: string, level = 5): void {
-    const v = (name || '').trim()
-    if (!v) return
-    cvData.value.competencies.push({ id: `comp_${Date.now()}`, name: v, level })
+    const trimmedName = (name || '').trim()
+    if (!trimmedName) return
+    cvData.value.competencies.push({ id: createItemId('comp'), name: trimmedName, level })
   }
   function removeCompetency(id: string): void {
-    cvData.value.competencies = cvData.value.competencies.filter((x) => x.id !== id)
+    cvData.value.competencies = cvData.value.competencies.filter((entry) => entry.id !== id)
   }
   function addSkill(name: string, level = 5): void {
-    const v = (name || '').trim()
-    if (!v) return
-    cvData.value.skills.push({ id: `skill_${Date.now()}`, name: v, level })
+    const trimmedName = (name || '').trim()
+    if (!trimmedName) return
+    cvData.value.skills.push({ id: createItemId('skill'), name: trimmedName, level })
   }
   function removeSkill(id: string): void {
-    cvData.value.skills = cvData.value.skills.filter((x) => x.id !== id)
+    cvData.value.skills = cvData.value.skills.filter((entry) => entry.id !== id)
   }
 
-  // ---- Validation --------------------------------------------------------
   function setFieldError(key: string, message: string | null): void {
     if (message) errors.value[key] = message
     else delete errors.value[key]
@@ -109,31 +105,44 @@ export const useCvStore = defineStore('cv', () => {
   }
 
   /** Items with a start/end year range (experience or education) for a step. */
-  function dateItemsFor(step: number) {
+  function dateRangeItemsForStep(step: number) {
     if (step === 2) return cvData.value.experience
     if (step === 3) return cvData.value.education
     return []
   }
 
-  /** Validate the whole step, replacing `errors`. Returns true when valid. */
-  function validateStep(step: number): boolean {
-    const next: Record<string, string> = {}
-    if (step === 1) {
-      const result = personalSchema.safeParse(cvData.value.personal)
-      if (!result.success) {
-        for (const issue of result.error.issues) {
-          const key = String(issue.path[0])
-          if (!next[key]) next[key] = issue.message
-        }
-      }
-    } else if (step === 2 || step === 3) {
-      for (const item of dateItemsFor(step)) {
-        const result = dateRangeSchema.safeParse(item)
-        if (!result.success) next[item.id] = result.error.issues[0].message
+  function validatePersonal(): Record<string, string> {
+    const fieldErrors: Record<string, string> = {}
+    const result = personalSchema.safeParse(cvData.value.personal)
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        const fieldName = String(issue.path[0])
+        if (!fieldErrors[fieldName]) fieldErrors[fieldName] = issue.message
       }
     }
-    errors.value = next
-    return Object.keys(next).length === 0
+    return fieldErrors
+  }
+
+  function validateDateRangeItems(step: number): Record<string, string> {
+    const itemErrors: Record<string, string> = {}
+    for (const item of dateRangeItemsForStep(step)) {
+      const result = dateRangeSchema.safeParse(item)
+      if (!result.success) itemErrors[item.id] = result.error.issues[0].message
+    }
+    return itemErrors
+  }
+
+  const stepValidators: Record<number, () => Record<string, string>> = {
+    1: validatePersonal,
+    2: () => validateDateRangeItems(2),
+    3: () => validateDateRangeItems(3),
+  }
+
+  /** Validate the whole step, replacing `errors`. Returns true when valid. */
+  function validateStep(step: number): boolean {
+    const nextErrors = stepValidators[step]?.() ?? {}
+    errors.value = nextErrors
+    return Object.keys(nextErrors).length === 0
   }
 
   /**
@@ -148,7 +157,7 @@ export const useCvStore = defineStore('cv', () => {
         : result.error.issues.find((i) => String(i.path[0]) === key)
       setFieldError(key, issue ? issue.message : null)
     } else if (step === 2 || step === 3) {
-      const item = dateItemsFor(step).find((x) => x.id === key)
+      const item = dateRangeItemsForStep(step).find((entry) => entry.id === key)
       if (!item) return
       const result = dateRangeSchema.safeParse(item)
       setFieldError(key, result.success ? null : result.error.issues[0].message)
