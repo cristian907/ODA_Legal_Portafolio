@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { STORAGE_KEYS } from '@/shared/constants/storageKeys'
 import { SAMPLE_CV_DATA, CV_TOTAL_STEPS } from '@/shared/constants/sampleCv'
 import { readJSON, writeJSON } from '@/composables/useLocalStorage'
-import { personalSchema, dateRangeSchema } from '@/schemas/cv'
+import { personalSchema, experienceItemSchema, educationItemSchema, languageItemSchema, dateRangeSchema } from '@/schemas/cv'
 import type { CvData } from '@/types/cv'
 
 function createEmptyCv(): CvData {
@@ -69,13 +69,22 @@ export const useCvStore = defineStore('cv', () => {
     cvData.value.education = cvData.value.education.filter((entry) => entry.id !== id)
   }
 
-  function addLanguage(name: string): void {
+  function addLanguage(name: string): boolean {
     const trimmedName = (name || '').trim()
-    if (!trimmedName) return
+    const result = languageItemSchema.safeParse(trimmedName)
+    if (!result.success) {
+      setFieldError('languages', result.error.issues[0].message)
+      return false
+    }
+    setFieldError('languages', null)
     cvData.value.languages.push({ id: createItemId('lang'), name: trimmedName })
+    return true
   }
   function removeLanguage(id: string): void {
     cvData.value.languages = cvData.value.languages.filter((entry) => entry.id !== id)
+    if (cvData.value.languages.length === 0 && errors.value.languages) {
+      delete errors.value.languages
+    }
   }
 
   function addCompetency(name: string, level = 5): void {
@@ -123,19 +132,41 @@ export const useCvStore = defineStore('cv', () => {
     return fieldErrors
   }
 
-  function validateDateRangeItems(step: number): Record<string, string> {
+  function validateExperienceItems(): Record<string, string> {
     const itemErrors: Record<string, string> = {}
-    for (const item of dateRangeItemsForStep(step)) {
-      const result = dateRangeSchema.safeParse(item)
+    for (const item of cvData.value.experience) {
+      const result = experienceItemSchema.safeParse(item)
       if (!result.success) itemErrors[item.id] = result.error.issues[0].message
+    }
+    return itemErrors
+  }
+
+  function validateEducationItems(): Record<string, string> {
+    const itemErrors: Record<string, string> = {}
+    for (const item of cvData.value.education) {
+      const result = educationItemSchema.safeParse(item)
+      if (!result.success) itemErrors[item.id] = result.error.issues[0].message
+    }
+    return itemErrors
+  }
+
+  function validateLanguages(): Record<string, string> {
+    const itemErrors: Record<string, string> = {}
+    for (const lang of cvData.value.languages) {
+      const result = languageItemSchema.safeParse(lang.name)
+      if (!result.success) {
+        itemErrors['languages'] = result.error.issues[0].message
+        break
+      }
     }
     return itemErrors
   }
 
   const stepValidators: Record<number, () => Record<string, string>> = {
     1: validatePersonal,
-    2: () => validateDateRangeItems(2),
-    3: () => validateDateRangeItems(3),
+    2: validateExperienceItems,
+    3: validateEducationItems,
+    4: validateLanguages,
   }
 
   /** Validate the whole step, replacing `errors`. Returns true when valid. */
@@ -156,10 +187,15 @@ export const useCvStore = defineStore('cv', () => {
         ? undefined
         : result.error.issues.find((i) => String(i.path[0]) === key)
       setFieldError(key, issue ? issue.message : null)
-    } else if (step === 2 || step === 3) {
-      const item = dateRangeItemsForStep(step).find((entry) => entry.id === key)
+    } else if (step === 2) {
+      const item = cvData.value.experience.find((entry) => entry.id === key)
       if (!item) return
-      const result = dateRangeSchema.safeParse(item)
+      const result = experienceItemSchema.safeParse(item)
+      setFieldError(key, result.success ? null : result.error.issues[0].message)
+    } else if (step === 3) {
+      const item = cvData.value.education.find((entry) => entry.id === key)
+      if (!item) return
+      const result = educationItemSchema.safeParse(item)
       setFieldError(key, result.success ? null : result.error.issues[0].message)
     }
   }
@@ -186,6 +222,7 @@ export const useCvStore = defineStore('cv', () => {
     removeSkill,
     validateStep,
     validateField,
+    setFieldError,
     clearErrors,
     goToStep,
   }

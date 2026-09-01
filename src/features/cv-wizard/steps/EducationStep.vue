@@ -32,21 +32,47 @@ const inputClass =
       </button>
 
       <label class="flex flex-col gap-1 text-sm text-slate-300">
-        Institución / Universidad <span class="text-red-400">*</span>
-        <input v-model="edu.institution" type="text" :class="inputClass" placeholder="Ej. Universidad Ensigna" />
+        Institución / Universidad
+        <input
+          v-model="edu.institution"
+          type="text"
+          :class="inputClass"
+          placeholder="Ej. Universidad Ensigna"
+          @blur="cv.validateField(3, edu.id)"
+        />
       </label>
       <label class="flex flex-col gap-1 text-sm text-slate-300">
         Carrera / Título Obtenido
-        <input v-model="edu.degree" type="text" :class="inputClass" placeholder="Ej. Ingeniería en sistemas" />
+        <input
+          v-model="edu.degree"
+          type="text"
+          :class="inputClass"
+          placeholder="Ej. Ingeniería en sistemas"
+          @blur="cv.validateField(3, edu.id)"
+        />
       </label>
       <div class="grid grid-cols-2 gap-3">
         <label class="flex flex-col gap-1 text-sm text-slate-300">
           Año Inicio
-          <input v-model="edu.startDate" type="text" :class="inputClass" placeholder="Ej. 2018" @blur="cv.validateField(3, edu.id)" />
+          <input
+            v-model="edu.startDate"
+            type="text"
+            maxlength="4"
+            :class="inputClass"
+            placeholder="Ej. 2018"
+            @blur="cv.validateField(3, edu.id)"
+          />
         </label>
         <label class="flex flex-col gap-1 text-sm text-slate-300">
           Año Fin
-          <input v-model="edu.endDate" type="text" :class="inputClass" placeholder="Ej. 2023" @blur="cv.validateField(3, edu.id)" />
+          <input
+            v-model="edu.endDate"
+            type="text"
+            maxlength="8"
+            :class="inputClass"
+            placeholder="Ej. 2023 o Actual"
+            @blur="cv.validateField(3, edu.id)"
+          />
         </label>
       </div>
       <span v-if="cv.errors[edu.id]" class="text-xs text-red-400">{{ cv.errors[edu.id] }}</span>

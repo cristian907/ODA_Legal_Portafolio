@@ -32,24 +32,50 @@ const inputClass =
       </button>
 
       <label class="flex flex-col gap-1 text-sm text-slate-300">
-        Empresa / Cargo <span class="text-red-400">*</span>
-        <input v-model="exp.title" type="text" :class="inputClass" placeholder="Ej. Multinacional González" />
+        Empresa / Cargo
+        <input
+          v-model="exp.title"
+          type="text"
+          :class="inputClass"
+          placeholder="Ej. Multinacional González"
+          @blur="cv.validateField(2, exp.id)"
+        />
       </label>
       <div class="grid grid-cols-2 gap-3">
         <label class="flex flex-col gap-1 text-sm text-slate-300">
           Año Inicio
-          <input v-model="exp.startDate" type="text" :class="inputClass" placeholder="Ej. 2019" @blur="cv.validateField(2, exp.id)" />
+          <input
+            v-model="exp.startDate"
+            type="text"
+            maxlength="4"
+            :class="inputClass"
+            placeholder="Ej. 2019"
+            @blur="cv.validateField(2, exp.id)"
+          />
         </label>
         <label class="flex flex-col gap-1 text-sm text-slate-300">
           Año Fin
-          <input v-model="exp.endDate" type="text" :class="inputClass" placeholder="Ej. 2023 o Actual" @blur="cv.validateField(2, exp.id)" />
+          <input
+            v-model="exp.endDate"
+            type="text"
+            maxlength="8"
+            :class="inputClass"
+            placeholder="Ej. 2023 o Actual"
+            @blur="cv.validateField(2, exp.id)"
+          />
         </label>
       </div>
-      <span v-if="cv.errors[exp.id]" class="text-xs text-red-400">{{ cv.errors[exp.id] }}</span>
       <label class="flex flex-col gap-1 text-sm text-slate-300">
         Descripción
-        <textarea v-model="exp.desc" rows="2" :class="[inputClass, 'resize-none']" placeholder="Breve descripción de funciones y logros..."></textarea>
+        <textarea
+          v-model="exp.desc"
+          rows="2"
+          :class="[inputClass, 'resize-none']"
+          placeholder="Breve descripción de funciones y logros..."
+          @blur="cv.validateField(2, exp.id)"
+        ></textarea>
       </label>
+      <span v-if="cv.errors[exp.id]" class="text-xs text-red-400">{{ cv.errors[exp.id] }}</span>
     </div>
 
     <button

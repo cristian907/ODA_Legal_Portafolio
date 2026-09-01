@@ -57,7 +57,7 @@ const photoThumb = computed(() => {
 
     <div class="grid grid-cols-2 gap-3">
       <label class="flex flex-col gap-1 text-sm text-slate-300">
-        Nombre <span class="text-red-400">*</span>
+        Nombre
         <input
           v-model="p.firstName"
           type="text"
@@ -68,7 +68,7 @@ const photoThumb = computed(() => {
         <span v-if="cv.errors.firstName" class="text-xs text-red-400">{{ cv.errors.firstName }}</span>
       </label>
       <label class="flex flex-col gap-1 text-sm text-slate-300">
-        Apellido <span class="text-red-400">*</span>
+        Apellido
         <input
           v-model="p.lastName"
           type="text"
@@ -81,7 +81,7 @@ const photoThumb = computed(() => {
     </div>
 
     <label class="flex flex-col gap-1 text-sm text-slate-300">
-      Título / Profesión <span class="text-red-400">*</span>
+      Título / Profesión
       <input
         v-model="p.jobTitle"
         type="text"
@@ -155,7 +155,14 @@ const photoThumb = computed(() => {
     <div class="grid grid-cols-2 gap-3">
       <label class="flex flex-col gap-1 text-sm text-slate-300">
         <span><i class="fas fa-globe"></i> Página Web</span>
-        <input v-model="p.website" type="text" :class="[inputClass, 'border-[#1e293b]']" placeholder="www.unsitiogenial.es" />
+        <input
+          v-model="p.website"
+          type="text"
+          :class="[inputClass, cv.errors.website ? 'border-red-500' : 'border-[#1e293b]']"
+          placeholder="www.unsitiogenial.es"
+          @blur="cv.validateField(1, 'website')"
+        />
+        <span v-if="cv.errors.website" class="text-xs text-red-400">{{ cv.errors.website }}</span>
       </label>
       <label class="flex flex-col gap-1 text-sm text-slate-300">
         <span><i class="fas fa-map-marker-alt"></i> Localización</span>
