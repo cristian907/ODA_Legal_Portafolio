@@ -96,18 +96,36 @@ export const useCvStore = defineStore('cv', () => {
     }
   }
 
-  function addCompetency(name: string, level = 5): void {
+  function addCompetency(name: string, level = 5): boolean {
     const trimmedName = (name || '').trim()
-    if (!trimmedName) return
+    if (!trimmedName) return false
+    const isDuplicate = cvData.value.competencies.some(
+      (comp) => comp.name.trim().toLowerCase() === trimmedName.toLowerCase(),
+    )
+    if (isDuplicate) {
+      setFieldError('competencies', 'Esta competencia ya ha sido agregada.')
+      return false
+    }
+    setFieldError('competencies', null)
     cvData.value.competencies.push({ id: createItemId('comp'), name: trimmedName, level })
+    return true
   }
   function removeCompetency(id: string): void {
     cvData.value.competencies = cvData.value.competencies.filter((entry) => entry.id !== id)
   }
-  function addSkill(name: string, level = 5): void {
+  function addSkill(name: string, level = 5): boolean {
     const trimmedName = (name || '').trim()
-    if (!trimmedName) return
+    if (!trimmedName) return false
+    const isDuplicate = cvData.value.skills.some(
+      (skill) => skill.name.trim().toLowerCase() === trimmedName.toLowerCase(),
+    )
+    if (isDuplicate) {
+      setFieldError('skills', 'Esta habilidad ya ha sido agregada.')
+      return false
+    }
+    setFieldError('skills', null)
     cvData.value.skills.push({ id: createItemId('skill'), name: trimmedName, level })
+    return true
   }
   function removeSkill(id: string): void {
     cvData.value.skills = cvData.value.skills.filter((entry) => entry.id !== id)
