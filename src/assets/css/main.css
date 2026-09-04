@@ -1,0 +1,208 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   DESIGN TOKENS — single source of truth for theming.
+   The admin theme editor mutates these custom properties at RUNTIME, so the
+   whole site re-themes live. Tailwind utilities consume them via @theme inline
+   below. Never hardcode these colors as static Tailwind classes.
+   ========================================================================== */
+:root {
+  /* Fonts (--font-main is swappable via an uploaded .ttf) */
+  --font-main: 'Plus Jakarta Sans', sans-serif;
+  --font-heading: var(--font-main);
+  --font-body: var(--font-main);
+
+  /* Text sizes in px */
+  --size-titles: 40px;
+  --size-subtitles: 20px;
+  --size-body: 16px;
+
+  /* 5-color base palette (light mode default) */
+  --svc-color-1: #e4edf7; /* section / page background */
+  --svc-color-2: #ffffff; /* card / surface background */
+  --svc-color-3: #1e293b; /* main text */
+  --svc-color-4: #c5a059; /* primary / accent / icons */
+  --svc-color-5: #0f172a; /* highlight / hover / borders */
+
+  /* Semantic aliases derived from the 5-color palette */
+  --bg-main: var(--svc-color-1);
+  --bg-surface: var(--svc-color-2);
+  --bg-glass: var(--svc-color-2);
+  --text-main: var(--svc-color-3);
+  --text-muted: var(--svc-color-3);
+  --border-color: var(--svc-color-5);
+  --accent-gold: var(--svc-color-4);
+  --accent-hover: var(--svc-color-5);
+  --header-bg: var(--svc-color-1);
+  --footer-bg: var(--svc-color-5);
+  /* Text over intrinsically dark surfaces (hero image, footer). Always a
+     PALETTE var so a full palette change — e.g. everything red — propagates
+     here too; only the alias differs per theme to keep default contrast. */
+  --text-on-dark: var(--svc-color-2);
+  --footer-text: var(--text-on-dark);
+  /* Mirror of --text-on-dark: text/ink over a light surface (e.g. the ghost
+     button's hover fill). Also always a palette var so it propagates. */
+  --text-on-light: var(--svc-color-3);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.16);
+
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Explicit light block so a scoped subtree (e.g. the admin live preview) can
+   force the light mapping regardless of the document root's theme. */
+[data-theme='light'] {
+  --svc-color-1: #e4edf7;
+  --svc-color-2: #ffffff;
+  --svc-color-3: #1e293b;
+  --svc-color-4: #c5a059;
+  --svc-color-5: #0f172a;
+
+  --bg-main: var(--svc-color-1);
+  --bg-surface: var(--svc-color-2);
+  --bg-glass: var(--svc-color-2);
+  --text-main: var(--svc-color-3);
+  --text-muted: var(--svc-color-3);
+  --border-color: var(--svc-color-5);
+  --accent-gold: var(--svc-color-4);
+  --accent-hover: var(--svc-color-5);
+  --header-bg: var(--svc-color-1);
+  --footer-bg: var(--svc-color-5);
+  --text-on-dark: var(--svc-color-2);
+  --footer-text: var(--text-on-dark);
+  --text-on-light: var(--svc-color-3);
+}
+
+[data-theme='dark'] {
+  --svc-color-1: #0f172a;
+  --svc-color-2: #1e293b;
+  --svc-color-3: #f8fafc;
+  --svc-color-4: #d4af37;
+  --svc-color-5: #e5be48;
+
+  --bg-main: var(--svc-color-1);
+  --bg-surface: var(--svc-color-2);
+  --bg-glass: var(--svc-color-2);
+  --text-main: var(--svc-color-3);
+  --text-muted: var(--svc-color-3);
+  --border-color: var(--svc-color-5);
+  --accent-gold: var(--svc-color-4);
+  --accent-hover: var(--svc-color-5);
+  --header-bg: var(--svc-color-1);
+  --footer-bg: var(--header-bg);
+  --text-on-dark: var(--svc-color-3);
+  --footer-text: var(--text-on-dark);
+  --text-on-light: var(--svc-color-1);
+}
+
+/* ==========================================================================
+   TAILWIND THEME BRIDGE
+   `inline` makes Tailwind emit var(--…) into the generated utilities instead
+   of resolving the value at build time — so runtime token changes take effect.
+   Usage: bg-svc-1, text-app, border-app, bg-surface, text-gold, font-main…
+   ========================================================================== */
+@theme inline {
+  --color-svc-1: var(--svc-color-1);
+  --color-svc-2: var(--svc-color-2);
+  --color-svc-3: var(--svc-color-3);
+  --color-svc-4: var(--svc-color-4);
+  --color-svc-5: var(--svc-color-5);
+
+  --color-bg-main: var(--bg-main);
+  --color-surface: var(--bg-surface);
+  --color-app: var(--text-main);
+  --color-muted: var(--text-muted);
+  --color-border-app: var(--border-color);
+  --color-gold: var(--accent-gold);
+  --color-hover: var(--accent-hover);
+  --color-header: var(--header-bg);
+  --color-footer: var(--footer-bg);
+  --color-footer-text: var(--footer-text);
+  --color-on-dark: var(--text-on-dark);
+
+  --font-main: var(--font-main);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+@layer base {
+  body {
+    margin: 0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-size: var(--size-body);
+    line-height: 1.6;
+    transition:
+      background-color var(--transition-normal),
+      color var(--transition-normal);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Keep FontAwesome glyphs immune to the swappable --font-main. */
+  i.fas,
+  i.fa-solid {
+    font-family: 'Font Awesome 6 Free' !important;
+    font-weight: 900 !important;
+  }
+  i.fab,
+  i.fa-brands {
+    font-family: 'Font Awesome 6 Brands' !important;
+    font-weight: 400 !important;
+  }
+  i.far,
+  i.fa-regular {
+    font-family: 'Font Awesome 6 Free' !important;
+    font-weight: 400 !important;
+  }
+}
+
+/* ==========================================================================
+   SHARED COMPONENT PRIMITIVES — reused across features (Tailwind @apply).
+   ========================================================================== */
+@layer components {
+  .app-container {
+    @apply mx-auto w-full max-w-[1200px] px-6;
+  }
+
+  .btn-primary {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border-none bg-svc-4 px-6 py-3 font-semibold text-svc-2;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
+  }
+  .btn-primary:hover {
+    background: var(--svc-color-5);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Ghost button over the dark hero. Every color derives from a palette var
+     (via --text-on-dark / --text-on-light), so a full palette change — the
+     "everything red" test — propagates here too. */
+  .btn-secondary {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-6 py-3 font-semibold;
+    color: var(--text-on-dark);
+    background: color-mix(in srgb, var(--text-on-dark) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--text-on-dark) 30%, transparent);
+    backdrop-filter: blur(8px);
+    transition: all var(--transition-fast);
+  }
+  .btn-secondary:hover {
+    background: var(--text-on-dark);
+    color: var(--text-on-light);
+    border-color: var(--text-on-dark);
+    transform: translateY(-2px);
+  }
+}

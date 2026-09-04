@@ -1,5 +1,6 @@
 # Archivos de Cálculo KLM y scripts asociados
 calculo_klm_cv.xlsx
+calculo_klm_cv_old.xlsx
 calculo_klm_cv.txt
 build_excel.py
 
@@ -20,3 +21,14 @@ Thumbs.db
 # Directorios de artefactos y temporales
 .tempmediaStorage/
 scratch/
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# Tooling caches
+.atl/
+.codegraph/

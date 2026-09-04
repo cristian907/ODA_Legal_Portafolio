@@ -1,0 +1,8 @@
+# Controls which dependency postinstall build scripts pnpm may run.
+# esbuild → downloads its native binary (used by Vite).
+# vue-demi → sets the correct Vue 3 bindings (used by Pinia).
+# core-js → only prints a donation notice; not needed.
+allowBuilds:
+  esbuild: true
+  vue-demi: true
+  core-js: false

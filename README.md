@@ -1,97 +1,97 @@
-# ODA Legal - Portafolio Corporativo & Panel de Administración con Generador de CV
+# ODA Legal — Portafolio Corporativo & Panel de Administración con Generador de CV
 
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)](https://developer.mozilla.org/es/docs/Web/HTML)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)](https://developer.mozilla.org/es/docs/Web/CSS)
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=flat&logo=javascript&logoColor=black)](https://developer.mozilla.org/es/docs/Web/JavaScript)
-[![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
-
+[![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?style=flat&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat&logo=vite&logoColor=white)](https://vite.dev/)
+[![Pinia](https://img.shields.io/badge/Pinia-2-FFD859?style=flat&logo=vuedotjs&logoColor=black)](https://pinia.vuejs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 Aplicación web integral para la firma jurídica **ODA Legal**, que combina un **portafolio web corporativo de alto impacto visual** y un **panel de administración avanzado** con un módulo interactivo para la **creación y exportación de Currículum Vitae profesional en formato A4**.
+
 
 ---
 
 ## 🏛️ Características Principales
 
-### 1. Portafolio Web Corporativo (`index.html`)
-- **Diseño Jurídico Premium**: Estética elegante y confiable basada en tonos Azul Noche (`#0f172a`), Dorado Noble (`#c5a059`) y tipografías editoriales (`Cinzel` y `Montserrat`).
-- **Navegación Fluida**: Secciones modulares de Servicios Legales, Trayectoria de la Firma, Casos de Éxito, Testimonios y Formulario de Contacto.
-- **Totalmente Responsivo**: Adaptable a dispositivos móviles, tablets y pantallas de escritorio.
+### 1. Portafolio Web Corporativo (ruta `/`)
+- **Diseño Jurídico Premium**: estética elegante basada en tonos Azul Noche (`#0f172a`) y Dorado Noble (`#c5a059`).
+- **Navegación fluida**: secciones de Servicios Legales, Galería y Contacto.
+- **Tema claro/oscuro reactivo** y **totalmente responsivo**.
 
-### 2. Panel de Administración (`admin.html`)
-- **Pestaña "Estilos" (Live Theme Editor)**:
-  - Personalización en tiempo real de paletas cromáticas, variables CSS y tipografías del sitio.
-  - Previsualización en vivo integrada mediante `iframe` bidireccional.
-- **Pestaña "Creación de CV" (Asistente Interactivo & Exportador PDF)**:
-  - **Asistente paso a paso (Wizard)**:
-    1. *Datos Personales*: Nombre, cargo, contacto, perfil profesional y ubicación.
-    2. *Experiencia Laboral*: Gestión dinámica de puestos, empresas, periodos y logros.
-    3. *Educación*: Títulos, universidades, años de graduación y distinciones.
-    4. *Habilidades & Competencias*: Especialidades legales, áreas de práctica y nivel de dominio.
-    5. *Idiomas & Certificaciones*: Lenguajes dominados, colegiaturas y acreditaciones.
-  - **Visor en Vivo de Hoja A4**:
-    - Renderizado en tiempo real a proporción $210\text{ mm} \times 297\text{ mm}$ ($794\text{px} \times 1122\text{px}$).
-    - Controles interactivos de zoom: Alejar, Ajustar automáticamente a la pantalla y Acercar.
-  - **Exportación Directa a PDF de 1 Página**:
-    - Motor de renderizado con `html2pdf.js` / `html2canvas` / `jsPDF`.
-    - Genera un archivo PDF limpio a alta resolución garantizando exactamente **1 sola página A4** sin desbordes ni márgenes en blanco.
-  - **Persistencia Local**: Guardado automático de datos en `localStorage`.
+### 2. Panel de Administración (ruta `/admin`)
+- **Editor de Estilos en Vivo**:
+  - Personalización en tiempo real de paleta (5 colores), tamaños tipográficos y fuente (`.ttf`).
+  - **Vista previa reactiva**: el portafolio real se renderiza con el estilo en edición, sin `iframe` ni `postMessage` — todo es estado compartido de Pinia.
+  - Biblioteca de estilos con búsqueda, filtros y paginación; slots activos independientes para modo claro y oscuro.
+- **Asistente de CV (Wizard de 5 pasos)**: datos personales, experiencia, educación, idiomas, competencias y habilidades.
+  - **Visor A4 en vivo** (794 × 1123 px) con zoom y auto-ajuste.
+  - **Exportación a PDF de 1 página** con `html2pdf.js` (cargado de forma diferida).
+  - **Persistencia automática** en `localStorage`.
 
 ---
 
 ## 📁 Estructura del Proyecto
 
 ```text
-ODA_Portafolio/
-│
-├── assets/
-│   └── images/               # Recursos gráficos corporativos (hero, abogado, martillo, reuniones)
-│
-├── css/
-│   ├── styles.css            # Estilos globales, diseño responsive y tokens de diseño del sitio
-│   ├── admin.css             # Estilos del panel de administración, sidebar proporcional y tabs
-│   └── cv-template.css       # Maquetación, tipografías y reglas de impresión del CV en A4
-│
-├── js/
-│   ├── main.js               # Lógica interactiva del portafolio web (animaciones, navegación)
-│   ├── admin.js              # Controlador del panel de administración y personalizador de estilos
-│   └── cv-wizard.js          # Asistente de pasos de CV, visor reactivo y generador de PDF
-│
-├── index.html                # Página de inicio / Portafolio público
-├── admin.html                # Panel de Control & Creador de CV
-├── server.py                 # Servidor HTTP local con enrutamiento amigable
-├── .gitignore                # Exclusiones de Git (cálculos KLM, temporales, cachés)
-└── README.md                 # Documentación técnica del proyecto
+ODA_Legal_Portafolio/
+├── public/assets/images/        # Recursos gráficos corporativos
+├── index.html                   # Único entry point (SPA)
+├── vite.config.js
+├── src/
+│   ├── main.ts · App.vue
+│   ├── router/                  # rutas '/' (portafolio) y '/admin'
+│   ├── types/                   # tipos de dominio (theme · cv)
+│   ├── assets/css/              # tailwind + variables de tema + cv-template
+│   ├── shared/constants/        # palettes · storageKeys · sampleCv
+│   ├── composables/             # useTheme · useLocalStorage · usePdfExport · useToast · useConfirm
+│   ├── stores/                  # theme · cv · auth (Pinia)
+│   ├── components/              # reutilizables globales
+│   │   ├── feedback/            # ToastHost · ConfirmModal
+│   │   └── form/                # SegmentedControl · ColorRow · SizeRow · FontUploader
+│   └── features/
+│       ├── portfolio/           # Hero, Services, Gallery, Footer…
+│       ├── theme-editor/        # editor de temas + vista previa en vivo
+│       └── cv-wizard/           # wizard, hoja A4 y exportación PDF
+└── README.md
 ```
 
 ---
 
-## 🚀 Puesta en Marcha (Instalación y Ejecución)
+## 🚀 Puesta en Marcha
 
-### Requisitos Previos
-- Cualquier navegador web moderno (Google Chrome, Mozilla Firefox, Microsoft Edge, Safari).
-- Python 3.x (opcional pero recomendado para el servidor local).
+### Requisitos
+- Node.js 18+ y pnpm.
 
-### Ejecutar con el Servidor Integrado
-1. Abre una terminal en la raíz del proyecto.
-2. Ejecuta el servidor Python:
-   ```bash
-   python3 server.py
-   ```
-3. Accede desde tu navegador a las siguientes rutas:
-   - **Portafolio Web**: [http://localhost:8080/](http://localhost:8080/) o `http://localhost:8080/index.html`
-   - **Panel de Administración y CV**: [http://localhost:8080/admin](http://localhost:8080/admin) o `http://localhost:8080/admin.html`
+### Instalación y desarrollo
+```bash
+pnpm install     # instala dependencias
+pnpm dev         # servidor de desarrollo con hot-reload → http://localhost:8080/
+pnpm type-check  # verifica tipos con vue-tsc (sin emitir)
+```
 
-### Ejecución Alternativa
-También puedes abrir directamente los archivos `index.html` y `admin.html` en tu navegador o utilizar extensiones como **Live Server** en VS Code.
+Rutas:
+- **Portafolio**: [http://localhost:8080/](http://localhost:8080/)
+- **Panel de Administración y CV**: [http://localhost:8080/admin](http://localhost:8080/admin)
+
+### Compilación para producción
+```bash
+pnpm build    # genera la carpeta dist/ (estática, lista para desplegar)
+pnpm preview  # sirve localmente el build de producción
+```
+
+El resultado en `dist/` es completamente estático: se despliega en cualquier hosting de archivos estáticos (Netlify, Vercel, GitHub Pages, Nginx…). Para el enrutamiento SPA, configurá el fallback de rutas a `index.html`.
 
 ---
 
 ## 🛠️ Tecnologías y Librerías
 
-- **Frontend**: HTML5 Semántico, CSS3 Vanilla (Variables CSS, Flexbox, CSS Grid).
-- **Programación**: JavaScript ES6+ Vanilla (sin dependencias pesadas de framework).
-- **Generación de PDF**: [html2pdf.js v0.10.1](https://github.com/eKoopmans/html2pdf.js) (integración de `html2canvas` y `jsPDF`).
-- **Iconografía & Fuentes**: [Font Awesome 6.4](https://fontawesome.com/) y [Google Fonts](https://fonts.google.com/) (*Cinzel*, *Montserrat*, *Outfit*, *Inter*).
-- **Backend / Entorno de pruebas**: Python 3 (`http.server` & `socketserver`).
+- **Framework**: [Vue 3](https://vuejs.org/) (Composition API, `<script setup lang="ts">`).
+- **Lenguaje**: [TypeScript 5](https://www.typescriptlang.org/) (modo `strict`; type-check con `vue-tsc` integrado al build).
+- **Build & Dev**: [Vite 5](https://vite.dev/).
+- **Estado**: [Pinia](https://pinia.vuejs.org/).
+- **Ruteo**: [Vue Router 4](https://router.vuejs.org/).
+- **Estilos**: [Tailwind CSS 4](https://tailwindcss.com/) sobre variables CSS (que impulsan el editor de temas en vivo).
+- **Generación de PDF**: [html2pdf.js 0.10.1](https://github.com/eKoopmans/html2pdf.js) (`html2canvas` + `jsPDF`), importado dinámicamente bajo demanda.
+- **Iconografía & Fuentes**: [Font Awesome 6.4](https://fontawesome.com/) y [Google Fonts](https://fonts.google.com/) (*Playfair Display*, *Plus Jakarta Sans*).
 
 ---
 
