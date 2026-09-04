@@ -24,7 +24,6 @@ const stepComponents: Record<number, Component> = {
 }
 
 function tryGo(target: number) {
-  // Going backwards is always allowed; forward requires a valid current step.
   if (target < cv.currentStep) {
     cv.clearErrors()
     cv.goToStep(target)
@@ -52,7 +51,7 @@ function finish() {
   <div class="flex h-full flex-col overflow-y-auto p-5">
     <CvStepper v-if="cv.currentStep <= 5" :current-step="cv.currentStep" @goto="tryGo" />
 
-    <div class="flex-1">
+    <div class="flex-1 py-1">
       <component
         :is="stepComponents[cv.currentStep]"
         v-if="cv.currentStep <= 5"
@@ -60,8 +59,8 @@ function finish() {
       <CompletionStep v-else @download="emit('download')" @edit="cv.goToStep(1)" />
     </div>
 
-    <!-- Navigation -->
-    <div v-if="cv.currentStep <= 5" class="mt-6 flex justify-between gap-3">
+    <!-- Navigation Footer -->
+    <div v-if="cv.currentStep <= 5" class="mt-4 flex shrink-0 justify-between gap-3 border-t border-[#1e293b]/60 pt-3">
       <button
         v-if="cv.currentStep > 1"
         class="rounded-lg border border-[#1e293b] px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
