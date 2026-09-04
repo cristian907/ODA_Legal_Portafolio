@@ -50,6 +50,10 @@ async function downloadPdf() {
   }
 }
 
+function printCv() {
+  window.print()
+}
+
 function onResize() {
   autoFit()
 }
@@ -60,7 +64,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => window.removeEventListener('resize', onResize))
 
-defineExpose({ autoFit, downloadPdf })
+defineExpose({ autoFit, downloadPdf, printCv })
 </script>
 
 <template>
@@ -93,6 +97,13 @@ defineExpose({ autoFit, downloadPdf })
           <i class="fas fa-search-plus"></i>
         </button>
         <button
+          class="rounded border border-[#c5a059]/40 bg-[#c5a059]/10 px-3 py-1.5 text-sm font-semibold text-[#c5a059] transition hover:bg-[#c5a059]/20"
+          title="Imprimir o Guardar como PDF Vectorial"
+          @click="printCv"
+        >
+          <i class="fas fa-print"></i> Imprimir
+        </button>
+        <button
           class="rounded bg-[#c5a059] px-3 py-1.5 text-sm font-semibold text-[#0f172a] transition hover:bg-[#b38e44]"
           title="Descargar en PDF"
           @click="downloadPdf"
@@ -115,6 +126,8 @@ defineExpose({ autoFit, downloadPdf })
 </template>
 
 <style scoped>
+.cv-preview-viewport :deep(.cv-pages-container),
+.cv-preview-viewport :deep(.cv-paper-page),
 .cv-preview-viewport :deep(.cv-paper-sheet) {
   transform-origin: top center;
   flex-shrink: 0;

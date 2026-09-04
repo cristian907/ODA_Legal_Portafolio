@@ -135,8 +135,18 @@
 }
 
 /* ==========================================================================
-   2. HOJA DE CURRÍCULUM A4 (1 PÁGINA EXACTA) - ESTILO ODA LEGAL
+   2. CONTENEDOR MULTI-PÁGINA & HOJAS A4 (ESTILO MICROSOFT WORD)
    ========================================================================== */
+.cv-pages-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+}
+
+.cv-paper-page,
 .cv-paper-sheet {
   width: 794px;
   min-width: 794px;
@@ -151,11 +161,55 @@
   box-sizing: border-box;
   font-family: var(--cv-font);
   color: var(--cv-text-dark);
-  overflow: hidden;
+  line-height: 1.2;
   position: relative;
-  transform-origin: top center;
-  transition: transform 0.2s ease;
+  overflow: hidden;
   border: 1px solid rgba(197, 160, 89, 0.2);
+  page-break-after: always;
+  break-after: page;
+}
+
+/* Cabecera para páginas secundarias (Página 2, 3...) */
+.cv-page-secondary-header {
+  background: linear-gradient(135deg, #0f172a 0%, #17233c 100%);
+  color: var(--cv-text-white);
+  padding: 14px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid var(--cv-accent-gold);
+  flex-shrink: 0;
+}
+
+.cv-page-secondary-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.cv-page-secondary-number {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+  background: var(--cv-accent-gold);
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+/* Pie de página A4 con numeración */
+.cv-page-footer {
+  margin-top: auto;
+  padding: 6px 32px;
+  display: flex;
+  justify-content: flex-end;
+  font-size: 10px;
+  color: #94a3b8;
+  border-top: 1px solid #f8fafc;
+  background: #ffffff;
+  flex-shrink: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -334,11 +388,8 @@
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  font-weight: bold;
-}
-
-.is-exporting-pdf .cv-contact-icon i {
-  transform: translateY(-4px);
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -346,13 +397,12 @@
    -------------------------------------------------------------------------- */
 .cv-body-white {
   background-color: var(--cv-light-bg);
-  padding: 22px 32px 24px 32px;
+  padding: 18px 32px 14px 32px;
   flex: 1;
   display: grid;
   grid-template-columns: 59% 37%;
   gap: 4%;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 .cv-col-left,
@@ -369,6 +419,7 @@
   padding: 7px 14px;
   font-size: 13px;
   font-weight: 700;
+  line-height: 1.2;
   text-align: left;
   border-radius: 4px;
   letter-spacing: 0.5px;
@@ -393,22 +444,26 @@
 }
 
 .cv-timeline-item {
-  display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 8px;
+  display: flex;
   align-items: flex-start;
+  gap: 10px;
 }
 
 .cv-item-check {
   margin-top: 2px;
   color: var(--cv-accent-gold);
   font-size: 13px;
-  display: flex;
+  line-height: 1;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  width: 14px;
 }
 
 .cv-item-content {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -417,14 +472,16 @@
 .cv-item-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
+  line-height: 1.25;
 }
 
 .cv-item-company {
   font-size: 12px;
   font-weight: 700;
   color: #0f172a;
+  line-height: 1.2;
 }
 
 .cv-item-dates {
@@ -432,6 +489,7 @@
   font-weight: 700;
   color: #b38e44;
   white-space: nowrap;
+  line-height: 1.2;
 }
 
 .cv-item-desc {
@@ -459,11 +517,18 @@
   font-size: 11.5px;
   font-weight: 600;
   color: #1e293b;
+  line-height: 1.25;
 }
 
 .cv-lang-icon {
   color: var(--cv-accent-gold);
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 14px;
 }
 
 /* Bloque de Competencias (Barras doradas horizontales 1-5 niveles) */
@@ -1097,15 +1162,24 @@
     visibility: hidden;
   }
 
-  .cv-paper-sheet,
-  .cv-paper-sheet * {
+  .cv-pages-container,
+  .cv-pages-container * {
     visibility: visible;
   }
 
-  .cv-paper-sheet {
+  .cv-pages-container {
     position: absolute;
     left: 0;
     top: 0;
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .cv-paper-page {
     width: 210mm !important;
     height: 297mm !important;
     min-height: 297mm !important;
@@ -1113,10 +1187,22 @@
     margin: 0 !important;
     padding: 0 !important;
     box-shadow: none !important;
-    transform: none !important;
-    page-break-after: avoid;
-    page-break-inside: avoid;
+    border: none !important;
+    page-break-after: always !important;
+    break-after: page !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+}
+
+/* Contenedor de medición fuera de pantalla */
+.cv-measurer-container {
+  position: fixed !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 794px !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  z-index: -1000 !important;
+  opacity: 0 !important;
 }
