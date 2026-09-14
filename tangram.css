@@ -1,0 +1,459 @@
+/* ==========================================================================
+   TANGRAM - HOJA DE ESTILOS CSS PURO
+   Plantilla con las 7 figuras en SVG y 21 Keyframes preparados
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Variables de Diseño y Paleta de Colores
+   -------------------------------------------------------------------------- */
+:root {
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-card: rgba(23, 32, 54, 0.7);
+  --border-card: rgba(255, 255, 255, 0.08);
+  --border-highlight: rgba(99, 102, 241, 0.4);
+  
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
+
+  /* Colores para cada una de las 7 figuras */
+  --color-fig1: #ef4444; /* Triángulo Grande 1 (Rojo coral) */
+  --color-fig2: #3b82f6; /* Triángulo Grande 2 (Azul eléctrico) */
+  --color-fig3: #10b981; /* Triángulo Mediano (Verde esmeralda) */
+  --color-fig4: #f59e0b; /* Triángulo Pequeño 1 (Ámbar) */
+  --color-fig5: #8b5cf6; /* Triángulo Pequeño 2 (Violeta púrpura) */
+  --color-fig6: #ec4899; /* Cuadrado (Rosa fucsia) */
+  --color-fig7: #06b6d4; /* Paralelogramo (Cian turquesa) */
+
+  --stroke-width: 2px;
+  --stroke-color: rgba(255, 255, 255, 0.85);
+
+  --board-width: 440px;
+  --board-height: 840px;
+  --radius-lg: 16px;
+  --radius-md: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   Reset y Tipografía Base
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.05) 0px, transparent 70%);
+  color: var(--text-main);
+  font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Encabezado Principal
+   -------------------------------------------------------------------------- */
+.header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 2.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.9rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #a5b4fc;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.85rem;
+}
+
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #34d399;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #34d399;
+}
+
+.header h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   Contenedor Principal (Tablero y Panel Lateral)
+   -------------------------------------------------------------------------- */
+.tangram-layout {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   Tablero del Tangram (Contenedor de los SVG)
+   -------------------------------------------------------------------------- */
+.tangram-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.tangram-board-wrapper {
+  position: relative;
+  padding: 18px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  box-shadow: 
+    0 20px 40px -15px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.board-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.btn-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.25rem;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 9999px;
+  color: #e0e7ff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s ease;
+}
+
+.btn-replay:hover {
+  background: rgba(99, 102, 241, 0.4);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+}
+
+.btn-replay svg {
+  width: 17px;
+  height: 17px;
+}
+
+.tangram-board {
+  position: relative;
+  width: var(--board-width);
+  height: var(--board-height);
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: var(--radius-md);
+  overflow: visible;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7);
+  margin: 0 auto;
+}
+
+/* Guía visual del cuadro inicial (400x400) */
+.tangram-board::before {
+  content: "Posición Inicial (Cuadro)";
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 400px;
+  height: 400px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  pointer-events: none;
+  font-size: 0.72rem;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   Estilos de las 7 Figuras SVG del Tangram
+   -------------------------------------------------------------------------- */
+.tangram-figura {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 400px;
+  height: 400px;
+  overflow: visible;
+  cursor: pointer;
+  transition: filter 0.25s ease;
+}
+
+.tangram-figura polygon {
+  stroke: var(--stroke-color);
+  stroke-width: var(--stroke-width);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.tangram-figura:hover {
+  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.6));
+  z-index: 10;
+}
+
+/* --------------------------------------------------------------------------
+   Grupos de Animación por Propiedad (translateX, translateY, rotate)
+   -------------------------------------------------------------------------- */
+.anim-tx,
+.anim-ty,
+.anim-rot {
+  animation-duration: 3.2s;
+  animation-timing-function: cubic-bezier(0.35, 0, 0.25, 1);
+  animation-fill-mode: forwards; /* Se mantiene fija en la figura final */
+  will-change: transform;
+}
+
+/* --------------------------------------------------------------------------
+   Asignación de Color, Centroides y Animaciones para Figura 164
+   -------------------------------------------------------------------------- */
+
+/* FIGURA 1: Triángulo Grande 1 (Copa Superior de la Figura 164) */
+#figura-1 polygon { fill: var(--color-fig1); }
+#figura-1 .anim-tx  { animation-name: figura1-translateX; }
+#figura-1 .anim-ty  { animation-name: figura1-translateY; }
+#figura-1 .anim-rot {
+  transform-origin: 200px 66.67px;
+  animation-name: figura1-rotate;
+}
+
+/* FIGURA 2: Triángulo Grande 2 (Lado Derecho de la Columna) */
+#figura-2 polygon { fill: var(--color-fig2); }
+#figura-2 .anim-tx  { animation-name: figura2-translateX; }
+#figura-2 .anim-ty  { animation-name: figura2-translateY; }
+#figura-2 .anim-rot {
+  transform-origin: 66.67px 200px;
+  animation-name: figura2-rotate;
+}
+
+/* FIGURA 3: Triángulo Mediano (Inferior Izquierdo de la Columna) */
+#figura-3 polygon { fill: var(--color-fig3); }
+#figura-3 .anim-tx  { animation-name: figura3-translateX; }
+#figura-3 .anim-ty  { animation-name: figura3-translateY; }
+#figura-3 .anim-rot {
+  transform-origin: 333.33px 333.33px;
+  animation-name: figura3-rotate;
+}
+
+/* FIGURA 4: Triángulo Pequeño 1 (Bajo el Lado Izq. del Rombo) */
+#figura-4 polygon { fill: var(--color-fig4); }
+#figura-4 .anim-tx  { animation-name: figura4-translateX; }
+#figura-4 .anim-ty  { animation-name: figura4-translateY; }
+#figura-4 .anim-rot {
+  transform-origin: 200px 266.67px;
+  animation-name: figura4-rotate;
+}
+
+/* FIGURA 5: Triángulo Pequeño 2 (Lado Derecho de la Base) */
+#figura-5 polygon { fill: var(--color-fig5); }
+#figura-5 .anim-tx  { animation-name: figura5-translateX; }
+#figura-5 .anim-ty  { animation-name: figura5-translateY; }
+#figura-5 .anim-rot {
+  transform-origin: 366.67px 100px;
+  animation-name: figura5-rotate;
+}
+
+/* FIGURA 6: Cuadrado (Rombo Central) */
+#figura-6 polygon { fill: var(--color-fig6); }
+#figura-6 .anim-tx  { animation-name: figura6-translateX; }
+#figura-6 .anim-ty  { animation-name: figura6-translateY; }
+#figura-6 .anim-rot {
+  transform-origin: 300px 200px;
+  animation-name: figura6-rotate;
+}
+
+/* FIGURA 7: Paralelogramo (Lado Izquierdo de la Base) */
+#figura-7 polygon { fill: var(--color-fig7); }
+#figura-7 .anim-tx  { animation-name: figura7-translateX; }
+#figura-7 .anim-ty  { animation-name: figura7-translateY; }
+#figura-7 .anim-rot {
+  transform-origin: 150px 350px;
+  animation-name: figura7-rotate;
+}
+
+/* ==========================================================================
+   DECLARACIÓN DE LOS 21 KEYFRAMES (FIGURA 164)
+   Pasan exactamente del Cuadro Inicial al Tangram 164 y se mantienen allí.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   FIGURA 1: Triángulo Grande 1
+   -------------------------------------------------------------------------- */
+@keyframes figura1-translateX {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(0px); }
+}
+
+@keyframes figura1-translateY {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes figura1-rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* --------------------------------------------------------------------------
+   FIGURA 2: Triángulo Grande 2
+   -------------------------------------------------------------------------- */
+@keyframes figura2-translateX {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(166.67px); }
+}
+
+@keyframes figura2-translateY {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(300px); }
+}
+
+@keyframes figura2-rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(180deg); }
+}
+
+/* --------------------------------------------------------------------------
+   FIGURA 3: Triángulo Mediano
+   -------------------------------------------------------------------------- */
+@keyframes figura3-translateX {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(-166.67px); }
+}
+
+@keyframes figura3-translateY {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(300px); }
+}
+
+@keyframes figura3-rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+
+/* --------------------------------------------------------------------------
+   FIGURA 4: Triángulo Pequeño 1
+   -------------------------------------------------------------------------- */
+@keyframes figura4-translateX {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(-66.67px); }
+}
+
+@keyframes figura4-translateY {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(133.33px); }
+}
+
+@keyframes figura4-rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+
+/* --------------------------------------------------------------------------
+   FIGURA 5: Triángulo Pequeño 2
+   -------------------------------------------------------------------------- */
+@keyframes figura5-translateX {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(-66.67px); }
+}
+
+@keyframes figura5-translateY {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(666.67px); }
+}
+
+@keyframes figura5-rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+
+/* --------------------------------------------------------------------------
+   FIGURA 6: Cuadrado
+   -------------------------------------------------------------------------- */
+@keyframes figura6-translateX {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(-100px); }
+}
+
+@keyframes figura6-translateY {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(100px); }
+}
+
+@keyframes figura6-rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* --------------------------------------------------------------------------
+   FIGURA 7: Paralelogramo
+   -------------------------------------------------------------------------- */
+@keyframes figura7-translateX {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(0px); }
+}
+
+@keyframes figura7-translateY {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(400px); }
+}
+
+@keyframes figura7-rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* --------------------------------------------------------------------------
+   Pie de página
+   -------------------------------------------------------------------------- */
+.footer {
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tangram — 7 Figuras SVG y 21 Keyframes CSS</title>
+  <meta name="description" content="Plantilla en HTML y CSS puro con las 7 figuras del Tangram en SVG y 21 keyframes preparados para animaciones.">
+
+  <!-- Tipografía de Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Hoja de Estilos CSS Puro -->
+  <link rel="stylesheet" href="tangram.css">
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header class="header">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      HTML5 & CSS3 Puro
+    </div>
+    <h1>Plantilla Tangram</h1>
+    <p>7 figuras geométricas vectoriales en SVG organizadas en un tablero clásico, listas con 21 keyframes de animación en CSS.</p>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <main class="tangram-layout">
+    
+    <!-- Tablero del Tangram con las 7 figuras SVG -->
+    <section class="tangram-stage" aria-label="Tablero Tangram">
+      <div class="tangram-board-wrapper">
+        <div class="board-controls">
+          <button type="button" class="btn-replay" onclick="location.reload()">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+            </svg>
+            Reiniciar Animación (Figura 164)
+          </button>
+        </div>
+
+        <div class="tangram-board" id="tablero-tangram">
+
+          <!-- FIGURA 1: Triángulo Grande 1 -->
+          <svg class="tangram-figura figura-1" id="figura-1" viewBox="0 0 400 400" aria-label="Triángulo Grande 1">
+            <g class="anim-tx">
+              <g class="anim-ty">
+                <g class="anim-rot">
+                  <polygon points="0,0 400,0 200,200" />
+                </g>
+              </g>
+            </g>
+          </svg>
+
+          <!-- FIGURA 2: Triángulo Grande 2 -->
+          <svg class="tangram-figura figura-2" id="figura-2" viewBox="0 0 400 400" aria-label="Triángulo Grande 2">
+            <g class="anim-tx">
+              <g class="anim-ty">
+                <g class="anim-rot">
+                  <polygon points="0,0 200,200 0,400" />
+                </g>
+              </g>
+            </g>
+          </svg>
+
+          <!-- FIGURA 3: Triángulo Mediano -->
+          <svg class="tangram-figura figura-3" id="figura-3" viewBox="0 0 400 400" aria-label="Triángulo Mediano">
+            <g class="anim-tx">
+              <g class="anim-ty">
+                <g class="anim-rot">
+                  <polygon points="200,400 400,400 400,200" />
+                </g>
+              </g>
+            </g>
+          </svg>
+
+          <!-- FIGURA 4: Triángulo Pequeño 1 -->
+          <svg class="tangram-figura figura-4" id="figura-4" viewBox="0 0 400 400" aria-label="Triángulo Pequeño 1">
+            <g class="anim-tx">
+              <g class="anim-ty">
+                <g class="anim-rot">
+                  <polygon points="200,200 300,300 100,300" />
+                </g>
+              </g>
+            </g>
+          </svg>
+
+          <!-- FIGURA 5: Triángulo Pequeño 2 -->
+          <svg class="tangram-figura figura-5" id="figura-5" viewBox="0 0 400 400" aria-label="Triángulo Pequeño 2">
+            <g class="anim-tx">
+              <g class="anim-ty">
+                <g class="anim-rot">
+                  <polygon points="300,100 400,200 400,0" />
+                </g>
+              </g>
+            </g>
+          </svg>
+
+          <!-- FIGURA 6: Cuadrado -->
+          <svg class="tangram-figura figura-6" id="figura-6" viewBox="0 0 400 400" aria-label="Cuadrado">
+            <g class="anim-tx">
+              <g class="anim-ty">
+                <g class="anim-rot">
+                  <polygon points="200,200 300,100 400,200 300,300" />
+                </g>
+              </g>
+            </g>
+          </svg>
+
+          <!-- FIGURA 7: Paralelogramo (Romboide) -->
+          <svg class="tangram-figura figura-7" id="figura-7" viewBox="0 0 400 400" aria-label="Paralelogramo">
+            <g class="anim-tx">
+              <g class="anim-ty">
+                <g class="anim-rot">
+                  <polygon points="0,400 200,400 300,300 100,300" />
+                </g>
+              </g>
+            </g>
+          </svg>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>Plantilla Tangram SVG &bull; HTML y CSS Puro &bull; UJAP Interfaces</p>
+  </footer>
+
+</body>
+</html>
