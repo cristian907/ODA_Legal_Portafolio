@@ -29,8 +29,8 @@
   --stroke-width: 2px;
   --stroke-color: rgba(255, 255, 255, 0.85);
 
-  --board-width: 440px;
-  --board-height: 840px;
+  --board-width: 1040px;
+  --board-height: 860px;
   --radius-lg: 16px;
   --radius-md: 10px;
 }
@@ -68,30 +68,6 @@ body {
   margin: 0 auto 2.5rem;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.9rem;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  border-radius: 9999px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #a5b4fc;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 0.85rem;
-}
-
-.badge-dot {
-  width: 7px;
-  height: 7px;
-  background-color: #34d399;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #34d399;
-}
-
 .header h1 {
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 800;
@@ -114,7 +90,7 @@ body {
    Contenedor Principal (Tablero y Panel Lateral)
    -------------------------------------------------------------------------- */
 .tangram-layout {
-  max-width: 600px;
+  max-width: 1120px;
   margin: 0 auto;
   width: 100%;
   display: flex;
@@ -134,6 +110,8 @@ body {
 
 .tangram-board-wrapper {
   position: relative;
+  max-width: 100%;
+  overflow-x: auto;
   padding: 18px;
   background: var(--bg-card);
   backdrop-filter: blur(12px);
@@ -190,27 +168,6 @@ body {
   margin: 0 auto;
 }
 
-/* Guía visual del cuadro inicial (400x400) */
-.tangram-board::before {
-  content: "Posición Inicial (Cuadro)";
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 400px;
-  height: 400px;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  pointer-events: none;
-  font-size: 0.72rem;
-  font-family: monospace;
-  color: rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
 /* --------------------------------------------------------------------------
    Estilos de las 7 Figuras SVG del Tangram
    -------------------------------------------------------------------------- */
@@ -244,17 +201,17 @@ body {
 .anim-tx,
 .anim-ty,
 .anim-rot {
-  animation-duration: 3.2s;
+  animation-duration: 9.5s;
   animation-timing-function: cubic-bezier(0.35, 0, 0.25, 1);
-  animation-fill-mode: forwards; /* Se mantiene fija en la figura final */
+  animation-fill-mode: forwards; /* Se mantiene fija en la figura final (Figura 7) */
   will-change: transform;
 }
 
 /* --------------------------------------------------------------------------
-   Asignación de Color, Centroides y Animaciones para Figura 164
+   Asignación de Color, Centroides y Animaciones
    -------------------------------------------------------------------------- */
 
-/* FIGURA 1: Triángulo Grande 1 (Copa Superior de la Figura 164) */
+/* FIGURA 1: Triángulo Grande 1 */
 #figura-1 polygon { fill: var(--color-fig1); }
 #figura-1 .anim-tx  { animation-name: figura1-translateX; }
 #figura-1 .anim-ty  { animation-name: figura1-translateY; }
@@ -263,7 +220,7 @@ body {
   animation-name: figura1-rotate;
 }
 
-/* FIGURA 2: Triángulo Grande 2 (Lado Derecho de la Columna) */
+/* FIGURA 2: Triángulo Grande 2 */
 #figura-2 polygon { fill: var(--color-fig2); }
 #figura-2 .anim-tx  { animation-name: figura2-translateX; }
 #figura-2 .anim-ty  { animation-name: figura2-translateY; }
@@ -272,7 +229,7 @@ body {
   animation-name: figura2-rotate;
 }
 
-/* FIGURA 3: Triángulo Mediano (Inferior Izquierdo de la Columna) */
+/* FIGURA 3: Triángulo Mediano */
 #figura-3 polygon { fill: var(--color-fig3); }
 #figura-3 .anim-tx  { animation-name: figura3-translateX; }
 #figura-3 .anim-ty  { animation-name: figura3-translateY; }
@@ -281,7 +238,7 @@ body {
   animation-name: figura3-rotate;
 }
 
-/* FIGURA 4: Triángulo Pequeño 1 (Bajo el Lado Izq. del Rombo) */
+/* FIGURA 4: Triángulo Pequeño 1 */
 #figura-4 polygon { fill: var(--color-fig4); }
 #figura-4 .anim-tx  { animation-name: figura4-translateX; }
 #figura-4 .anim-ty  { animation-name: figura4-translateY; }
@@ -290,7 +247,7 @@ body {
   animation-name: figura4-rotate;
 }
 
-/* FIGURA 5: Triángulo Pequeño 2 (Lado Derecho de la Base) */
+/* FIGURA 5: Triángulo Pequeño 2 */
 #figura-5 polygon { fill: var(--color-fig5); }
 #figura-5 .anim-tx  { animation-name: figura5-translateX; }
 #figura-5 .anim-ty  { animation-name: figura5-translateY; }
@@ -299,7 +256,7 @@ body {
   animation-name: figura5-rotate;
 }
 
-/* FIGURA 6: Cuadrado (Rombo Central) */
+/* FIGURA 6: Cuadrado */
 #figura-6 polygon { fill: var(--color-fig6); }
 #figura-6 .anim-tx  { animation-name: figura6-translateX; }
 #figura-6 .anim-ty  { animation-name: figura6-translateY; }
@@ -308,7 +265,7 @@ body {
   animation-name: figura6-rotate;
 }
 
-/* FIGURA 7: Paralelogramo (Lado Izquierdo de la Base) */
+/* FIGURA 7: Paralelogramo */
 #figura-7 polygon { fill: var(--color-fig7); }
 #figura-7 .anim-tx  { animation-name: figura7-translateX; }
 #figura-7 .anim-ty  { animation-name: figura7-translateY; }
@@ -318,142 +275,155 @@ body {
 }
 
 /* ==========================================================================
-   DECLARACIÓN DE LOS 21 KEYFRAMES (FIGURA 164)
-   Pasan exactamente del Cuadro Inicial al Tangram 164 y se mantienen allí.
+   DECLARACIÓN DE LOS 21 KEYFRAMES (SECUENCIA COMPLETA)
+   - 0% a 15%:   Figura 164 (Cáliz / Trofeo) centrada
+   - 45% a 60%:  Figura 29 (Flecha con Bloque) centrada
+   - 88% a 100%: Figura 7 (Puente / Arco) centrada y fija
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
    FIGURA 1: Triángulo Grande 1
    -------------------------------------------------------------------------- */
 @keyframes figura1-translateX {
-  0%   { transform: translateX(0px); }
-  100% { transform: translateX(0px); }
+  0%, 15%   { transform: translateX(300px); }
+  45%, 60%  { transform: translateX(311.78px); }
+  88%, 100% { transform: translateX(-6.41px); }
 }
 
 @keyframes figura1-translateY {
-  0%   { transform: translateY(0px); }
-  100% { transform: translateY(0px); }
+  0%, 15%   { transform: translateY(10px); }
+  45%, 60%  { transform: translateY(437.61px); }
+  88%, 100% { transform: translateY(390.47px); }
 }
 
 @keyframes figura1-rotate {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(0deg); }
+  0%, 15%   { transform: rotate(0deg); }
+  45%, 60%  { transform: rotate(225deg); }
+  88%, 100% { transform: rotate(315deg); }
 }
 
 /* --------------------------------------------------------------------------
    FIGURA 2: Triángulo Grande 2
    -------------------------------------------------------------------------- */
 @keyframes figura2-translateX {
-  0%   { transform: translateX(0px); }
-  100% { transform: translateX(166.67px); }
+  0%, 15%   { transform: translateX(466.67px); }
+  45%, 60%  { transform: translateX(350.83px); }
+  88%, 100% { transform: translateX(739.75px); }
 }
 
 @keyframes figura2-translateY {
-  0%   { transform: translateY(0px); }
-  100% { transform: translateY(300px); }
+  0%, 15%   { transform: translateY(310px); }
+  45%, 60%  { transform: translateY(398.56px); }
+  88%, 100% { transform: translateY(257.14px); }
 }
 
 @keyframes figura2-rotate {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(180deg); }
+  0%, 15%   { transform: rotate(180deg); }
+  45%, 60%  { transform: rotate(135deg); }
+  88%, 100% { transform: rotate(135deg); }
 }
 
 /* --------------------------------------------------------------------------
    FIGURA 3: Triángulo Mediano
    -------------------------------------------------------------------------- */
 @keyframes figura3-translateX {
-  0%   { transform: translateX(0px); }
-  100% { transform: translateX(-166.67px); }
+  0%, 15%   { transform: translateX(133.33px); }
+  45%, 60%  { transform: translateX(60.60px); }
+  88%, 100% { transform: translateX(166.67px); }
 }
 
 @keyframes figura3-translateY {
-  0%   { transform: translateY(0px); }
-  100% { transform: translateY(300px); }
+  0%, 15%   { transform: translateY(310px); }
+  45%, 60%  { transform: translateY(-111.90px); }
+  88%, 100% { transform: translateY(123.81px); }
 }
 
 @keyframes figura3-rotate {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(90deg); }
+  0%, 15%   { transform: rotate(90deg); }
+  45%, 60%  { transform: rotate(225deg); }
+  88%, 100% { transform: rotate(405deg); }
 }
 
 /* --------------------------------------------------------------------------
    FIGURA 4: Triángulo Pequeño 1
    -------------------------------------------------------------------------- */
 @keyframes figura4-translateX {
-  0%   { transform: translateX(0px); }
-  100% { transform: translateX(-66.67px); }
+  0%, 15%   { transform: translateX(233.33px); }
+  45%, 60%  { transform: translateX(453.20px); }
+  88%, 100% { transform: translateX(135.01px); }
 }
 
 @keyframes figura4-translateY {
-  0%   { transform: translateY(0px); }
-  100% { transform: translateY(133.33px); }
+  0%, 15%   { transform: translateY(143.33px); }
+  45%, 60%  { transform: translateY(190.47px); }
+  88%, 100% { transform: translateY(96.19px); }
 }
 
 @keyframes figura4-rotate {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(90deg); }
+  0%, 15%   { transform: rotate(90deg); }
+  45%, 60%  { transform: rotate(315deg); }
+  88%, 100% { transform: rotate(225deg); }
 }
 
 /* --------------------------------------------------------------------------
    FIGURA 5: Triángulo Pequeño 2
    -------------------------------------------------------------------------- */
 @keyframes figura5-translateX {
-  0%   { transform: translateX(0px); }
-  100% { transform: translateX(-66.67px); }
+  0%, 15%   { transform: translateX(233.33px); }
+  45%, 60%  { transform: translateX(333.68px); }
+  88%, 100% { transform: translateX(156.91px); }
 }
 
 @keyframes figura5-translateY {
-  0%   { transform: translateY(0px); }
-  100% { transform: translateY(666.67px); }
+  0%, 15%   { transform: translateY(676.67px); }
+  45%, 60%  { transform: translateY(545.70px); }
+  88%, 100% { transform: translateY(215.72px); }
 }
 
 @keyframes figura5-rotate {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(90deg); }
+  0%, 15%   { transform: rotate(90deg); }
+  45%, 60%  { transform: rotate(225deg); }
+  88%, 100% { transform: rotate(135deg); }
 }
 
 /* --------------------------------------------------------------------------
    FIGURA 6: Cuadrado
    -------------------------------------------------------------------------- */
 @keyframes figura6-translateX {
-  0%   { transform: translateX(0px); }
-  100% { transform: translateX(-100px); }
+  0%, 15%   { transform: translateX(200px); }
+  45%, 60%  { transform: translateX(93.93px); }
+  88%, 100% { transform: translateX(341.43px); }
 }
 
 @keyframes figura6-translateY {
-  0%   { transform: translateY(0px); }
-  100% { transform: translateY(100px); }
+  0%, 15%   { transform: translateY(110px); }
+  45%, 60%  { transform: translateY(139.29px); }
+  88%, 100% { transform: translateY(139.29px); }
 }
 
 @keyframes figura6-rotate {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(0deg); }
+  0%, 15%   { transform: rotate(0deg); }
+  45%, 60%  { transform: rotate(45deg); }
+  88%, 100% { transform: rotate(45deg); }
 }
 
 /* --------------------------------------------------------------------------
    FIGURA 7: Paralelogramo
    -------------------------------------------------------------------------- */
 @keyframes figura7-translateX {
-  0%   { transform: translateX(0px); }
-  100% { transform: translateX(0px); }
+  0%, 15%   { transform: translateX(300px); }
+  45%, 60%  { transform: translateX(526.77px); }
+  88%, 100% { transform: translateX(279.29px); }
 }
 
 @keyframes figura7-translateY {
-  0%   { transform: translateY(0px); }
-  100% { transform: translateY(400px); }
+  0%, 15%   { transform: translateY(410px); }
+  45%, 60%  { transform: translateY(201.42px); }
+  88%, 100% { transform: translateY(-10.71px); }
 }
 
 @keyframes figura7-rotate {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(0deg); }
-}
-
-/* --------------------------------------------------------------------------
-   Pie de página
-   -------------------------------------------------------------------------- */
-.footer {
-  margin-top: 3rem;
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-dim);
+  0%, 15%   { transform: rotate(0deg); }
+  45%, 60%  { transform: rotate(135deg); }
+  88%, 100% { transform: rotate(45deg); }
 }
