@@ -17,14 +17,20 @@
   --text-muted: #9ca3af;
   --text-dim: #6b7280;
 
-  /* Colores para cada una de las 7 figuras */
-  --color-fig1: #ef4444; /* Triángulo Grande 1 (Rojo coral) */
-  --color-fig2: #3b82f6; /* Triángulo Grande 2 (Azul eléctrico) */
-  --color-fig3: #10b981; /* Triángulo Mediano (Verde esmeralda) */
-  --color-fig4: #f59e0b; /* Triángulo Pequeño 1 (Ámbar) */
-  --color-fig5: #8b5cf6; /* Triángulo Pequeño 2 (Violeta púrpura) */
-  --color-fig6: #ec4899; /* Cuadrado (Rosa fucsia) */
-  --color-fig7: #06b6d4; /* Paralelogramo (Cian turquesa) */
+  /* Paleta de 5 colores de la página */
+  --svc-color-1: #e4edf7; /* Color 1: Fondo / Azul claro */
+  --svc-color-2: #ffffff; /* Color 2: Blanco / Superficie */
+  --svc-color-3: #1e293b; /* Color 3: Pizarra oscuro */
+  --svc-color-4: #c5a059; /* Color 4: Dorado ODA principal */
+  --svc-color-5: #0f172a; /* Color 5: Azul marino noche */
+
+  --color-fig1: var(--svc-color-4); /* Triángulo Grande 1 (Dorado ODA) */
+  --color-fig2: var(--svc-color-3); /* Triángulo Grande 2 (Pizarra oscuro) */
+  --color-fig3: var(--svc-color-1); /* Triángulo Mediano (Azul claro) */
+  --color-fig4: var(--svc-color-5); /* Triángulo Pequeño 1 (Azul noche) */
+  --color-fig5: var(--svc-color-4); /* Triángulo Pequeño 2 (Dorado ODA) */
+  --color-fig6: var(--svc-color-2); /* Cuadrado (Blanco) */
+  --color-fig7: var(--svc-color-2); /* Paralelogramo (Blanco) */
 
   --stroke-width: 2px;
   --stroke-color: rgba(255, 255, 255, 0.85);

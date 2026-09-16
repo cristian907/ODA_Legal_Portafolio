@@ -85,6 +85,18 @@ export const useThemeStore = defineStore('theme', () => {
   }
 
   function persistAppliedForTheme(theme: ThemeName): void {
+    const activeId = theme === 'dark' ? activeDarkId.value : activeLightId.value
+    const activeIdKey = theme === 'dark' ? STORAGE_KEYS.ACTIVE_STYLE_DARK : STORAGE_KEYS.ACTIVE_STYLE_LIGHT
+    const appliedKey = theme === 'dark' ? STORAGE_KEYS.APPLIED_DARK : STORAGE_KEYS.APPLIED_LIGHT
+
+    if (!activeId) {
+      removeKey(activeIdKey)
+      removeKey(appliedKey)
+      if (theme === 'dark') appliedDark.value = null
+      else appliedLight.value = null
+      return
+    }
+
     const config = getConfigForTheme(theme)
     const applied: AppliedConfig = {
       palette: config.palette,
@@ -92,28 +104,29 @@ export const useThemeStore = defineStore('theme', () => {
       fontDataUrl: config.fontDataUrl,
       fontName: config.fontName,
     }
-    const appliedKey = theme === 'dark' ? STORAGE_KEYS.APPLIED_DARK : STORAGE_KEYS.APPLIED_LIGHT
     writeJSON(appliedKey, applied)
+    writeRaw(activeIdKey, activeId)
     if (theme === 'dark') appliedDark.value = applied
     else appliedLight.value = applied
-
-    const activeId = theme === 'dark' ? activeDarkId.value : activeLightId.value
-    const activeIdKey = theme === 'dark' ? STORAGE_KEYS.ACTIVE_STYLE_DARK : STORAGE_KEYS.ACTIVE_STYLE_LIGHT
-    if (activeId) writeRaw(activeIdKey, activeId)
-    else removeKey(activeIdKey)
   }
 
   /** Each slot may only hold a style of its own theme; free stale slots. */
   function reconcileSlots(): void {
+    let changed = false
     const lightStyle = savedStyles.value.find((style) => style.id === activeLightId.value)
     if (activeLightId.value && (!lightStyle || lightStyle.theme !== 'light')) {
       activeLightId.value = null
       persistAppliedForTheme('light')
+      changed = true
     }
     const darkStyle = savedStyles.value.find((style) => style.id === activeDarkId.value)
     if (activeDarkId.value && (!darkStyle || darkStyle.theme !== 'dark')) {
       activeDarkId.value = null
       persistAppliedForTheme('dark')
+      changed = true
+    }
+    if (changed) {
+      applyCurrent()
     }
   }
 
@@ -122,10 +135,12 @@ export const useThemeStore = defineStore('theme', () => {
     if (style.theme === 'dark') activeDarkId.value = style.id
     else activeLightId.value = style.id
     themeDefault.value = style.theme
+    currentTheme.value = style.theme
     writeRaw(STORAGE_KEYS.THEME_DEFAULT, themeDefault.value)
-    writeRaw(STORAGE_KEYS.THEME_CURRENT, themeDefault.value)
+    writeRaw(STORAGE_KEYS.THEME_CURRENT, currentTheme.value)
     persistAppliedForTheme(style.theme)
     reconcileSlots()
+    applyCurrent()
   }
 
   function applyCurrent(): void {
@@ -154,6 +169,8 @@ export const useThemeStore = defineStore('theme', () => {
     activeDarkId.value = readRaw(STORAGE_KEYS.ACTIVE_STYLE_DARK, null)
     themeDefault.value = toThemeName(readRaw(STORAGE_KEYS.THEME_DEFAULT, 'light'))
     allowToggle.value = readRaw(STORAGE_KEYS.THEME_ALLOW_TOGGLE, 'true') !== 'false'
+    appliedLight.value = readJSON<AppliedConfig | null>(STORAGE_KEYS.APPLIED_LIGHT, null)
+    appliedDark.value = readJSON<AppliedConfig | null>(STORAGE_KEYS.APPLIED_DARK, null)
 
     reconcileSlots()
   }
@@ -169,11 +186,18 @@ export const useThemeStore = defineStore('theme', () => {
     themeDefault.value = mode
     writeRaw(STORAGE_KEYS.THEME_DEFAULT, mode)
     writeRaw(STORAGE_KEYS.THEME_CURRENT, mode)
+    currentTheme.value = mode
+    applyCurrent()
   }
 
   function setAllowToggle(value: boolean): void {
     allowToggle.value = value
     writeRaw(STORAGE_KEYS.THEME_ALLOW_TOGGLE, String(value))
+    if (!value) {
+      currentTheme.value = themeDefault.value
+      writeRaw(STORAGE_KEYS.THEME_CURRENT, currentTheme.value)
+      applyCurrent()
+    }
   }
 
   const isActive = (id: string | null): boolean =>
@@ -296,26 +320,41 @@ export const useThemeStore = defineStore('theme', () => {
   function deleteStyle(style: SavedStyle): void {
     savedStyles.value = savedStyles.value.filter((saved) => saved.id !== style.id)
     persistSavedStyles()
+    let changed = false
     if (style.id === activeLightId.value) {
       activeLightId.value = null
       persistAppliedForTheme('light')
+      changed = true
     }
     if (style.id === activeDarkId.value) {
       activeDarkId.value = null
       persistAppliedForTheme('dark')
+      changed = true
+    }
+    if (changed) {
+      applyCurrent()
     }
   }
 
   function resetAll(): void {
     activeLightId.value = null
     activeDarkId.value = null
+    appliedLight.value = null
+    appliedDark.value = null
+    draft.value = null
     themeDefault.value = 'light'
+    currentTheme.value = 'light'
     allowToggle.value = true
+
     writeRaw(STORAGE_KEYS.THEME_DEFAULT, 'light')
     writeRaw(STORAGE_KEYS.THEME_CURRENT, 'light')
     writeRaw(STORAGE_KEYS.THEME_ALLOW_TOGGLE, 'true')
-    persistAppliedForTheme('light')
-    persistAppliedForTheme('dark')
+    removeKey(STORAGE_KEYS.ACTIVE_STYLE_LIGHT)
+    removeKey(STORAGE_KEYS.ACTIVE_STYLE_DARK)
+    removeKey(STORAGE_KEYS.APPLIED_LIGHT)
+    removeKey(STORAGE_KEYS.APPLIED_DARK)
+
+    applyCurrent()
   }
 
   return {
