@@ -75,6 +75,25 @@ async function resetAll() {
           @change="theme.setAllowToggle(($event.target as HTMLInputElement).checked)"
         />
       </label>
+
+      <label class="flex cursor-pointer items-start justify-between gap-4 border-t border-slate-800/80 pt-3">
+        <span class="flex flex-col">
+          <span class="text-[0.82rem] text-slate-300">Pantalla de carga (animación Tangram)</span>
+          <span class="text-xs text-slate-500">
+            {{
+              theme.loaderEnabled
+                ? 'La animación introductoria del Tangram se muestra al ingresar a la landing page.'
+                : 'La pantalla de carga está desactivada; la landing carga de inmediato.'
+            }}
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          class="mt-1 h-5 w-5 shrink-0 accent-[#c5a059]"
+          :checked="theme.loaderEnabled"
+          @change="theme.setLoaderEnabled(($event.target as HTMLInputElement).checked)"
+        />
+      </label>
     </section>
 
     <!-- Estilos activos por modo -->

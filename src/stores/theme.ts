@@ -32,6 +32,7 @@ export const useThemeStore = defineStore('theme', () => {
   const currentTheme = ref<ThemeName>('light')
   const themeDefault = ref<ThemeName>('light')
   const allowToggle = ref(true)
+  const loaderEnabled = ref(readRaw(STORAGE_KEYS.LOADER_ENABLED, 'true') !== 'false')
   const appliedLight = ref<AppliedConfig | null>(null)
   const appliedDark = ref<AppliedConfig | null>(null)
 
@@ -152,6 +153,7 @@ export const useThemeStore = defineStore('theme', () => {
     loadEditorState()
     themeDefault.value = toThemeName(readRaw(STORAGE_KEYS.THEME_DEFAULT, 'light'))
     allowToggle.value = readRaw(STORAGE_KEYS.THEME_ALLOW_TOGGLE, 'true') !== 'false'
+    loaderEnabled.value = readRaw(STORAGE_KEYS.LOADER_ENABLED, 'true') !== 'false'
     appliedLight.value = readJSON<AppliedConfig | null>(STORAGE_KEYS.APPLIED_LIGHT, null)
     appliedDark.value = readJSON<AppliedConfig | null>(STORAGE_KEYS.APPLIED_DARK, null)
 
@@ -169,6 +171,7 @@ export const useThemeStore = defineStore('theme', () => {
     activeDarkId.value = readRaw(STORAGE_KEYS.ACTIVE_STYLE_DARK, null)
     themeDefault.value = toThemeName(readRaw(STORAGE_KEYS.THEME_DEFAULT, 'light'))
     allowToggle.value = readRaw(STORAGE_KEYS.THEME_ALLOW_TOGGLE, 'true') !== 'false'
+    loaderEnabled.value = readRaw(STORAGE_KEYS.LOADER_ENABLED, 'true') !== 'false'
     appliedLight.value = readJSON<AppliedConfig | null>(STORAGE_KEYS.APPLIED_LIGHT, null)
     appliedDark.value = readJSON<AppliedConfig | null>(STORAGE_KEYS.APPLIED_DARK, null)
 
@@ -198,6 +201,11 @@ export const useThemeStore = defineStore('theme', () => {
       writeRaw(STORAGE_KEYS.THEME_CURRENT, currentTheme.value)
       applyCurrent()
     }
+  }
+
+  function setLoaderEnabled(value: boolean): void {
+    loaderEnabled.value = value
+    writeRaw(STORAGE_KEYS.LOADER_ENABLED, String(value))
   }
 
   const isActive = (id: string | null): boolean =>
@@ -345,10 +353,12 @@ export const useThemeStore = defineStore('theme', () => {
     themeDefault.value = 'light'
     currentTheme.value = 'light'
     allowToggle.value = true
+    loaderEnabled.value = true
 
     writeRaw(STORAGE_KEYS.THEME_DEFAULT, 'light')
     writeRaw(STORAGE_KEYS.THEME_CURRENT, 'light')
     writeRaw(STORAGE_KEYS.THEME_ALLOW_TOGGLE, 'true')
+    writeRaw(STORAGE_KEYS.LOADER_ENABLED, 'true')
     removeKey(STORAGE_KEYS.ACTIVE_STYLE_LIGHT)
     removeKey(STORAGE_KEYS.ACTIVE_STYLE_DARK)
     removeKey(STORAGE_KEYS.APPLIED_LIGHT)
@@ -384,6 +394,8 @@ export const useThemeStore = defineStore('theme', () => {
     toggleTheme,
     setThemeDefault,
     setAllowToggle,
+    loaderEnabled,
+    setLoaderEnabled,
     validateStyleName,
     openDraft,
     closeDraft,
