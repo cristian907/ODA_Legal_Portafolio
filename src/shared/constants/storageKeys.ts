@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   THEME_DEFAULT: 'oda_theme_default',
   THEME_CURRENT: 'oda_theme',
   THEME_ALLOW_TOGGLE: 'oda_theme_allow_toggle',
+  LOADER_ENABLED: 'oda_loader_enabled',
 
   // CV wizard
   CV_DATA: 'oda_cv_data',
