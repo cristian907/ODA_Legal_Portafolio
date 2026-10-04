@@ -5,6 +5,7 @@ import { useThemeStore } from '@/stores/theme'
 import TangramLoader from './TangramLoader.vue'
 import TheHeader from './TheHeader.vue'
 import HeroSection from './HeroSection.vue'
+import VideoSection from './VideoSection.vue'
 import ServicesSection from './ServicesSection.vue'
 import GallerySection from './GallerySection.vue'
 import TheFooter from './TheFooter.vue'
@@ -22,6 +23,7 @@ const showLoader = ref(!previewMode && route.path === '/' && theme.loaderEnabled
   <TheHeader />
   <main>
     <HeroSection />
+    <VideoSection />
     <ServicesSection />
     <GallerySection />
   </main>

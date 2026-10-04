@@ -8,12 +8,12 @@ defineEmits(['close'])
 
 <template>
   <div
-    class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-8 transition-opacity"
+    class="fixed inset-0 z-2000 flex items-center justify-center bg-black/90 p-8 transition-opacity"
     :class="open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'"
     @click.self="$emit('close')"
   >
     <button
-      class="absolute right-8 top-6 cursor-pointer border-none bg-transparent text-4xl leading-none text-white transition-colors hover:text-gold"
+      class="absolute right-8 top-6 cursor-pointer border-0 bg-transparent text-4xl leading-none text-white transition-colors hover:text-gold"
       aria-label="Cerrar"
       @click="$emit('close')"
     >

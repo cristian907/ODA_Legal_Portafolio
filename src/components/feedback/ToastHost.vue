@@ -21,7 +21,7 @@ const accent = computed(() => {
   <Transition name="toast">
     <div
       v-if="state.visible"
-      class="fixed bottom-6 left-1/2 z-[3000] flex -translate-x-1/2 items-center gap-2 rounded-lg border bg-[#0b0f17] px-4 py-3 text-sm font-semibold shadow-xl"
+      class="fixed bottom-6 left-1/2 z-3000 flex -translate-x-1/2 items-center gap-2 rounded-lg border bg-[#0b0f17] px-4 py-3 text-sm font-semibold shadow-xl"
       :class="accent"
       role="status"
     >

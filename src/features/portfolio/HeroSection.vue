@@ -7,14 +7,14 @@ const stats = [
 </script>
 
 <template>
-  <section id="inicio" class="hero relative flex min-h-[90vh] items-center overflow-hidden pb-16 pt-[100px]">
+  <section id="inicio" class="hero relative flex min-h-[90vh] items-center overflow-hidden pb-16 pt-25">
     <div class="hero-overlay pointer-events-none absolute inset-0"></div>
 
     <div class="app-container hero-grid relative z-10">
       <!-- Copy -->
       <div>
         <div
-          class="mb-6 inline-flex items-center gap-2 rounded-full border border-svc-4 bg-white/[0.12] px-4 py-[0.4rem] font-semibold uppercase tracking-[1px] text-on-dark backdrop-blur-sm"
+          class="mb-6 inline-flex items-center gap-2 rounded-full border border-svc-4 bg-white/12 px-4 py-[0.4rem] font-semibold uppercase tracking-[1px] text-on-dark backdrop-blur-sm"
         >
           <i class="fas fa-award"></i> Abogado &amp; Asesor Legal de Excelencia
         </div>
@@ -37,12 +37,12 @@ const stats = [
 
       <!-- Featured card -->
       <div
-        class="relative rounded-2xl border border-svc-5 bg-surface p-8 text-center shadow-[0_16px_32px_rgba(0,0,0,0.16)] backdrop-blur-[16px]"
+        class="relative rounded-2xl border border-svc-5 bg-surface p-8 text-center shadow-[0_16px_32px_rgba(0,0,0,0.16)] backdrop-blur-lg"
       >
         <img
           src="/assets/images/attorney.png"
           alt="Lic. Oscar De Abreu"
-          class="mx-auto mb-6 h-[140px] w-[140px] rounded-full border-4 border-svc-4 object-cover shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+          class="mx-auto mb-6 h-35 w-35 rounded-full border-4 border-svc-4 object-cover shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
         />
         <h3 class="hero-card-name mb-1 font-bold text-svc-3">Lic. Oscar De Abreu</h3>
         <p class="hero-card-subtitle mb-6 font-medium text-svc-4">Abogado Senior &amp; Consultor Legal</p>

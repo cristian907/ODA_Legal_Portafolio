@@ -16,6 +16,7 @@ function onToggle() {
 
 const links = [
   { hash: '#inicio', label: 'Inicio' },
+  { hash: '#video', label: 'Video' },
   { hash: '#servicios', label: 'Servicios' },
   { hash: '#galeria', label: 'Galería' },
   { hash: '#contacto', label: 'Contacto' },
@@ -32,10 +33,10 @@ function onNav(hash: string) {
 
 <template>
   <header
-    class="left-0 top-0 z-[1000] w-full border-b border-border-app bg-header backdrop-blur-[12px] transition-colors"
+    class="left-0 top-0 z-1000 w-full border-b border-border-app bg-header backdrop-blur-md transition-colors"
     :class="previewMode ? 'sticky' : 'fixed'"
   >
-    <div class="app-container flex min-h-[80px] items-center justify-between py-2">
+    <div class="app-container flex min-h-20 items-center justify-between py-2">
       <!-- Logo -->
       <RouterLink
         to="/"
