@@ -1,6 +1,6 @@
 import { ALLOWED_EXTENSIONS, TITLE_MAX_LENGTH } from '../config'
 import { ValidationError } from './errors'
-import { hasAllowedExtension } from './fileExtension'
+import { describeExtensions, hasAllowedExtension } from './fileExtension'
 
 const MIN_SUBTITLES = 2
 const MIN_AUDIO_TRACKS = 2
@@ -28,11 +28,6 @@ export interface VideoPackageCandidate {
 }
 
 export type ValidVideoPackage = VideoPackageCandidate
-
-function describeExtensions(extensions: readonly string[]): string {
-  if (extensions.length === 1) return extensions[0]
-  return `${extensions.slice(0, -1).join(', ')} o ${extensions[extensions.length - 1]}`
-}
 
 function titleErrors(title: string): string[] {
   const trimmed = title.trim()

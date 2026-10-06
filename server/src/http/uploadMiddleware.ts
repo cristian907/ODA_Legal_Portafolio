@@ -37,13 +37,13 @@ function filterByExtension(_request: Request, file: Express.Multer.File, accept:
   accept(null, true)
 }
 
-const temporaryStorage = multer.diskStorage({
+export const temporaryDiskStorage = multer.diskStorage({
   destination: UPLOADS_TMP_DIR,
   filename: (_request, file, name) => name(null, `${randomUUID()}${fileExtension(file.originalname)}`),
 })
 
 export const uploadVideoPackage = multer({
-  storage: temporaryStorage,
+  storage: temporaryDiskStorage,
   fileFilter: filterByExtension,
   defParamCharset: 'utf8',
   limits: {

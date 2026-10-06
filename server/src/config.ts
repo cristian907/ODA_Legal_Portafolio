@@ -7,6 +7,8 @@ export const PORT = Number(process.env.PORT ?? 3001)
 export const UPLOADS_DIR = join(REPO_ROOT, 'uploads')
 export const UPLOADS_TMP_DIR = join(UPLOADS_DIR, '.tmp')
 export const UPLOADS_PUBLIC_PATH = '/uploads'
+export const PHOTOS_DIR = join(UPLOADS_DIR, 'photos')
+export const PHOTOS_PUBLIC_PATH = `${UPLOADS_PUBLIC_PATH}/photos`
 
 export const THUMBNAIL_INTERVAL_SECONDS = 5
 export const THUMBNAIL_WIDTH = 160
@@ -24,3 +26,8 @@ export const ALLOWED_EXTENSIONS = {
 } as const
 
 export type UploadField = keyof typeof ALLOWED_EXTENSIONS
+
+export const MAX_PHOTO_BYTES = 10 * 1024 * 1024
+export const ALLOWED_PHOTO_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'] as const
+export const CROPPED_PHOTO_MAX_WIDTH = 1200
+export const CROPPED_PHOTO_WEBP_QUALITY = 82

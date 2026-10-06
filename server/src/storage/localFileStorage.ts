@@ -1,18 +1,24 @@
 import { mkdir, open, rename, rm, writeFile } from 'node:fs/promises'
 import { join, relative, resolve, sep } from 'node:path'
-import { UPLOADS_DIR, UPLOADS_PUBLIC_PATH, UPLOADS_TMP_DIR } from '../config'
+import { PHOTOS_DIR, UPLOADS_DIR, UPLOADS_PUBLIC_PATH, UPLOADS_TMP_DIR } from '../config'
 
 export async function ensureUploadDirectories(): Promise<void> {
   await mkdir(UPLOADS_TMP_DIR, { recursive: true })
+  await mkdir(PHOTOS_DIR, { recursive: true })
+}
+
+/** Resolves a direct child of `parent`, rejecting names that escape it. */
+export function childDirectory(parent: string, name: string): string {
+  const directory = resolve(parent, name)
+  const relativePath = relative(parent, directory)
+  if (!relativePath || relativePath.startsWith('..') || relativePath.includes(sep)) {
+    throw new Error(`Invalid directory name: ${name}`)
+  }
+  return directory
 }
 
 export function packageDirectory(packageId: string): string {
-  const directory = resolve(UPLOADS_DIR, packageId)
-  const relativePath = relative(UPLOADS_DIR, directory)
-  if (!relativePath || relativePath.startsWith('..') || relativePath.includes(sep)) {
-    throw new Error(`Invalid package id: ${packageId}`)
-  }
-  return directory
+  return childDirectory(UPLOADS_DIR, packageId)
 }
 
 export function publicFileUrl(packageId: string, storedName: string): string {

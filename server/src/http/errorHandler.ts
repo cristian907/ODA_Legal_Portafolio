@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express'
 import multer from 'multer'
 import { MAX_VIDEO_BYTES } from '../config'
-import { ProcessingError, ValidationError } from '../domain/errors'
+import { NotFoundError, ProcessingError, ValidationError } from '../domain/errors'
 
 const MEGABYTE = 1024 * 1024
 const GENERIC_ERROR_MESSAGE = 'Ocurrió un error inesperado en el servidor.'
@@ -16,6 +16,10 @@ function multerMessage(error: multer.MulterError): string {
   return MULTER_MESSAGES[error.code] ?? 'No se pudieron recibir los archivos enviados.'
 }
 
+function isMalformedJsonBody(error: unknown): boolean {
+  return (error as { type?: unknown } | null)?.type === 'entity.parse.failed'
+}
+
 export function errorHandler(
   error: unknown,
   _request: Request,
@@ -24,6 +28,14 @@ export function errorHandler(
 ): void {
   if (error instanceof ValidationError) {
     response.status(400).json({ errors: error.errors })
+    return
+  }
+  if (isMalformedJsonBody(error)) {
+    response.status(400).json({ errors: ['El cuerpo de la solicitud no es un JSON válido.'] })
+    return
+  }
+  if (error instanceof NotFoundError) {
+    response.status(404).json({ errors: [error.message] })
     return
   }
   if (error instanceof multer.MulterError) {

@@ -3,6 +3,7 @@ import { basename } from 'node:path'
 import type { Request, Response } from 'express'
 import { ValidationError } from '../domain/errors'
 import { fileExtension } from '../domain/fileExtension'
+import { isUuid } from '../domain/identifiers'
 import { validateVideoPackage, type VideoPackageCandidate } from '../domain/validateVideoPackage'
 import type { StoredFile, StoredTrack, VideoManifest } from '../domain/videoPackage'
 import {
@@ -39,7 +40,6 @@ interface StoredPackage {
   audioTracks: StoredTrack[]
 }
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const VTT_SIGNATURE_BYTES = 16
 
 function uploadedFilesOf(request: Request, field: string): UploadedFile[] {
@@ -174,7 +174,7 @@ export async function createVideo(request: Request, response: Response): Promise
 
 export async function deleteVideo(request: Request, response: Response): Promise<void> {
   const packageId = String(request.params.id)
-  if (!UUID_PATTERN.test(packageId)) {
+  if (!isUuid(packageId)) {
     throw new ValidationError(['El identificador del video no es válido.'])
   }
   await removePackage(packageId)
