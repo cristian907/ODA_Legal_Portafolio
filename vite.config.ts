@@ -3,7 +3,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
-const VIDEO_SERVER_URL = 'http://localhost:3001'
+// Local file server; override with VITE_API_TARGET to run a second instance side by side.
+const VIDEO_SERVER_URL = process.env.VITE_API_TARGET ?? 'http://localhost:3001'
 
 // https://vite.dev/config/
 export default defineConfig({

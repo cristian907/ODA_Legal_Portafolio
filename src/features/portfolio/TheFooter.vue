@@ -8,8 +8,8 @@ const socials = [
 
 const navLinks = [
   { hash: '#inicio', label: 'Inicio' },
-  { hash: '#servicios', label: 'Especialidades' },
   { hash: '#galeria', label: 'Galería' },
+  { hash: '#servicios', label: 'Especialidades' },
   { hash: '#contacto', label: 'Contacto Directo' },
 ]
 

@@ -7,7 +7,7 @@ import TheHeader from './TheHeader.vue'
 import HeroSection from './HeroSection.vue'
 import VideoSection from './VideoSection.vue'
 import ServicesSection from './ServicesSection.vue'
-import GallerySection from './GallerySection.vue'
+import PhotoCarouselSection from './carousel/PhotoCarouselSection.vue'
 import TheFooter from './TheFooter.vue'
 
 const previewMode = inject('previewMode', false)
@@ -24,8 +24,8 @@ const showLoader = ref(!previewMode && route.path === '/' && theme.loaderEnabled
   <main>
     <HeroSection />
     <VideoSection />
+    <PhotoCarouselSection />
     <ServicesSection />
-    <GallerySection />
   </main>
   <TheFooter />
 </template>

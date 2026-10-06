@@ -17,8 +17,8 @@ function onToggle() {
 const links = [
   { hash: '#inicio', label: 'Inicio' },
   { hash: '#video', label: 'Video' },
-  { hash: '#servicios', label: 'Servicios' },
   { hash: '#galeria', label: 'Galería' },
+  { hash: '#servicios', label: 'Servicios' },
   { hash: '#contacto', label: 'Contacto' },
 ]
 
