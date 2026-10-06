@@ -36,16 +36,22 @@ export function buildUploadFormData(payload: VideoUploadPayload): FormData {
   return formData
 }
 
-function serverErrors(body: unknown): string[] {
+function backendErrors(body: unknown): string[] {
   const errors = (body as { errors?: unknown } | null)?.errors
-  const messages = Array.isArray(errors) ? errors.filter((item) => typeof item === 'string') : []
-  return messages.length > 0 ? messages : [UNEXPECTED_ERROR_MESSAGE]
+  return Array.isArray(errors) ? errors.filter((item) => typeof item === 'string') : []
 }
 
-function errorFromStatus(status: number, body: unknown): VideoApiError {
-  if (status === 0) return new VideoApiError('network', [NETWORK_ERROR_MESSAGE])
+/**
+ * Maps a failed response to a typed error. A 5xx without the backend's
+ * `{ errors: string[] }` body comes from the dev proxy when the file server
+ * is down, so it is reported as a network failure.
+ */
+export function classifyFailure(status: number, body: unknown): VideoApiError {
+  const errors = backendErrors(body)
+  const isProxyFailure = status >= 500 && errors.length === 0
+  if (status === 0 || isProxyFailure) return new VideoApiError('network', [NETWORK_ERROR_MESSAGE])
   const kind: VideoApiErrorKind = status >= 400 && status < 500 ? 'validation' : 'server'
-  return new VideoApiError(kind, serverErrors(body))
+  return new VideoApiError(kind, errors.length > 0 ? errors : [UNEXPECTED_ERROR_MESSAGE])
 }
 
 function parseJson(text: string): unknown {
@@ -73,9 +79,9 @@ export function uploadVideoPackage(
     request.addEventListener('load', () => {
       const body = parseJson(request.responseText)
       if (isSuccess(request.status) && body) resolve(body as VideoManifest)
-      else reject(errorFromStatus(request.status, body))
+      else reject(classifyFailure(request.status, body))
     })
-    request.addEventListener('error', () => reject(errorFromStatus(0, null)))
+    request.addEventListener('error', () => reject(classifyFailure(0, null)))
     request.send(buildUploadFormData(payload))
   })
 }
@@ -85,7 +91,7 @@ export async function deleteVideoPackage(id: string): Promise<void> {
   try {
     response = await fetch(`${VIDEOS_ENDPOINT}/${encodeURIComponent(id)}`, { method: 'DELETE' })
   } catch {
-    throw errorFromStatus(0, null)
+    throw classifyFailure(0, null)
   }
-  if (!response.ok) throw errorFromStatus(response.status, await response.json().catch(() => null))
+  if (!response.ok) throw classifyFailure(response.status, await response.json().catch(() => null))
 }
