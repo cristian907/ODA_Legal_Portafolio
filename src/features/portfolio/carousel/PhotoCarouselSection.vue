@@ -8,7 +8,7 @@ const { photos, settings } = storeToRefs(useGalleryStore())
 </script>
 
 <template>
-  <section id="galeria" class="bg-surface py-20 transition-colors">
+  <section id="galeria" class="border-b border-svc-3/10 bg-svc-1 py-20 transition-colors">
     <div class="app-container">
       <SectionHeader
         tag="Instalaciones &amp; Despacho"

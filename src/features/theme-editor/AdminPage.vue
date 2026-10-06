@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useToast } from '@/composables/useToast'
@@ -12,6 +12,8 @@ import CvWizard from '@/features/cv-wizard/CvWizard.vue'
 import CvPreviewPanel from '@/features/cv-wizard/CvPreviewPanel.vue'
 import VideoAdminPanel from '@/features/video-admin/VideoAdminPanel.vue'
 import VideoPreviewPanel from '@/features/video-admin/VideoPreviewPanel.vue'
+import GalleryAdminPanel from '@/features/gallery-admin/GalleryAdminPanel.vue'
+import GalleryPreviewPanel from '@/features/gallery-admin/GalleryPreviewPanel.vue'
 import ToastHost from '@/components/feedback/ToastHost.vue'
 import ConfirmModal from '@/components/feedback/ConfirmModal.vue'
 import type { SavedStyle, ThemeName } from '@/types/theme'
@@ -20,11 +22,22 @@ const auth = useAuthStore()
 const theme = useThemeStore()
 const { show } = useToast()
 
-type AdminModule = 'styles' | 'cv' | 'video'
+type AdminModule = 'styles' | 'cv' | 'video' | 'gallery'
 type StylesView = 'general' | 'library' | 'editor'
 type ReturnView = 'general' | 'library'
 
 const activeModule = ref<AdminModule>('styles')
+
+const MODULES: { id: AdminModule; label: string; icon: string }[] = [
+  { id: 'styles', label: 'Estilos', icon: 'fa-palette' },
+  { id: 'cv', label: 'Creación de CV', icon: 'fa-id-card' },
+  { id: 'video', label: 'Video', icon: 'fa-film' },
+  { id: 'gallery', label: 'Galería', icon: 'fa-images' },
+]
+
+/** Modules laid out as the 40/60 split that stacks below 900px. */
+const isSplitModule = computed(() => activeModule.value === 'video' || activeModule.value === 'gallery')
+
 const view = ref<StylesView>('general')
 const editorReturnView = ref<ReturnView>('general')
 
@@ -82,39 +95,24 @@ watch(activeModule, (m) => {
         </span>
         <span class="hidden font-semibold lg:inline">Panel de Control | ODA Legal</span>
 
-        <nav class="ml-2 flex gap-1 rounded-lg border border-[#c5a059]/20 bg-white/5 p-1">
+        <nav class="ml-2 flex gap-1 rounded-lg border border-[#c5a059]/20 bg-white/5 p-1" aria-label="Módulos">
           <button
+            v-for="item in MODULES"
+            :key="item.id"
+            type="button"
             class="inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition"
             :class="
-              activeModule === 'styles'
+              activeModule === item.id
                 ? 'bg-gradient-to-br from-[#c5a059] to-[#b38e44] text-[#0f172a]'
                 : 'text-slate-400 hover:text-white'
             "
-            @click="activeModule = 'styles'"
+            :aria-current="activeModule === item.id ? 'page' : undefined"
+            :title="item.label"
+            :aria-label="item.label"
+            @click="activeModule = item.id"
           >
-            <i class="fas fa-palette"></i> Estilos
-          </button>
-          <button
-            class="inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition"
-            :class="
-              activeModule === 'cv'
-                ? 'bg-gradient-to-br from-[#c5a059] to-[#b38e44] text-[#0f172a]'
-                : 'text-slate-400 hover:text-white'
-            "
-            @click="activeModule = 'cv'"
-          >
-            <i class="fas fa-id-card"></i> Creación de CV
-          </button>
-          <button
-            class="inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition"
-            :class="
-              activeModule === 'video'
-                ? 'bg-gradient-to-br from-[#c5a059] to-[#b38e44] text-[#0f172a]'
-                : 'text-slate-400 hover:text-white'
-            "
-            @click="activeModule = 'video'"
-          >
-            <i class="fas fa-film"></i> Video
+            <i class="fas" :class="item.icon" aria-hidden="true"></i>
+            <span class="hidden min-[960px]:inline">{{ item.label }}</span>
           </button>
         </nav>
       </div>
@@ -143,11 +141,11 @@ watch(activeModule, (m) => {
     <main
       class="grid min-h-0 flex-1"
       :class="
-        activeModule === 'video' &&
+        isSplitModule &&
         'auto-rows-max grid-cols-1 overflow-y-auto [color-scheme:dark] min-[900px]:auto-rows-[minmax(0,1fr)] min-[900px]:grid-cols-[40%_60%] min-[900px]:overflow-hidden'
       "
       :style="
-        activeModule === 'video'
+        isSplitModule
           ? undefined
           : { gridTemplateColumns: activeModule === 'cv' ? '45% 55%' : '32% 68%' }
       "
@@ -218,8 +216,9 @@ watch(activeModule, (m) => {
         <!-- CV module -->
         <CvWizard v-else-if="activeModule === 'cv'" @download="cvPreview?.downloadPdf()" />
 
-        <!-- Video module -->
-        <VideoAdminPanel v-else />
+        <VideoAdminPanel v-else-if="activeModule === 'video'" />
+
+        <GalleryAdminPanel v-else />
       </div>
 
       <!-- Preview panel -->
@@ -240,7 +239,9 @@ watch(activeModule, (m) => {
 
         <CvPreviewPanel v-else-if="activeModule === 'cv'" ref="cvPreview" />
 
-        <VideoPreviewPanel v-else />
+        <VideoPreviewPanel v-else-if="activeModule === 'video'" />
+
+        <GalleryPreviewPanel v-else />
       </div>
     </main>
 
