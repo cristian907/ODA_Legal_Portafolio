@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, ref, watch, type ComponentPublicInstance } from 'vue'
+import type { VideoManifest } from '@/types/video'
 import PlayerControlsBar from './player/PlayerControlsBar.vue'
 import PlayerEndScreen from './player/PlayerEndScreen.vue'
 import PlayerFeedbackLayer from './player/PlayerFeedbackLayer.vue'
@@ -13,19 +14,24 @@ import { usePictureInPicture } from './player/composables/usePictureInPicture'
 import { usePlayback } from './player/composables/usePlayback'
 import { usePlayerFeedback } from './player/composables/usePlayerFeedback'
 import { usePlayerKeyboard } from './player/composables/usePlayerKeyboard'
+import { useSubtitles } from './player/composables/useSubtitles'
+import { useSyncedAudio } from './player/composables/useSyncedAudio'
+import { useThumbnailTrack } from './player/composables/useThumbnailTrack'
 import { useVideoAreaClicks } from './player/composables/useVideoAreaClicks'
 import { useVolume } from './player/composables/useVolume'
 import { SUBTITLES_OFF, type PlayerMenuOption } from './player/types'
 
+/**
+ * Plays a published video package. Render it with `:key="manifest.id"` so publishing
+ * a new package starts from a fresh player state.
+ */
 const props = withDefaults(
   defineProps<{
-    src: string
-    title?: string
+    manifest: VideoManifest
     theaterMode?: boolean
     startTime?: number
   }>(),
   {
-    title: 'Volcano Smoke, Fire & Heat Flame',
     theaterMode: false,
     startTime: 0,
   },
@@ -44,6 +50,7 @@ const DOUBLE_CLICK_SKIP_SECONDS = 10
 
 const containerRef = ref<HTMLDivElement | null>(null)
 const videoRef = ref<HTMLVideoElement | null>(null)
+const audioRefs = ref<HTMLAudioElement[]>([])
 
 const startSecond = ref(props.startTime || 0)
 const isScrubbing = ref(false)
@@ -66,24 +73,33 @@ const { showControls, revealControls, hideControlsIfIdle } = useControlsVisibili
   isPinned: () => isSettingsOpen.value || isScrubbing.value,
 })
 
-const subtitleOptions: PlayerMenuOption[] = [
+const {
+  selectedSubtitle,
+  activeText: subtitleText,
+  selectSubtitle,
+  toggleSubtitles,
+} = useSubtitles(videoRef, () => props.manifest.subtitles.length)
+
+const subtitleOptions = computed<PlayerMenuOption[]>(() => [
   { value: SUBTITLES_OFF, label: 'Desactivados' },
-  { value: 0, label: 'Español (generados automáticamente)' },
-  { value: 1, label: 'Inglés' },
-]
-const simulatedSubtitleTexts = ['[Fuego volcánico crepitante y nubes de ceniza]', '[Crackle of volcano flames and ash clouds]']
-const selectedSubtitle = ref(SUBTITLES_OFF)
-const subtitleText = computed(() => simulatedSubtitleTexts[selectedSubtitle.value] ?? '')
+  ...props.manifest.subtitles.map((subtitle, index) => ({ value: index, label: subtitle.label })),
+])
 
-const audioOptions: PlayerMenuOption[] = [
-  { value: 0, label: 'Original (Estéreo)', hint: 'Predeterminado' },
-  { value: 1, label: 'Español (Doblaje)' },
-  { value: 2, label: 'Sonido ambiental' },
-]
 const selectedAudio = ref(0)
+const audioOptions = computed<PlayerMenuOption[]>(() =>
+  props.manifest.audioTracks.map((track, index) => ({
+    value: index,
+    label: track.label,
+    hint: index === 0 ? 'Predeterminado' : undefined,
+  })),
+)
 
-function toggleSubtitles(): void {
-  selectedSubtitle.value = selectedSubtitle.value === SUBTITLES_OFF ? 0 : SUBTITLES_OFF
+useSyncedAudio(videoRef, audioRefs, selectedAudio, volume, isMuted)
+
+const { cues: thumbnailCues } = useThumbnailTrack(() => props.manifest.thumbnails.vttPath)
+
+function registerAudioElement(element: Element | ComponentPublicInstance | null, index: number): void {
+  if (element instanceof HTMLAudioElement) audioRefs.value[index] = element
 }
 
 async function togglePlay(): Promise<void> {
@@ -137,13 +153,6 @@ function toggleTheaterMode(): void {
   emit('update:theaterMode', !props.theaterMode)
 }
 
-watchEffect(() => {
-  const video = videoRef.value
-  if (!video) return
-  video.volume = volume.value
-  video.muted = isMuted.value
-})
-
 watch(
   () => props.startTime,
   (nextStart) => {
@@ -177,8 +186,9 @@ defineExpose({
   >
     <video
       ref="videoRef"
-      :src="src"
+      :src="manifest.video.path"
       class="h-full w-full object-contain"
+      muted
       playsinline
       preload="metadata"
       @timeupdate="playback.mediaListeners.onTimeUpdate"
@@ -188,9 +198,26 @@ defineExpose({
       @pause="playback.mediaListeners.onPause"
       @ended="playback.mediaListeners.onEnded"
       @click="onVideoAreaClick"
-    ></video>
+    >
+      <track
+        v-for="subtitle in manifest.subtitles"
+        :key="subtitle.path"
+        kind="subtitles"
+        :src="subtitle.path"
+        :srclang="subtitle.language"
+        :label="subtitle.label"
+      />
+    </video>
 
-    <PlayerTitleOverlay :title="title" :visible="showControls" />
+    <audio
+      v-for="(track, index) in manifest.audioTracks"
+      :key="track.path"
+      :ref="(element) => registerAudioElement(element, index)"
+      :src="track.path"
+      preload="auto"
+    ></audio>
+
+    <PlayerTitleOverlay :title="manifest.title" :visible="showControls" />
 
     <PlayerSubtitleOverlay v-if="subtitleText" :text="subtitleText" />
 
@@ -208,6 +235,7 @@ defineExpose({
         :current-time="currentTime"
         :duration="duration"
         :buffered-end="bufferedEnd"
+        :thumbnails="thumbnailCues"
         @seek="playback.seekTo"
       />
 
@@ -242,7 +270,7 @@ defineExpose({
             :selected-subtitle="selectedSubtitle"
             :playback-rate="playbackRate"
             @select-audio="selectedAudio = $event"
-            @select-subtitle="selectedSubtitle = $event"
+            @select-subtitle="selectSubtitle"
             @select-rate="playback.setPlaybackRate"
           />
         </template>

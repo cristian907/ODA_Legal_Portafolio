@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { formatTime } from './utils/formatTime'
+import { findThumbnail, type ThumbnailCue } from './utils/thumbnailVtt'
+import { clampTooltipCenter } from './utils/tooltipPosition'
 
-const props = defineProps<{
-  currentTime: number
-  duration: number
-  bufferedEnd: number
-  scrubbing: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    currentTime: number
+    duration: number
+    bufferedEnd: number
+    scrubbing: boolean
+    thumbnails?: ThumbnailCue[]
+  }>(),
+  { thumbnails: () => [] },
+)
 
 const emit = defineEmits<{
   (e: 'seek', seconds: number): void
@@ -17,6 +23,8 @@ const emit = defineEmits<{
 const barRef = ref<HTMLDivElement | null>(null)
 const hoverTime = ref<number | null>(null)
 const hoverPercent = ref(0)
+const hoverOffsetPx = ref(0)
+const barWidthPx = ref(0)
 
 function toPercent(seconds: number): number {
   if (!props.duration) return 0
@@ -27,6 +35,25 @@ const playedPercent = computed(() => toPercent(props.currentTime))
 const bufferedPercent = computed(() => toPercent(props.bufferedEnd))
 const formattedHoverTime = computed(() => formatTime(hoverTime.value ?? 0))
 
+const hoverThumbnail = computed(() =>
+  hoverTime.value === null ? null : findThumbnail(props.thumbnails, hoverTime.value),
+)
+
+const previewLeftPx = computed(() =>
+  clampTooltipCenter(hoverOffsetPx.value, barWidthPx.value, hoverThumbnail.value?.w ?? 0),
+)
+
+const thumbnailStyle = computed(() => {
+  const thumbnail = hoverThumbnail.value
+  if (!thumbnail) return {}
+  return {
+    width: `${thumbnail.w}px`,
+    height: `${thumbnail.h}px`,
+    backgroundImage: `url(${JSON.stringify(thumbnail.url)})`,
+    backgroundPosition: `-${thumbnail.x}px -${thumbnail.y}px`,
+  }
+})
+
 /** Horizontal pointer position as a 0..1 ratio of the bar width. */
 function pointerRatio(event: MouseEvent): number {
   if (!barRef.value) return 0
@@ -36,8 +63,10 @@ function pointerRatio(event: MouseEvent): number {
 }
 
 function onMouseMove(event: MouseEvent): void {
-  if (!props.duration) return
+  if (!props.duration || !barRef.value) return
   const ratio = pointerRatio(event)
+  barWidthPx.value = barRef.value.getBoundingClientRect().width
+  hoverOffsetPx.value = ratio * barWidthPx.value
   hoverPercent.value = ratio * 100
   hoverTime.value = ratio * props.duration
 }
@@ -80,7 +109,21 @@ onBeforeUnmount(() => {
     @pointerdown="onPointerDown"
   >
     <div
-      v-if="hoverTime !== null"
+      v-if="hoverThumbnail"
+      class="pointer-events-none absolute bottom-full mb-2 flex -translate-x-1/2 flex-col items-center gap-1"
+      :style="{ left: `${previewLeftPx}px` }"
+    >
+      <div
+        class="overflow-hidden rounded-md border border-white/20 bg-black bg-no-repeat shadow-lg"
+        :style="thumbnailStyle"
+      ></div>
+      <span class="rounded bg-black/85 px-2 py-0.5 text-xs font-semibold text-white shadow-md backdrop-blur-xs">
+        {{ formattedHoverTime }}
+      </span>
+    </div>
+
+    <div
+      v-else-if="hoverTime !== null"
       class="pointer-events-none absolute -top-8 -translate-x-1/2 rounded bg-black/85 px-2 py-0.5 text-xs font-semibold text-white shadow-md backdrop-blur-xs"
       :style="{ left: `${hoverPercent}%` }"
     >
