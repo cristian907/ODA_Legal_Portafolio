@@ -10,6 +10,8 @@ import EditorView from './EditorView.vue'
 import LivePreview from './LivePreview.vue'
 import CvWizard from '@/features/cv-wizard/CvWizard.vue'
 import CvPreviewPanel from '@/features/cv-wizard/CvPreviewPanel.vue'
+import VideoAdminPanel from '@/features/video-admin/VideoAdminPanel.vue'
+import VideoPreviewPanel from '@/features/video-admin/VideoPreviewPanel.vue'
 import ToastHost from '@/components/feedback/ToastHost.vue'
 import ConfirmModal from '@/components/feedback/ConfirmModal.vue'
 import type { SavedStyle, ThemeName } from '@/types/theme'
@@ -18,7 +20,7 @@ const auth = useAuthStore()
 const theme = useThemeStore()
 const { show } = useToast()
 
-type AdminModule = 'styles' | 'cv'
+type AdminModule = 'styles' | 'cv' | 'video'
 type StylesView = 'general' | 'library' | 'editor'
 type ReturnView = 'general' | 'library'
 
@@ -78,11 +80,11 @@ watch(activeModule, (m) => {
         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#c5a059] text-[#0f172a]">
           <i class="fas fa-balance-scale"></i>
         </span>
-        <span class="hidden font-semibold sm:inline">Panel de Control | ODA Legal</span>
+        <span class="hidden font-semibold lg:inline">Panel de Control | ODA Legal</span>
 
         <nav class="ml-2 flex gap-1 rounded-lg border border-[#c5a059]/20 bg-white/5 p-1">
           <button
-            class="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition"
+            class="inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition"
             :class="
               activeModule === 'styles'
                 ? 'bg-gradient-to-br from-[#c5a059] to-[#b38e44] text-[#0f172a]'
@@ -93,7 +95,7 @@ watch(activeModule, (m) => {
             <i class="fas fa-palette"></i> Estilos
           </button>
           <button
-            class="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition"
+            class="inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition"
             :class="
               activeModule === 'cv'
                 ? 'bg-gradient-to-br from-[#c5a059] to-[#b38e44] text-[#0f172a]'
@@ -103,11 +105,22 @@ watch(activeModule, (m) => {
           >
             <i class="fas fa-id-card"></i> Creación de CV
           </button>
+          <button
+            class="inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition"
+            :class="
+              activeModule === 'video'
+                ? 'bg-gradient-to-br from-[#c5a059] to-[#b38e44] text-[#0f172a]'
+                : 'text-slate-400 hover:text-white'
+            "
+            @click="activeModule = 'video'"
+          >
+            <i class="fas fa-film"></i> Video
+          </button>
         </nav>
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="hidden items-center gap-2 text-sm text-slate-400 md:flex">
+        <span class="hidden items-center gap-2 text-sm text-slate-400 xl:flex">
           <i class="fas fa-user-shield"></i> Lic. Oscar De Abreu (Admin)
         </span>
         <RouterLink
@@ -129,7 +142,15 @@ watch(activeModule, (m) => {
     <!-- Two-column dashboard -->
     <main
       class="grid min-h-0 flex-1"
-      :style="{ gridTemplateColumns: activeModule === 'cv' ? '45% 55%' : '32% 68%' }"
+      :class="
+        activeModule === 'video' &&
+        'auto-rows-max grid-cols-1 overflow-y-auto [color-scheme:dark] min-[900px]:auto-rows-[minmax(0,1fr)] min-[900px]:grid-cols-[40%_60%] min-[900px]:overflow-hidden'
+      "
+      :style="
+        activeModule === 'video'
+          ? undefined
+          : { gridTemplateColumns: activeModule === 'cv' ? '45% 55%' : '32% 68%' }
+      "
     >
       <!-- Controls panel -->
       <div class="flex min-h-0 flex-col border-r border-[#1e293b] bg-[#0b0f17]">
@@ -195,7 +216,10 @@ watch(activeModule, (m) => {
         </template>
 
         <!-- CV module -->
-        <CvWizard v-else @download="cvPreview?.downloadPdf()" />
+        <CvWizard v-else-if="activeModule === 'cv'" @download="cvPreview?.downloadPdf()" />
+
+        <!-- Video module -->
+        <VideoAdminPanel v-else />
       </div>
 
       <!-- Preview panel -->
@@ -214,7 +238,9 @@ watch(activeModule, (m) => {
           </div>
         </template>
 
-        <CvPreviewPanel v-else ref="cvPreview" />
+        <CvPreviewPanel v-else-if="activeModule === 'cv'" ref="cvPreview" />
+
+        <VideoPreviewPanel v-else />
       </div>
     </main>
 

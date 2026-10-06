@@ -124,6 +124,8 @@
   --color-on-dark: var(--text-on-dark);
 
   --font-main: var(--font-main);
+  /* Admin-only utility face for timecodes, durations, sizes and counters. */
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 /* ==========================================================================
