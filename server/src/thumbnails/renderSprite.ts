@@ -12,7 +12,9 @@ export interface ThumbnailFrame {
 export function buildSpriteFilter(layout: SpriteLayout, frame: ThumbnailFrame): string {
   const { width, height, intervalSeconds } = frame
   return [
-    `fps=1/${intervalSeconds}`,
+    // round=up keeps, for tile i, the frame on screen at i * interval; the
+    // default rounding samples the middle of each interval instead.
+    `fps=1/${intervalSeconds}:round=up`,
     `scale=${width}:${height}:force_original_aspect_ratio=decrease`,
     `pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2`,
     `tile=${layout.columns}x${layout.rows}`,
