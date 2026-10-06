@@ -13,6 +13,9 @@ export const STORAGE_KEYS = {
 
   // CV wizard
   CV_DATA: 'oda_cv_data',
+
+  // Portfolio video (manifest returned by the local video server)
+  VIDEO_MANIFEST: 'oda_video_manifest',
 } as const
 
 // sessionStorage (cleared when the tab closes)
