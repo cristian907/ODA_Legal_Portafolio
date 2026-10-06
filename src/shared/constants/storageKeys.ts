@@ -16,6 +16,10 @@ export const STORAGE_KEYS = {
 
   // Portfolio video (manifest returned by the local video server)
   VIDEO_MANIFEST: 'oda_video_manifest',
+
+  // Portfolio photo carousel (records returned by the local file server + admin metadata)
+  GALLERY_PHOTOS: 'oda_gallery_photos',
+  GALLERY_SETTINGS: 'oda_gallery_settings',
 } as const
 
 // sessionStorage (cleared when the tab closes)

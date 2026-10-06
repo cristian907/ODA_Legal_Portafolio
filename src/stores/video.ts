@@ -3,13 +3,14 @@ import { ref } from 'vue'
 import { STORAGE_KEYS } from '@/shared/constants/storageKeys'
 import { readJSON, removeKey, writeJSON } from '@/composables/useLocalStorage'
 import { videoUploadSchema } from '@/schemas/video'
-import { deleteVideoPackage, uploadVideoPackage, VideoApiError } from '@/services/videoApi'
+import { FileServerError } from '@/services/fileServerClient'
+import { deleteVideoPackage, uploadVideoPackage } from '@/services/videoApi'
 import type { VideoManifest, VideoUploadDraft } from '@/types/video'
 
 const UNEXPECTED_PUBLISH_ERROR = 'No se pudo publicar el video. Inténtalo de nuevo.'
 
 function errorMessages(error: unknown): string[] {
-  return error instanceof VideoApiError ? error.errors : [UNEXPECTED_PUBLISH_ERROR]
+  return error instanceof FileServerError ? error.errors : [UNEXPECTED_PUBLISH_ERROR]
 }
 
 /** Removing the old package is cleanup only; a failure must not undo a publish. */

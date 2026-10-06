@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildUploadFormData, classifyFailure } from './videoApi'
+import { buildUploadFormData } from './videoApi'
 import type { VideoUploadPayload } from '@/types/video'
 
 function fileNamed(name: string): File {
@@ -46,37 +46,5 @@ describe('buildUploadFormData', () => {
       { label: 'Español', language: 'es' },
       { label: 'English', language: 'en' },
     ])
-  })
-})
-
-describe('classifyFailure', () => {
-  it('reports a missing response as a network error', () => {
-    const error = classifyFailure(0, null)
-    expect(error.kind).toBe('network')
-    expect(error.errors[0]).toContain('pnpm dev')
-  })
-
-  it('reports a dev proxy failure without the backend error shape as a network error', () => {
-    const error = classifyFailure(500, null)
-    expect(error.kind).toBe('network')
-    expect(error.errors[0]).toContain('pnpm dev')
-  })
-
-  it('reports a backend 5xx with its error list as a server error', () => {
-    const error = classifyFailure(500, { errors: ['No se pudo guardar el video.'] })
-    expect(error).toMatchObject({ kind: 'server', errors: ['No se pudo guardar el video.'] })
-  })
-
-  it('reports a 4xx with its error list as a validation error', () => {
-    const error = classifyFailure(400, { errors: ['El título es obligatorio.'] })
-    expect(error).toMatchObject({ kind: 'validation', errors: ['El título es obligatorio.'] })
-  })
-
-  it('falls back to a generic message for a 4xx without an error list', () => {
-    const error = classifyFailure(404, null)
-    expect(error).toMatchObject({
-      kind: 'validation',
-      errors: ['El servidor respondió con un error inesperado.'],
-    })
   })
 })
