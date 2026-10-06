@@ -2,7 +2,10 @@
 # esbuild → downloads its native binary (used by Vite).
 # vue-demi → sets the correct Vue 3 bindings (used by Pinia).
 # core-js → only prints a donation notice; not needed.
+# ffmpeg-static / ffprobe-static → download the ffmpeg/ffprobe binaries (video thumbnails server).
 allowBuilds:
   esbuild: true
   vue-demi: true
   core-js: false
+  ffmpeg-static: true
+  ffprobe-static: true

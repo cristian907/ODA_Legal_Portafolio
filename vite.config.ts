@@ -3,6 +3,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
+const VIDEO_SERVER_URL = 'http://localhost:3001'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
@@ -13,5 +15,9 @@ export default defineConfig({
   },
   server: {
     port: 8080,
+    proxy: {
+      '/api': VIDEO_SERVER_URL,
+      '/uploads': VIDEO_SERVER_URL,
+    },
   },
 })
