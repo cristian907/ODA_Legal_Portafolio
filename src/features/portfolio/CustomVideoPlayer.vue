@@ -187,6 +187,7 @@ defineExpose({
     <video
       ref="videoRef"
       :src="manifest.video.path"
+      :poster="manifest.poster?.path"
       class="h-full w-full object-contain"
       muted
       playsinline
@@ -217,7 +218,11 @@ defineExpose({
       preload="auto"
     ></audio>
 
-    <PlayerTitleOverlay :title="manifest.title" :visible="showControls" />
+    <PlayerTitleOverlay
+      :title="manifest.title"
+      :subtitle="manifest.subtitle"
+      :visible="showControls"
+    />
 
     <PlayerSubtitleOverlay v-if="subtitleText" :text="subtitleText" />
 

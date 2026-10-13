@@ -15,6 +15,7 @@ export function buildSpriteFilter(layout: SpriteLayout, frame: ThumbnailFrame): 
     // round=up keeps, for tile i, the frame on screen at i * interval; the
     // default rounding samples the middle of each interval instead.
     `fps=1/${intervalSeconds}:round=up`,
+    `scale='trunc(iw*sar/2)*2':ih,setsar=1`,
     `scale=${width}:${height}:force_original_aspect_ratio=decrease`,
     `pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2`,
     `tile=${layout.columns}x${layout.rows}`,

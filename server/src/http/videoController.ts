@@ -29,13 +29,16 @@ interface UploadedTrack extends TrackMetadata {
 
 interface UploadedPackage {
   title: string
+  subtitle: string
   video: UploadedFile[]
+  poster: UploadedFile | null
   subtitles: UploadedTrack[]
   audioTracks: UploadedTrack[]
 }
 
 interface StoredPackage {
   video: StoredFile & { diskPath: string }
+  poster?: StoredFile
   subtitles: StoredTrack[]
   audioTracks: StoredTrack[]
 }
@@ -48,7 +51,7 @@ function uploadedFilesOf(request: Request, field: string): UploadedFile[] {
 }
 
 function allUploadedFiles(request: Request): UploadedFile[] {
-  return ['video', 'subtitles', 'audioTracks'].flatMap((field) => uploadedFilesOf(request, field))
+  return ['video', 'poster', 'subtitles', 'audioTracks'].flatMap((field) => uploadedFilesOf(request, field))
 }
 
 function textField(value: unknown): string {
@@ -78,7 +81,9 @@ function attachMetadata(files: UploadedFile[], metadata: TrackMetadata[]): Uploa
 function readUploadedPackage(request: Request): UploadedPackage {
   return {
     title: textField(request.body?.title),
+    subtitle: textField(request.body?.subtitle),
     video: uploadedFilesOf(request, 'video'),
+    poster: uploadedFilesOf(request, 'poster')[0] ?? null,
     subtitles: attachMetadata(
       uploadedFilesOf(request, 'subtitles'),
       parseTrackMetadata(request.body?.subtitleMeta, 'subtitleMeta'),
@@ -101,7 +106,9 @@ async function toCandidate(uploaded: UploadedPackage): Promise<VideoPackageCandi
   )
   return {
     title: uploaded.title,
+    subtitle: uploaded.subtitle,
     videos: uploaded.video.map((file) => ({ fileName: file.originalname })),
+    poster: uploaded.poster ? { fileName: uploaded.poster.originalname } : null,
     subtitles,
     audioTracks: uploaded.audioTracks.map((track) => ({
       fileName: track.file.originalname,
@@ -138,8 +145,18 @@ async function storePackage(packageId: string, uploaded: UploadedPackage): Promi
   const [videoFile] = uploaded.video
   const videoName = `video${fileExtension(videoFile.originalname)}`
   const diskPath = await moveIntoPackage(videoFile.path, packageId, videoName)
+  let poster: StoredFile | undefined
+  if (uploaded.poster) {
+    const posterName = `poster${fileExtension(uploaded.poster.originalname)}`
+    await moveIntoPackage(uploaded.poster.path, packageId, posterName)
+    poster = {
+      path: publicFileUrl(packageId, posterName),
+      fileName: basename(uploaded.poster.originalname),
+    }
+  }
   return {
     video: { path: publicFileUrl(packageId, videoName), fileName: basename(videoFile.originalname), diskPath },
+    ...(poster ? { poster } : {}),
     subtitles: await storeTracks(packageId, uploaded.subtitles, 'subtitle'),
     audioTracks: await storeTracks(packageId, uploaded.audioTracks, 'audio'),
   }
@@ -147,15 +164,17 @@ async function storePackage(packageId: string, uploaded: UploadedPackage): Promi
 
 async function buildPackage(packageId: string, request: Request): Promise<VideoManifest> {
   const uploaded = readUploadedPackage(request)
-  const { title } = validateVideoPackage(await toCandidate(uploaded))
+  const validated = validateVideoPackage(await toCandidate(uploaded))
   const stored = await storePackage(packageId, uploaded)
   const { durationSeconds, thumbnails } = await generateThumbnails(packageId, stored.video.diskPath)
   return {
     id: packageId,
-    title,
+    title: validated.title,
+    ...(validated.subtitle ? { subtitle: validated.subtitle } : {}),
     createdAt: new Date().toISOString(),
     durationSeconds,
     video: { path: stored.video.path, fileName: stored.video.fileName },
+    ...(stored.poster ? { poster: stored.poster } : {}),
     subtitles: stored.subtitles,
     audioTracks: stored.audioTracks,
     thumbnails,

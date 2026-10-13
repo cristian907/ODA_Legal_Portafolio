@@ -39,6 +39,20 @@ describe('missingRequirements', () => {
     ])
   })
 
+  it('reports a subtitle over the length limit', () => {
+    expect(missingRequirements({ ...completeDraft(), subtitle: 'a'.repeat(121) })).toEqual([
+      'El subtítulo supera los 120 caracteres',
+    ])
+  })
+
+  it('reports a video over the size limit', () => {
+    const draft = completeDraft()
+    const bigVideo = file('big.mp4')
+    Object.defineProperty(bigVideo, 'size', { value: 400 * 1024 * 1024 + 1 })
+    draft.video = bigVideo
+    expect(missingRequirements(draft)).toEqual(['El video supera los 400 MB'])
+  })
+
   it('uses the singular when one track is missing', () => {
     const draft = completeDraft()
     draft.subtitles.pop()

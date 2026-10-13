@@ -109,6 +109,22 @@ describe('thumbnail generation', () => {
     })
   }, 30_000)
 
+  it('preserves the display aspect ratio of anamorphic video', async () => {
+    const anamorphicPath = join(workDir, 'anamorphic.mp4')
+    await run(FFMPEG_PATH, [
+      '-v', 'error',
+      '-f', 'lavfi',
+      '-i', 'testsrc=duration=1:size=720x576:rate=1',
+      '-vf', 'setsar=64/45',
+      '-pix_fmt', 'yuv420p',
+      anamorphicPath,
+    ])
+    const layout = planSpriteLayout(1, frame.intervalSeconds, 1)
+    const spritePath = join(workDir, 'anamorphic.jpg')
+    await renderSprite(anamorphicPath, spritePath, layout, frame)
+    expect(await probeImageSize(spritePath)).toBe('160x90')
+  }, 30_000)
+
   it('fails with a processing error for a file that is not a video', async () => {
     await expect(probeDuration(join(workDir, 'missing.mp4'))).rejects.toThrow(
       'No se pudo leer la duración del video.',

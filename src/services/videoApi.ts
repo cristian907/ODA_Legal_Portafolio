@@ -12,7 +12,13 @@ function trackMetadata(tracks: VideoTrackUpload[]): string {
 export function buildUploadFormData(payload: VideoUploadPayload): FormData {
   const formData = new FormData()
   formData.append('title', payload.title)
+  if (payload.subtitle?.trim()) {
+    formData.append('subtitle', payload.subtitle.trim())
+  }
   formData.append('video', payload.video)
+  if (payload.poster) {
+    formData.append('poster', payload.poster)
+  }
   payload.subtitles.forEach((track) => formData.append('subtitles', track.file))
   payload.audioTracks.forEach((track) => formData.append('audioTracks', track.file))
   formData.append('subtitleMeta', trackMetadata(payload.subtitles))

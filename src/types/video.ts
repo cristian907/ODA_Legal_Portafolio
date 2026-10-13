@@ -20,9 +20,11 @@ export interface VideoThumbnails {
 export interface VideoManifest {
   id: string
   title: string
+  subtitle?: string
   createdAt: string
   durationSeconds: number
   video: VideoStoredFile
+  poster?: VideoStoredFile
   subtitles: VideoStoredTrack[]
   audioTracks: VideoStoredTrack[]
   thumbnails: VideoThumbnails
@@ -37,7 +39,9 @@ export interface VideoTrackDraft {
 
 export interface VideoUploadDraft {
   title: string
+  subtitle?: string
   video: File | null
+  poster?: File | null
   subtitles: VideoTrackDraft[]
   audioTracks: VideoTrackDraft[]
 }
@@ -51,7 +55,9 @@ export interface VideoTrackUpload {
 
 export interface VideoUploadPayload {
   title: string
+  subtitle?: string
   video: File
+  poster?: File | null
   subtitles: VideoTrackUpload[]
   audioTracks: VideoTrackUpload[]
 }

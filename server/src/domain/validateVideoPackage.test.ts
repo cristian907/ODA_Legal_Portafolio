@@ -42,6 +42,18 @@ describe('validateVideoPackage', () => {
     ])
   })
 
+  it('accepts and trims an optional subtitle', () => {
+    expect(
+      validateVideoPackage({ ...validCandidate(), subtitle: '  Subtítulo válido  ' }).subtitle,
+    ).toBe('Subtítulo válido')
+  })
+
+  it('rejects a subtitle longer than 120 characters', () => {
+    expect(errorsFor({ ...validCandidate(), subtitle: 'a'.repeat(121) })).toEqual([
+      'El subtítulo no puede superar los 120 caracteres.',
+    ])
+  })
+
   it('requires exactly one video', () => {
     expect(errorsFor({ ...validCandidate(), videos: [] })).toEqual(['Debes adjuntar un archivo de video.'])
     const twoVideos = [{ fileName: 'a.mp4' }, { fileName: 'b.mp4' }]
@@ -53,6 +65,18 @@ describe('validateVideoPackage', () => {
   it('rejects a video with an unsupported extension', () => {
     expect(errorsFor({ ...validCandidate(), videos: [{ fileName: 'clip.avi' }] })).toEqual([
       'El video "clip.avi" debe tener formato .mp4 o .webm.',
+    ])
+  })
+
+  it('accepts an optional poster image', () => {
+    expect(validateVideoPackage({ ...validCandidate(), poster: { fileName: 'cover.jpg' } }).poster).toEqual({
+      fileName: 'cover.jpg',
+    })
+  })
+
+  it('rejects a poster with an unsupported extension', () => {
+    expect(errorsFor({ ...validCandidate(), poster: { fileName: 'cover.gif' } })).toEqual([
+      'La miniatura "cover.gif" debe tener formato .jpg, .jpeg, .png o .webp.',
     ])
   })
 
@@ -105,8 +129,14 @@ describe('validateVideoPackage', () => {
     const candidate = validCandidate()
     candidate.audioTracks[0] = { ...candidate.audioTracks[0], fileName: 'es.flac' }
     expect(errorsFor(candidate)).toEqual([
-      'La pista de audio 1 ("es.flac") debe tener formato .mp3, .m4a, .ogg o .wav.',
+      'La pista de audio 1 ("es.flac") debe tener formato .mp3, .m4a, .ogg, .wav o .aac.',
     ])
+  })
+
+  it('accepts .aac audio tracks', () => {
+    const candidate = validCandidate()
+    candidate.audioTracks[0] = { ...candidate.audioTracks[0], fileName: 'es.aac' }
+    expect(errorsFor(candidate)).toEqual([])
   })
 
   it('collects every error at once', () => {

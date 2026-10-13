@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useToast } from '@/composables/useToast'
-import { VIDEO_EXTENSIONS } from '@/schemas/video'
+import { MAX_VIDEO_BYTES, VIDEO_EXTENSIONS } from '@/schemas/video'
 import { formatTime } from '@/features/portfolio/player/utils/formatTime'
 import { formatFileSize } from './formatFileSize'
 import { splitByExtension } from './splitByExtension'
@@ -51,6 +51,10 @@ function pick(files: File[]): void {
   const { accepted } = splitByExtension(files, VIDEO_EXTENSIONS)
   if (accepted.length === 0) {
     show('El video debe ser .mp4 o .webm', 'error')
+    return
+  }
+  if (accepted[0].size > MAX_VIDEO_BYTES) {
+    show(`El video puede pesar como máximo ${MAX_VIDEO_BYTES / (1024 * 1024)} MB`, 'error')
     return
   }
   emit('select', accepted[0])

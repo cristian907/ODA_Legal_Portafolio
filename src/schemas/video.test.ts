@@ -43,6 +43,18 @@ describe('videoUploadSchema', () => {
     ])
   })
 
+  it('accepts an optional subtitle and trims it', () => {
+    const result = videoUploadSchema.safeParse({ ...validDraft(), subtitle: '  Subtítulo opcional  ' })
+    expect(result.success).toBe(true)
+    expect(result.data?.subtitle).toBe('Subtítulo opcional')
+  })
+
+  it('limits the subtitle to 120 characters', () => {
+    expect(messagesFor({ ...validDraft(), subtitle: 'a'.repeat(121) })).toEqual([
+      'El subtítulo no puede superar los 120 caracteres.',
+    ])
+  })
+
   it('requires a video file', () => {
     expect(messagesFor({ ...validDraft(), video: null })).toEqual(['Selecciona un archivo de video.'])
   })
@@ -50,6 +62,14 @@ describe('videoUploadSchema', () => {
   it('rejects unsupported video formats', () => {
     expect(messagesFor({ ...validDraft(), video: fileNamed('clip.avi') })).toEqual([
       'El video debe ser .mp4 o .webm.',
+    ])
+  })
+
+  it('rejects videos exceeding 400 MB', () => {
+    const bigVideo = fileNamed('big.mp4')
+    Object.defineProperty(bigVideo, 'size', { value: 400 * 1024 * 1024 + 1 })
+    expect(messagesFor({ ...validDraft(), video: bigVideo })).toEqual([
+      'El video puede pesar como máximo 400 MB.',
     ])
   })
 
@@ -70,7 +90,13 @@ describe('videoUploadSchema', () => {
   it('rejects unsupported audio formats', () => {
     const draft = validDraft()
     draft.audioTracks[1] = { ...draft.audioTracks[1], file: fileNamed('en.flac') }
-    expect(messagesFor(draft)).toEqual(['La pista de audio debe ser .mp3, .m4a, .ogg o .wav.'])
+    expect(messagesFor(draft)).toEqual(['La pista de audio debe ser .mp3, .m4a, .ogg, .wav o .aac.'])
+  })
+
+  it('accepts .aac audio files', () => {
+    const draft = validDraft()
+    draft.audioTracks[1] = { ...draft.audioTracks[1], file: fileNamed('en.aac') }
+    expect(videoUploadSchema.safeParse(draft).success).toBe(true)
   })
 
   it('requires file, label and language on every track', () => {
@@ -80,6 +106,25 @@ describe('videoUploadSchema', () => {
       'Selecciona un archivo.',
       'La etiqueta es obligatoria.',
       'El idioma es obligatorio.',
+    ])
+  })
+
+  it('accepts an optional poster image', () => {
+    const result = videoUploadSchema.safeParse({ ...validDraft(), poster: fileNamed('thumb.jpg') })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects unsupported poster formats', () => {
+    expect(messagesFor({ ...validDraft(), poster: fileNamed('thumb.gif') })).toEqual([
+      'La miniatura debe ser .jpg, .jpeg, .png o .webp.',
+    ])
+  })
+
+  it('rejects poster exceeding 10 MB', () => {
+    const bigPoster = fileNamed('big.png')
+    Object.defineProperty(bigPoster, 'size', { value: 10 * 1024 * 1024 + 1 })
+    expect(messagesFor({ ...validDraft(), poster: bigPoster })).toEqual([
+      'La miniatura puede pesar como máximo 10 MB.',
     ])
   })
 })

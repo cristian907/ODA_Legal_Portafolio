@@ -8,7 +8,7 @@ export type TrackKind = 'subtitles' | 'audioTracks'
 export type TrackField = 'label' | 'language'
 
 function emptyDraft(): VideoUploadDraft {
-  return { title: '', video: null, subtitles: [], audioTracks: [] }
+  return { title: '', subtitle: '', video: null, poster: null, subtitles: [], audioTracks: [] }
 }
 
 function trackFromFile(file: File): VideoTrackDraft {
@@ -29,6 +29,10 @@ export function useVideoDraft() {
     draft.video = file
   }
 
+  function setPoster(file: File | null): void {
+    draft.poster = file
+  }
+
   function addTracks(kind: TrackKind, files: File[]): void {
     draft[kind].push(...files.map(trackFromFile))
   }
@@ -46,5 +50,5 @@ export function useVideoDraft() {
     Object.assign(draft, emptyDraft())
   }
 
-  return { draft, missing, isReady, setVideo, addTracks, updateTrack, removeTrack, reset }
+  return { draft, missing, isReady, setVideo, setPoster, addTracks, updateTrack, removeTrack, reset }
 }

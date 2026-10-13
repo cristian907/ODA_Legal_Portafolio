@@ -1,4 +1,4 @@
-import { ALLOWED_EXTENSIONS, TITLE_MAX_LENGTH } from '../config'
+import { ALLOWED_EXTENSIONS, SUBTITLE_MAX_LENGTH, TITLE_MAX_LENGTH } from '../config'
 import { ValidationError } from './errors'
 import { describeExtensions, hasAllowedExtension } from './fileExtension'
 
@@ -22,7 +22,9 @@ export interface SubtitleCandidate extends TrackCandidate {
 
 export interface VideoPackageCandidate {
   title: string
+  subtitle?: string
   videos: FileCandidate[]
+  poster?: FileCandidate | null
   subtitles: SubtitleCandidate[]
   audioTracks: TrackCandidate[]
 }
@@ -38,12 +40,29 @@ function titleErrors(title: string): string[] {
   return []
 }
 
+function subtitleTextErrors(subtitle?: string): string[] {
+  if (!subtitle) return []
+  const trimmed = subtitle.trim()
+  if (trimmed.length > SUBTITLE_MAX_LENGTH) {
+    return [`El subtítulo no puede superar los ${SUBTITLE_MAX_LENGTH} caracteres.`]
+  }
+  return []
+}
+
 function videoErrors(videos: FileCandidate[]): string[] {
   if (videos.length === 0) return ['Debes adjuntar un archivo de video.']
   if (videos.length > 1) return ['Solo se permite un archivo de video.']
   const [video] = videos
   if (!hasAllowedExtension(video.fileName, ALLOWED_EXTENSIONS.video)) {
     return [`El video "${video.fileName}" debe tener formato ${describeExtensions(ALLOWED_EXTENSIONS.video)}.`]
+  }
+  return []
+}
+
+function posterErrors(poster?: FileCandidate | null): string[] {
+  if (!poster) return []
+  if (!hasAllowedExtension(poster.fileName, ALLOWED_EXTENSIONS.poster)) {
+    return [`La miniatura "${poster.fileName}" debe tener formato ${describeExtensions(ALLOWED_EXTENSIONS.poster)}.`]
   }
   return []
 }
@@ -98,10 +117,17 @@ function audioTrackListErrors(audioTracks: TrackCandidate[]): string[] {
 export function validateVideoPackage(candidate: VideoPackageCandidate): ValidVideoPackage {
   const errors = [
     ...titleErrors(candidate.title),
+    ...subtitleTextErrors(candidate.subtitle),
     ...videoErrors(candidate.videos),
+    ...posterErrors(candidate.poster),
     ...subtitleListErrors(candidate.subtitles),
     ...audioTrackListErrors(candidate.audioTracks),
   ]
   if (errors.length > 0) throw new ValidationError(errors)
-  return { ...candidate, title: candidate.title.trim() }
+  return {
+    ...candidate,
+    title: candidate.title.trim(),
+    ...(candidate.subtitle?.trim() ? { subtitle: candidate.subtitle.trim() } : {}),
+    ...(candidate.poster ? { poster: candidate.poster } : {}),
+  }
 }

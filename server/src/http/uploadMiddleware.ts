@@ -13,6 +13,7 @@ import { fileExtension, hasAllowedExtension } from '../domain/fileExtension'
 
 const FIELD_LABELS: Record<UploadField, string> = {
   video: 'video',
+  poster: 'miniatura',
   subtitles: 'subtítulo',
   audioTracks: 'pista de audio',
 }
@@ -48,10 +49,11 @@ export const uploadVideoPackage = multer({
   defParamCharset: 'utf8',
   limits: {
     fileSize: MAX_VIDEO_BYTES,
-    files: 1 + MAX_TRACK_FILES * 2,
+    files: 2 + MAX_TRACK_FILES * 2,
   },
 }).fields([
   { name: 'video', maxCount: 1 },
+  { name: 'poster', maxCount: 1 },
   { name: 'subtitles', maxCount: MAX_TRACK_FILES },
   { name: 'audioTracks', maxCount: MAX_TRACK_FILES },
 ])

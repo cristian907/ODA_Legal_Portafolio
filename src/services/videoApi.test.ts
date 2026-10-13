@@ -27,7 +27,18 @@ describe('buildUploadFormData', () => {
   it('includes the title and the video file', () => {
     const formData = buildUploadFormData(payload)
     expect(formData.get('title')).toBe('Presentación')
+    expect(formData.get('subtitle')).toBeNull()
     expect(fileNames(formData, 'video')).toEqual(['intro.mp4'])
+  })
+
+  it('includes the subtitle when provided', () => {
+    const formData = buildUploadFormData({ ...payload, subtitle: 'Conferencia legal' })
+    expect(formData.get('subtitle')).toBe('Conferencia legal')
+  })
+
+  it('includes the poster when provided', () => {
+    const formData = buildUploadFormData({ ...payload, poster: fileNamed('cover.jpg') })
+    expect(fileNames(formData, 'poster')).toEqual(['cover.jpg'])
   })
 
   it('appends tracks in order', () => {

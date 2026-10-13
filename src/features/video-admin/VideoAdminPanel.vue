@@ -9,9 +9,11 @@ import {
   MIN_AUDIO_TRACKS,
   MIN_SUBTITLES,
   SUBTITLE_EXTENSIONS,
+  VIDEO_SUBTITLE_MAX_LENGTH,
   VIDEO_TITLE_MAX_LENGTH,
 } from '@/schemas/video'
 import PublishedVideoCard from './PublishedVideoCard.vue'
+import ThumbnailDropzone from './ThumbnailDropzone.vue'
 import TrackList from './TrackList.vue'
 import VideoDropzone from './VideoDropzone.vue'
 import { useVideoDraft } from './useVideoDraft'
@@ -20,7 +22,7 @@ const store = useVideoStore()
 const { manifest, isPublishing, uploadProgress, errors } = storeToRefs(store)
 const { show } = useToast()
 const { confirm } = useConfirm()
-const { draft, missing, isReady, setVideo, addTracks, updateTrack, removeTrack, reset } = useVideoDraft()
+const { draft, missing, isReady, setVideo, setPoster, addTracks, updateTrack, removeTrack, reset } = useVideoDraft()
 
 const UPLOAD_COMPLETE = 100
 
@@ -31,6 +33,7 @@ const publishLabel = computed(() => {
   return 'Publicar video'
 })
 const titleLength = computed(() => draft.title.length)
+const subtitleLength = computed(() => draft.subtitle?.length ?? 0)
 
 async function publish(): Promise<void> {
   if (!isReady.value || isPublishing.value) return
@@ -98,12 +101,57 @@ async function retire(): Promise<void> {
       </section>
 
       <section class="flex flex-col gap-1.5">
+        <div class="flex items-baseline justify-between gap-3">
+          <label
+            for="videoSubtitle"
+            class="text-[0.72rem] font-semibold uppercase tracking-wider text-slate-500"
+          >
+            Subtítulo (opcional)
+          </label>
+          <span
+            class="font-mono text-xs tabular-nums"
+            :class="subtitleLength > VIDEO_SUBTITLE_MAX_LENGTH ? 'text-red-400' : 'text-slate-500'"
+            aria-hidden="true"
+          >
+            {{ subtitleLength }}/{{ VIDEO_SUBTITLE_MAX_LENGTH }}
+          </span>
+        </div>
+        <input
+          id="videoSubtitle"
+          v-model="draft.subtitle"
+          type="text"
+          placeholder="Ej. Conferencia de Derecho Corporativo"
+          :disabled="isPublishing"
+          class="rounded-lg border bg-[#0b0f17] px-3 py-2 text-sm text-white outline-none placeholder:text-slate-600"
+          :class="
+            subtitleLength > VIDEO_SUBTITLE_MAX_LENGTH
+              ? 'border-red-500'
+              : 'border-[#1e293b] focus:border-[#c5a059]'
+          "
+        />
+      </section>
+
+      <section class="flex flex-col gap-1.5">
         <h3 class="text-[0.72rem] font-semibold uppercase tracking-wider text-slate-500">Video</h3>
         <VideoDropzone
           :file="draft.video"
           :disabled="isPublishing"
           @select="setVideo"
           @remove="setVideo(null)"
+        />
+      </section>
+
+      <section class="flex flex-col gap-1.5">
+        <div class="flex items-baseline justify-between gap-3">
+          <h3 class="text-[0.72rem] font-semibold uppercase tracking-wider text-slate-500">
+            Miniatura <span class="normal-case tracking-normal text-slate-600">(opcional)</span>
+          </h3>
+        </div>
+        <ThumbnailDropzone
+          :file="draft.poster"
+          :disabled="isPublishing"
+          @select="setPoster"
+          @remove="setPoster(null)"
         />
       </section>
 
@@ -131,7 +179,7 @@ async function retire(): Promise<void> {
         :tracks="draft.audioTracks"
         :minimum="MIN_AUDIO_TRACKS"
         :extensions="AUDIO_EXTENSIONS"
-        format-message="Las pistas de audio deben ser .mp3, .m4a, .ogg o .wav"
+        format-message="Las pistas de audio deben ser .mp3, .m4a, .ogg, .wav o .aac"
         label-placeholder="Español"
         :disabled="isPublishing"
         @add="addTracks('audioTracks', $event)"

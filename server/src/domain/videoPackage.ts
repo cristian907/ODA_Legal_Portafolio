@@ -19,9 +19,11 @@ export interface ThumbnailSet {
 export interface VideoManifest {
   id: string
   title: string
+  subtitle?: string
   createdAt: string
   durationSeconds: number
   video: StoredFile
+  poster?: StoredFile
   subtitles: StoredTrack[]
   audioTracks: StoredTrack[]
   thumbnails: ThumbnailSet

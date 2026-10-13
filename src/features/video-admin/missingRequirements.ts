@@ -1,4 +1,10 @@
-import { MIN_AUDIO_TRACKS, MIN_SUBTITLES, VIDEO_TITLE_MAX_LENGTH } from '@/schemas/video'
+import {
+  MAX_VIDEO_BYTES,
+  MIN_AUDIO_TRACKS,
+  MIN_SUBTITLES,
+  VIDEO_SUBTITLE_MAX_LENGTH,
+  VIDEO_TITLE_MAX_LENGTH,
+} from '@/schemas/video'
 import type { VideoTrackDraft, VideoUploadDraft } from '@/types/video'
 
 interface TrackNoun {
@@ -34,7 +40,12 @@ export function missingRequirements(draft: VideoUploadDraft): string[] {
   if (title === '') messages.push('Falta el título')
   else if (title.length > VIDEO_TITLE_MAX_LENGTH)
     messages.push(`El título supera los ${VIDEO_TITLE_MAX_LENGTH} caracteres`)
+  const subtitle = draft.subtitle?.trim() ?? ''
+  if (subtitle.length > VIDEO_SUBTITLE_MAX_LENGTH)
+    messages.push(`El subtítulo supera los ${VIDEO_SUBTITLE_MAX_LENGTH} caracteres`)
   if (!draft.video) messages.push('Falta el video')
+  else if (draft.video.size > MAX_VIDEO_BYTES)
+    messages.push(`El video supera los ${MAX_VIDEO_BYTES / (1024 * 1024)} MB`)
   messages.push(...trackRequirements(draft.subtitles, MIN_SUBTITLES, SUBTITLE_NOUN))
   messages.push(...trackRequirements(draft.audioTracks, MIN_AUDIO_TRACKS, AUDIO_NOUN))
   return messages

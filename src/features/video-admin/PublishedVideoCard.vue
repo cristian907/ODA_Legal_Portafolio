@@ -33,13 +33,24 @@ function plural(count: number, singular: string, pluralForm: string): string {
       <span v-if="createdLabel" class="text-xs text-slate-500">{{ createdLabel }}</span>
     </div>
 
-    <div class="min-w-0">
-      <p class="truncate font-semibold text-white" :title="manifest.title">{{ manifest.title }}</p>
-      <p class="mt-0.5 text-xs text-slate-400">
-        <span class="font-mono tabular-nums">{{ formatTime(manifest.durationSeconds) }}</span>
-        · {{ plural(manifest.subtitles.length, 'subtítulo', 'subtítulos') }}
-        · {{ plural(manifest.audioTracks.length, 'audio', 'audios') }}
-      </p>
+    <div class="flex items-start gap-3.5">
+      <img
+        v-if="manifest.poster?.path"
+        :src="manifest.poster.path"
+        alt="Miniatura del video"
+        class="h-14 w-24 shrink-0 rounded-md border border-[#1e293b] object-cover"
+      />
+      <div class="min-w-0 flex-1">
+        <p class="truncate font-semibold text-white" :title="manifest.title">{{ manifest.title }}</p>
+        <p v-if="manifest.subtitle" class="truncate text-xs text-[#c5a059]" :title="manifest.subtitle">
+          {{ manifest.subtitle }}
+        </p>
+        <p class="mt-0.5 text-xs text-slate-400">
+          <span class="font-mono tabular-nums">{{ formatTime(manifest.durationSeconds) }}</span>
+          · {{ plural(manifest.subtitles.length, 'subtítulo', 'subtítulos') }}
+          · {{ plural(manifest.audioTracks.length, 'audio', 'audios') }}
+        </p>
+      </div>
     </div>
 
     <button
