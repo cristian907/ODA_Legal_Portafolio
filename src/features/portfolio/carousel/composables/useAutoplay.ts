@@ -13,25 +13,20 @@ interface AutoplayOptions {
 }
 
 /**
- * Timed rotation that yields to the user: it is off under reduced motion, can be
- * paused with a visible toggle, and is suspended on hover, keyboard focus, drag
- * and hidden tabs. Every (re)start begins a fresh full interval.
+ * Timed rotation that yields to the user: it is off under reduced motion and is
+ * suspended on hover, keyboard focus, drag and hidden tabs. Every (re)start
+ * begins a fresh full interval.
  */
 export function useAutoplay(options: AutoplayOptions) {
   const { enabled, intervalMs, reducedMotion, container, isDragging, onTick } = options
-  const userPaused = ref(false)
   const hovered = ref(false)
   const keyboardFocused = ref(false)
   const pageVisible = ref(typeof document === 'undefined' || document.visibilityState === 'visible')
-  /** Increments on every fresh interval, so progress indicators can restart. */
-  const cycle = ref(0)
 
-  /** Autoplay applies at all (shows the pause/play toggle). */
-  const available = computed(() => enabled.value && !reducedMotion.value)
   const running = computed(
     () =>
-      available.value &&
-      !userPaused.value &&
+      enabled.value &&
+      !reducedMotion.value &&
       !hovered.value &&
       !keyboardFocused.value &&
       !isDragging.value &&
@@ -48,7 +43,6 @@ export function useAutoplay(options: AutoplayOptions) {
   function schedule(): void {
     clearTimer()
     if (!running.value) return
-    cycle.value++
     timer = setTimeout(() => {
       onTick()
       schedule()
@@ -58,10 +52,6 @@ export function useAutoplay(options: AutoplayOptions) {
   /** Call after manual navigation so the next slide waits a full interval. */
   function restart(): void {
     if (running.value) schedule()
-  }
-
-  function toggle(): void {
-    userPaused.value = !userPaused.value
   }
 
   watch([running, intervalMs], schedule)
@@ -104,5 +94,5 @@ export function useAutoplay(options: AutoplayOptions) {
     document.removeEventListener('visibilitychange', onVisibilityChange)
   })
 
-  return { available, running, userPaused, cycle, toggle, restart }
+  return { running, restart }
 }

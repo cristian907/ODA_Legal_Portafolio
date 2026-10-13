@@ -125,61 +125,75 @@ watch(index, (current) => emit('change', current))
     :aria-label="props.label"
     @keydown="onKeydown"
   >
-    <div
-      ref="viewport"
-      class="viewport overflow-hidden rounded-xl outline-none"
-      :class="{ 'is-dragging': isDragging, 'cursor-grab': layout.scrollable }"
-      :tabindex="layout.scrollable ? 0 : undefined"
-      v-on="swipeListeners"
-    >
+    <div class="stage" :class="{ 'is-single': layout.perView === 1 }">
+      <button
+        v-if="layout.scrollable"
+        type="button"
+        class="nav-btn nav-prev"
+        aria-label="Foto anterior"
+        :disabled="!hasPrev"
+        @click="navigate(() => step(-1))"
+      >
+        <i class="fas fa-chevron-left text-sm" aria-hidden="true"></i>
+      </button>
+
       <div
-        ref="track"
-        class="track flex"
-        :class="{ 'is-animated': animate, 'justify-center': !layout.scrollable }"
-        :style="trackStyle"
-        @transitionend="onTransitionEnd"
+        ref="viewport"
+        class="viewport min-w-0 flex-1 overflow-hidden rounded-xl outline-none"
+        :class="{ 'is-dragging': isDragging, 'cursor-grab': layout.scrollable }"
+        :tabindex="layout.scrollable ? 0 : undefined"
+        v-on="swipeListeners"
       >
         <div
-          v-for="slide in slides"
-          :key="slide.key"
-          class="slide"
-          role="group"
-          aria-roledescription="foto"
-          :aria-label="`${slide.source + 1} de ${props.photos.length}`"
-          :aria-hidden="slide.clone ? 'true' : undefined"
+          ref="track"
+          class="track flex"
+          :class="{ 'is-animated': animate, 'justify-center': !layout.scrollable }"
+          :style="trackStyle"
+          @transitionend="onTransitionEnd"
         >
-          <figure class="slide-frame relative m-0 overflow-hidden rounded-xl" :style="{ aspectRatio }">
-            <img
-              :src="slide.photo.croppedPath"
-              :alt="slide.photo.alt"
-              loading="lazy"
-              draggable="false"
-              class="slide-image block h-full w-full object-cover select-none"
-            />
-            <figcaption v-if="slide.photo.title" class="slide-caption absolute inset-x-0 bottom-0">
-              <span class="line-clamp-2">{{ slide.photo.title }}</span>
-            </figcaption>
-          </figure>
+          <div
+            v-for="slide in slides"
+            :key="slide.key"
+            class="slide"
+            role="group"
+            aria-roledescription="foto"
+            :aria-label="`${slide.source + 1} de ${props.photos.length}`"
+            :aria-hidden="slide.clone ? 'true' : undefined"
+          >
+            <figure class="slide-frame relative m-0 overflow-hidden rounded-xl" :style="{ aspectRatio }">
+              <img
+                :src="slide.photo.croppedPath"
+                :alt="slide.photo.alt"
+                loading="lazy"
+                draggable="false"
+                class="slide-image block h-full w-full object-cover select-none"
+              />
+              <figcaption v-if="slide.photo.title" class="slide-caption absolute inset-x-0 bottom-0">
+                <span class="line-clamp-2">{{ slide.photo.title }}</span>
+              </figcaption>
+            </figure>
+          </div>
         </div>
       </div>
+
+      <button
+        v-if="layout.scrollable"
+        type="button"
+        class="nav-btn nav-next"
+        aria-label="Foto siguiente"
+        :disabled="!hasNext"
+        @click="navigate(() => step(1))"
+      >
+        <i class="fas fa-chevron-right text-sm" aria-hidden="true"></i>
+      </button>
     </div>
 
     <CarouselControls
-      v-if="layout.scrollable"
+      v-if="pages > 1"
       class="mt-6"
       :page-count="pages"
       :active-page="activePage"
-      :can-prev="hasPrev"
-      :can-next="hasNext"
-      :autoplay-available="autoplay.available.value"
-      :autoplay-paused="autoplay.userPaused.value"
-      :autoplay-running="autoplay.running.value"
-      :autoplay-interval-ms="props.settings.autoplayIntervalSeconds * 1000"
-      :autoplay-cycle="autoplay.cycle.value"
-      @prev="navigate(() => step(-1))"
-      @next="navigate(() => step(1))"
       @page="(page) => navigate(() => goTo(indexOfPage(page, layout)))"
-      @toggle-autoplay="autoplay.toggle"
     />
 
     <p class="sr-only" :aria-live="autoplay.running.value ? 'off' : 'polite'" aria-atomic="true">
@@ -189,6 +203,59 @@ watch(index, (current) => emit('change', current))
 </template>
 
 <style scoped>
+.stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-btn {
+  display: inline-flex;
+  height: 44px;
+  width: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--svc-color-3) 18%, transparent);
+  background: var(--svc-color-2);
+  color: var(--svc-color-3);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+.nav-btn:hover:not(:disabled) {
+  background: var(--svc-color-4);
+  border-color: var(--svc-color-4);
+  color: var(--svc-color-2);
+}
+.nav-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+.nav-btn:focus-visible {
+  outline: 2px solid var(--svc-color-4);
+  outline-offset: 3px;
+}
+
+/* A single photo keeps the full width: the arrows sit over its side edges. */
+.stage.is-single .nav-btn {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  transform: translateY(-50%);
+}
+.stage.is-single .nav-prev {
+  left: 0.5rem;
+}
+.stage.is-single .nav-next {
+  right: 0.5rem;
+}
+
 .viewport {
   touch-action: pan-y;
 }

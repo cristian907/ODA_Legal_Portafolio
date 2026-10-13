@@ -22,11 +22,9 @@ describe('slidesPerView', () => {
     [375, 1],
     [639, 1],
     [640, 3],
-    [1023, 3],
-    [1024, 4],
-    [1535, 4],
-    [1536, 5],
-    [2400, 5],
+    [1024, 3],
+    [1536, 3],
+    [2400, 3],
   ])('shows the right count at %ipx', (width, expected) => {
     expect(slidesPerView(width)).toBe(expected)
   })

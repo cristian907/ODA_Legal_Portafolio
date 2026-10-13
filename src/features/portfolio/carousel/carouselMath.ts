@@ -1,13 +1,9 @@
 // Pure carousel geometry. "Index" is a real photo (0..total-1); "position" is a
 // slot in the rendered track, which may hold leading/trailing loop clones.
 
-/** Container-width breakpoints (px) → photos visible at once. */
-const BREAKPOINTS: ReadonlyArray<readonly [maxWidth: number, perView: number]> = [
-  [640, 1],
-  [1024, 3],
-  [1536, 4],
-]
-const WIDEST_PER_VIEW = 5
+/** Containers narrower than this (px) show a single photo. */
+const SINGLE_PHOTO_MAX_WIDTH = 640
+const WIDE_PER_VIEW = 3
 
 /** Below this travel (px) a pointer gesture is a tap, not a drag. */
 const TAP_TOLERANCE_PX = 10
@@ -32,8 +28,7 @@ export interface CarouselLayout {
 }
 
 export function slidesPerView(containerWidth: number): number {
-  const match = BREAKPOINTS.find(([maxWidth]) => containerWidth < maxWidth)
-  return match ? match[1] : WIDEST_PER_VIEW
+  return containerWidth < SINGLE_PHOTO_MAX_WIDTH ? 1 : WIDE_PER_VIEW
 }
 
 export function carouselLayout(total: number, perView: number, loop: boolean): CarouselLayout {
