@@ -23,10 +23,8 @@ describe('photoMetadataSchema', () => {
     ])
   })
 
-  it('requires an alt text of at most 150 characters', () => {
-    expect(messages(photoMetadataSchema.safeParse({ title: '', alt: '   ' }))).toEqual([
-      'El texto alternativo es obligatorio.',
-    ])
+  it('allows an empty alt text and caps it at 150 characters', () => {
+    expect(photoMetadataSchema.parse({ title: '', alt: '   ' })).toEqual({ title: '', alt: '' })
     expect(messages(photoMetadataSchema.safeParse({ title: '', alt: 'a'.repeat(151) }))).toEqual([
       'El texto alternativo no puede superar los 150 caracteres.',
     ])

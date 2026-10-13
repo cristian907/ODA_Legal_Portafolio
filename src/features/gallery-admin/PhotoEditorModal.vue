@@ -450,7 +450,7 @@ const ghostButton =
             <div class="flex flex-col gap-1.5">
               <div class="flex items-baseline justify-between gap-3">
                 <label for="photoAlt" class="text-[0.72rem] font-semibold uppercase tracking-wider text-slate-500">
-                  Texto alternativo
+                  Texto alternativo <span class="normal-case tracking-normal text-slate-600">(opcional)</span>
                 </label>
                 <span
                   class="font-mono text-xs tabular-nums"
@@ -465,8 +465,6 @@ const ghostButton =
                 ref="altInput"
                 v-model="alt"
                 rows="3"
-                required
-                aria-required="true"
                 placeholder="Ej. Recepción del despacho con sillas de cuero y un escritorio de madera"
                 :disabled="isSaving"
                 :aria-invalid="altError ? 'true' : undefined"

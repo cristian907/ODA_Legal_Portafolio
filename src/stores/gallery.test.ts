@@ -107,9 +107,15 @@ describe('addPhoto', () => {
 
   it('rejects invalid metadata or files without calling the server', async () => {
     const store = useGalleryStore()
-    const added = await store.addPhoto(new File(['x'], 'scan.gif'), baseTransform, { title: '', alt: ' ' })
+    const added = await store.addPhoto(new File(['x'], 'scan.gif'), baseTransform, {
+      title: '',
+      alt: 'a'.repeat(151),
+    })
     expect(added).toBeNull()
-    expect(store.errors).toEqual(['La foto debe ser .jpg, .jpeg, .png o .webp.', 'El texto alternativo es obligatorio.'])
+    expect(store.errors).toEqual([
+      'La foto debe ser .jpg, .jpeg, .png o .webp.',
+      'El texto alternativo no puede superar los 150 caracteres.',
+    ])
     expect(uploadPhoto).not.toHaveBeenCalled()
   })
 

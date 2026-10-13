@@ -106,8 +106,8 @@ const announcement = ref('')
 const draggingId = ref<string | null>(null)
 const dropIndex = ref<number | null>(null)
 
-function photoLabel(photo: GalleryPhoto): string {
-  return photo.title || photo.alt
+function photoLabel(photo: GalleryPhoto, index: number): string {
+  return photo.title || photo.alt || `Foto ${index + 1}`
 }
 
 async function move(photo: GalleryPhoto, toIndex: number, focusSelector?: string): Promise<void> {
@@ -352,7 +352,7 @@ const iconButton =
                 <p class="truncate text-sm" :class="photo.title ? 'text-slate-100' : 'text-slate-500 italic'">
                   {{ photo.title || 'Sin título' }}
                 </p>
-                <p class="truncate text-xs text-slate-500" :title="photo.alt">{{ altExcerpt(photo.alt) }}</p>
+                <p v-if="photo.alt" class="truncate text-xs text-slate-500" :title="photo.alt">{{ altExcerpt(photo.alt) }}</p>
                 <p
                   v-if="recropFailures[photo.id]"
                   class="mt-1 inline-flex items-center gap-1.5 rounded bg-amber-500/10 px-1.5 py-0.5 text-[0.7rem] font-semibold text-amber-300"
@@ -368,7 +368,7 @@ const iconButton =
                   data-move="up"
                   :class="iconButton"
                   :disabled="index === 0 || isBusy"
-                  :aria-label="`Subir «${photoLabel(photo)}»`"
+                  :aria-label="`Subir «${photoLabel(photo, index)}»`"
                   @click="move(photo, index - 1, '[data-move=up]')"
                 >
                   <i class="fas fa-arrow-up text-xs" aria-hidden="true"></i>
@@ -378,7 +378,7 @@ const iconButton =
                   data-move="down"
                   :class="iconButton"
                   :disabled="index === photos.length - 1 || isBusy"
-                  :aria-label="`Bajar «${photoLabel(photo)}»`"
+                  :aria-label="`Bajar «${photoLabel(photo, index)}»`"
                   @click="move(photo, index + 1, '[data-move=down]')"
                 >
                   <i class="fas fa-arrow-down text-xs" aria-hidden="true"></i>
@@ -387,7 +387,7 @@ const iconButton =
                   type="button"
                   :class="iconButton"
                   :disabled="isBusy"
-                  :aria-label="`Editar «${photoLabel(photo)}»`"
+                  :aria-label="`Editar «${photoLabel(photo, index)}»`"
                   title="Editar"
                   @click="edit(photo)"
                 >
@@ -397,7 +397,7 @@ const iconButton =
                   type="button"
                   :class="[iconButton, 'hover:!text-red-400']"
                   :disabled="isBusy"
-                  :aria-label="`Eliminar foto «${photoLabel(photo)}»`"
+                  :aria-label="`Eliminar foto «${photoLabel(photo, index)}»`"
                   title="Eliminar foto"
                   @click="remove(photo)"
                 >

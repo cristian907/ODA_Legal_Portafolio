@@ -35,7 +35,6 @@ export const photoMetadataSchema = z.object({
   alt: z
     .string()
     .trim()
-    .min(1, 'El texto alternativo es obligatorio.')
     .max(PHOTO_ALT_MAX_LENGTH, `El texto alternativo no puede superar los ${PHOTO_ALT_MAX_LENGTH} caracteres.`),
 })
 
