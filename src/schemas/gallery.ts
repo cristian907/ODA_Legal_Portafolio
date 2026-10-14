@@ -38,6 +38,9 @@ export const photoMetadataSchema = z.object({
     .max(PHOTO_ALT_MAX_LENGTH, `El texto alternativo no puede superar los ${PHOTO_ALT_MAX_LENGTH} caracteres.`),
 })
 
+export const DESKTOP_ITEMS_PER_VIEW = [3, 4, 5] as const
+export const SLIDE_STEPS = ['single', 'group'] as const
+
 export const gallerySettingsSchema = z.object({
   aspectRatio: z.enum(ASPECT_RATIOS, { message: 'La proporción debe ser 4:3, 1:1, 3:4 o 16:9.' }),
   autoplay: z.boolean(),
@@ -47,4 +50,6 @@ export const gallerySettingsSchema = z.object({
     .min(MIN_AUTOPLAY_INTERVAL_SECONDS, INTERVAL_MESSAGE)
     .max(MAX_AUTOPLAY_INTERVAL_SECONDS, INTERVAL_MESSAGE),
   loop: z.boolean(),
+  itemsPerView: z.union([z.literal(3), z.literal(4), z.literal(5)]).default(3),
+  slideStep: z.enum(SLIDE_STEPS).default('single'),
 })

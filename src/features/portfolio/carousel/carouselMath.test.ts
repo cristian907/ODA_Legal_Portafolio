@@ -28,11 +28,21 @@ describe('slidesPerView', () => {
   ])('shows the right count at %ipx', (width, expected) => {
     expect(slidesPerView(width)).toBe(expected)
   })
+
+  it('supports custom desktop counts (4, 5)', () => {
+    expect(slidesPerView(1024, 4)).toBe(4)
+    expect(slidesPerView(1024, 5)).toBe(5)
+    expect(slidesPerView(375, 5)).toBe(1)
+  })
 })
 
 describe('carouselLayout', () => {
   it('clones one view of slides at each end when looping with more photos than fit', () => {
     expect(carouselLayout(8, 3, true)).toEqual({ total: 8, perView: 3, looping: true, clones: 3, maxIndex: 7, scrollable: true })
+  })
+
+  it('clones double the view of slides when looping and stepping by group', () => {
+    expect(carouselLayout(8, 3, true, 3)).toEqual({ total: 8, perView: 3, looping: true, clones: 6, maxIndex: 7, scrollable: true })
   })
 
   it('does not clone when loop is off and stops at the last full view', () => {

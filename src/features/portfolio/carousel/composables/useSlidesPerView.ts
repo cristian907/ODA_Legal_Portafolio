@@ -1,16 +1,30 @@
-import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import { slidesPerView } from '../carouselMath'
 
 /**
  * Slides visible at once, derived from the carousel's own width (not the window)
  * so it also adapts inside narrower hosts such as the admin preview pane.
  */
-export function useSlidesPerView(container: Ref<HTMLElement | null>) {
+export function useSlidesPerView(
+  container: Ref<HTMLElement | null>,
+  desktopCount: Ref<number> | number = 3,
+) {
   const perView = ref(1)
   let observer: ResizeObserver | null = null
 
+  function currentDesktopCount(): number {
+    return typeof desktopCount === 'number' ? desktopCount : desktopCount.value
+  }
+
   function update(width: number): void {
-    perView.value = slidesPerView(width)
+    perView.value = slidesPerView(width, currentDesktopCount())
+  }
+
+  if (typeof desktopCount !== 'number') {
+    watch(desktopCount, () => {
+      const element = container.value
+      if (element) update(element.getBoundingClientRect().width)
+    })
   }
 
   onMounted(() => {

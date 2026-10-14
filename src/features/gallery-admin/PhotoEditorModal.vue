@@ -135,8 +135,10 @@ function onError(): void {
 
 function setZoom(target: number): void {
   const clamped = Math.min(MAX_ZOOM, Math.max(1, target))
-  if (!cropper.value || Math.abs(clamped - zoom.value) < 0.001) return
-  cropper.value.zoom(clamped / zoom.value)
+  const current = zoom.value
+  if (!cropper.value || Math.abs(clamped - current) < 0.001) return
+  cropper.value.zoom(clamped / current)
+  syncFromCropper()
 }
 function onZoomInput(event: Event): void {
   setZoom(Number((event.target as HTMLInputElement).value))
@@ -246,7 +248,7 @@ const ghostButton =
 <template>
   <Teleport to="body">
     <div
-      class="fixed inset-0 z-2900 flex items-center justify-center bg-black/75 p-3 sm:p-6"
+      class="admin-view fixed inset-0 z-2900 flex items-center justify-center bg-black/75 p-3 sm:p-6"
       @pointerdown="onBackdropPointerDown"
       @click.self="onBackdropClick"
     >
@@ -302,6 +304,7 @@ const ghostButton =
                 :default-size="defaultSize"
                 :default-position="defaultPosition"
                 :debounce="false"
+                :transitions="false"
                 @ready="onReady"
                 @change="syncFromCropper"
                 @error="onError"

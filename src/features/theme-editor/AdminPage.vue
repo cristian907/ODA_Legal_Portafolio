@@ -86,7 +86,7 @@ watch(activeModule, (m) => {
 <template>
   <LoginScreen v-if="!auth.isLoggedIn" />
 
-  <div v-else class="flex h-screen flex-col bg-[#0b0f17] text-white">
+  <div v-else class="admin-view flex h-screen h-dvh flex-col overflow-hidden bg-[#0b0f17] text-white">
     <!-- Topbar -->
     <header class="flex h-[70px] shrink-0 items-center justify-between border-b border-[#1e293b] px-6">
       <div class="flex items-center gap-4">
@@ -139,10 +139,11 @@ watch(activeModule, (m) => {
 
     <!-- Two-column dashboard -->
     <main
-      class="grid min-h-0 flex-1"
+      class="grid min-h-0 flex-1 overflow-hidden"
       :class="
-        isSplitModule &&
-        'auto-rows-max grid-cols-1 overflow-y-auto [color-scheme:dark] min-[900px]:auto-rows-[minmax(0,1fr)] min-[900px]:grid-cols-[40%_60%] min-[900px]:overflow-hidden'
+        isSplitModule
+          ? 'auto-rows-max grid-cols-1 overflow-y-auto [color-scheme:dark] min-[900px]:auto-rows-[minmax(0,1fr)] min-[900px]:grid-cols-[40%_60%] min-[900px]:overflow-hidden'
+          : 'grid-rows-[minmax(0,1fr)] overflow-hidden'
       "
       :style="
         isSplitModule
@@ -151,7 +152,7 @@ watch(activeModule, (m) => {
       "
     >
       <!-- Controls panel -->
-      <div class="flex min-h-0 flex-col border-r border-[#1e293b] bg-[#0b0f17]">
+      <div class="admin-panel flex min-h-0 flex-col border-r border-[#1e293b] bg-[#0b0f17]">
         <template v-if="activeModule === 'styles'">
           <!-- Tabs (hidden in editor) -->
           <div v-if="view !== 'editor'" class="flex gap-1 border-b border-[#1e293b] px-5 pt-3">

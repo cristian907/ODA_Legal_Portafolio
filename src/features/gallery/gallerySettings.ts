@@ -6,6 +6,8 @@ export const DEFAULT_GALLERY_SETTINGS: Readonly<GallerySettings> = Object.freeze
   autoplay: true,
   autoplayIntervalSeconds: 5,
   loop: true,
+  itemsPerView: 3,
+  slideStep: 'single',
 })
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -25,5 +27,7 @@ export function restoreGallerySettings(stored: unknown): GallerySettings {
     autoplay: restoredValue(source, 'autoplay'),
     autoplayIntervalSeconds: restoredValue(source, 'autoplayIntervalSeconds'),
     loop: restoredValue(source, 'loop'),
+    itemsPerView: restoredValue(source, 'itemsPerView'),
+    slideStep: restoredValue(source, 'slideStep'),
   }
 }

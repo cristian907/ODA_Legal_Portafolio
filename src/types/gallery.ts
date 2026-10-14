@@ -47,10 +47,14 @@ export interface PhotoChanges {
 }
 
 export type AspectRatio = '4:3' | '1:1' | '3:4' | '16:9'
+export type DesktopPhotosPerView = 3 | 4 | 5
+export type SlideStep = 'single' | 'group'
 
 export interface GallerySettings {
   aspectRatio: AspectRatio
   autoplay: boolean
   autoplayIntervalSeconds: number
   loop: boolean
+  itemsPerView: DesktopPhotosPerView
+  slideStep: SlideStep
 }

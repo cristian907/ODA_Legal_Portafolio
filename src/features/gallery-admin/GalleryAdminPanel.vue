@@ -7,11 +7,12 @@ import { useConfirm } from '@/composables/useConfirm'
 import SegmentedControl from '@/components/form/SegmentedControl.vue'
 import {
   ASPECT_RATIOS,
+  DESKTOP_ITEMS_PER_VIEW,
   MAX_AUTOPLAY_INTERVAL_SECONDS,
   MIN_AUTOPLAY_INTERVAL_SECONDS,
   PHOTO_EXTENSIONS,
 } from '@/schemas/gallery'
-import type { AspectRatio, GalleryPhoto } from '@/types/gallery'
+import type { AspectRatio, DesktopPhotosPerView, GalleryPhoto, SlideStep } from '@/types/gallery'
 import PhotoEditorModal from './PhotoEditorModal.vue'
 import { partitionPhotoFiles } from './partitionPhotoFiles'
 import type { EditorSession } from './editorSession'
@@ -22,6 +23,14 @@ const { show } = useToast()
 const { confirm } = useConfirm()
 
 const ratioOptions = ASPECT_RATIOS.map((ratio) => ({ value: ratio, label: ratio }))
+const desktopItemsOptions = DESKTOP_ITEMS_PER_VIEW.map((count) => ({
+  value: String(count),
+  label: `${count} fotos`,
+}))
+const slideStepOptions = computed(() => [
+  { value: 'single', label: 'De una en una' },
+  { value: 'group', label: `De ${settings.value.itemsPerView} en ${settings.value.itemsPerView}` },
+])
 const thumbRatio = computed(() => settings.value.aspectRatio.replace(':', ' / '))
 const accept = PHOTO_EXTENSIONS.join(',')
 const isBusy = computed(() => isSaving.value || isRecropping.value)
@@ -40,6 +49,14 @@ async function changeRatio(value: string): Promise<void> {
   }
   const saved = await store.updateSettings({ aspectRatio })
   if (saved && Object.keys(recropFailures.value).length === 0) show('Proporción cambiada')
+}
+
+function setItemsPerView(value: string): void {
+  store.updateSettings({ itemsPerView: Number(value) as DesktopPhotosPerView })
+}
+
+function setSlideStep(value: string): void {
+  store.updateSettings({ slideStep: value as SlideStep })
 }
 
 function setAutoplay(autoplay: boolean): void {
@@ -199,6 +216,30 @@ const iconButton =
             </span>
           </div>
           <p class="sr-only" aria-live="polite">{{ isRecropping ? 'Recortando fotos…' : '' }}</p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <span id="galleryDesktopItemsLabel" class="text-sm text-slate-200">Fotos en escritorio</span>
+          <div role="group" aria-labelledby="galleryDesktopItemsLabel" class="flex flex-wrap items-center gap-3">
+            <SegmentedControl
+              :model-value="String(settings.itemsPerView)"
+              :options="desktopItemsOptions"
+              size="sm"
+              @update:model-value="setItemsPerView"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <span id="gallerySlideStepLabel" class="text-sm text-slate-200">Avance de fotos</span>
+          <div role="group" aria-labelledby="gallerySlideStepLabel" class="flex flex-wrap items-center gap-3">
+            <SegmentedControl
+              :model-value="settings.slideStep"
+              :options="slideStepOptions"
+              size="sm"
+              @update:model-value="setSlideStep"
+            />
+          </div>
         </div>
 
         <div class="flex items-center justify-between gap-4">

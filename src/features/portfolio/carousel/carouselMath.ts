@@ -27,18 +27,23 @@ export interface CarouselLayout {
   scrollable: boolean
 }
 
-export function slidesPerView(containerWidth: number): number {
-  return containerWidth < SINGLE_PHOTO_MAX_WIDTH ? 1 : WIDE_PER_VIEW
+export function slidesPerView(containerWidth: number, desktopCount: number = WIDE_PER_VIEW): number {
+  return containerWidth < SINGLE_PHOTO_MAX_WIDTH ? 1 : desktopCount
 }
 
-export function carouselLayout(total: number, perView: number, loop: boolean): CarouselLayout {
+export function carouselLayout(
+  total: number,
+  perView: number,
+  loop: boolean,
+  stepBy: number = 1,
+): CarouselLayout {
   const scrollable = total > perView
   const looping = loop && scrollable
   return {
     total,
     perView,
     looping,
-    clones: looping ? perView : 0,
+    clones: looping ? (stepBy > 1 ? perView * 2 : perView) : 0,
     maxIndex: !scrollable ? 0 : looping ? total - 1 : total - perView,
     scrollable,
   }

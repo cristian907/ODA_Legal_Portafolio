@@ -80,15 +80,27 @@ describe('gallery store initial state', () => {
   it('starts empty with default settings', () => {
     const store = useGalleryStore()
     expect(store.photos).toEqual([])
-    expect(store.settings).toEqual({ aspectRatio: '4:3', autoplay: true, autoplayIntervalSeconds: 5, loop: true })
+    expect(store.settings).toEqual({
+      aspectRatio: '4:3',
+      autoplay: true,
+      autoplayIntervalSeconds: 5,
+      loop: true,
+      itemsPerView: 3,
+      slideStep: 'single',
+    })
   })
 
   it('restores photos and settings from storage', () => {
     seedPhotos([galleryPhoto('a')])
-    localStorage.setItem(STORAGE_KEYS.GALLERY_SETTINGS, JSON.stringify({ aspectRatio: '1:1' }))
+    localStorage.setItem(
+      STORAGE_KEYS.GALLERY_SETTINGS,
+      JSON.stringify({ aspectRatio: '1:1', itemsPerView: 4, slideStep: 'group' }),
+    )
     const store = useGalleryStore()
     expect(store.photos.map((photo) => photo.id)).toEqual(['a'])
     expect(store.settings.aspectRatio).toBe('1:1')
+    expect(store.settings.itemsPerView).toBe(4)
+    expect(store.settings.slideStep).toBe('group')
   })
 })
 

@@ -52,10 +52,27 @@ describe('photoFileSchema', () => {
 })
 
 describe('gallerySettingsSchema', () => {
-  const valid = { aspectRatio: '4:3', autoplay: true, autoplayIntervalSeconds: 5, loop: true }
+  const valid = {
+    aspectRatio: '4:3',
+    autoplay: true,
+    autoplayIntervalSeconds: 5,
+    loop: true,
+    itemsPerView: 3,
+    slideStep: 'single' as const,
+  }
 
   it('accepts valid settings', () => {
     expect(gallerySettingsSchema.parse(valid)).toEqual(valid)
+  })
+
+  it('provides default itemsPerView and slideStep when omitted', () => {
+    const { itemsPerView: _i, slideStep: _s, ...legacy } = valid
+    expect(gallerySettingsSchema.parse(legacy)).toEqual(valid)
+  })
+
+  it('rejects invalid itemsPerView and slideStep', () => {
+    expect(gallerySettingsSchema.safeParse({ ...valid, itemsPerView: 6 }).success).toBe(false)
+    expect(gallerySettingsSchema.safeParse({ ...valid, slideStep: 'triple' }).success).toBe(false)
   })
 
   it('rejects unknown aspect ratios', () => {

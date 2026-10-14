@@ -40,8 +40,12 @@ const viewport = ref<HTMLElement | null>(null)
 const track = ref<HTMLElement | null>(null)
 
 const { reducedMotion } = usePrefersReducedMotion()
-const { perView } = useSlidesPerView(root)
-const layout = computed(() => carouselLayout(props.photos.length, perView.value, props.settings.loop))
+const desktopCount = computed(() => props.settings.itemsPerView ?? 3)
+const { perView } = useSlidesPerView(root, desktopCount)
+const stepDelta = computed(() => (props.settings.slideStep === 'group' ? perView.value : 1))
+const layout = computed(() =>
+  carouselLayout(props.photos.length, perView.value, props.settings.loop, stepDelta.value),
+)
 
 const { position, index, animate, dragPx, step, goTo, onTransitionEnd, startDrag, updateDrag, endDrag } =
   useCarouselTrack({ layout, track, reducedMotion })
@@ -66,9 +70,19 @@ const { isDragging, swipeListeners } = useSwipe(viewport, {
   onMove: (deltaX) => updateDrag(dragOffset(deltaX, !hasPrev.value, !hasNext.value)),
   onEnd: (deltaX, velocity) => {
     const slideWidth = (viewport.value?.clientWidth ?? 0) / layout.value.perView
-    const steps = resolveSwipe(deltaX, velocity, slideWidth)
+    const rawSteps = resolveSwipe(deltaX, velocity, slideWidth)
+    if (rawSteps === 0) {
+      void endDrag(0)
+      return
+    }
+    const delta =
+      props.settings.slideStep === 'group'
+        ? rawSteps > 0
+          ? stepDelta.value
+          : -stepDelta.value
+        : rawSteps
     const limit = layout.value.perView
-    void endDrag(Math.max(-limit, Math.min(limit, steps)))
+    void endDrag(Math.max(-limit, Math.min(limit, delta)))
     autoplay.restart()
   },
 })
@@ -81,7 +95,7 @@ const autoplay = useAutoplay({
   isDragging,
   onTick: () => {
     // Without loop, rotation rewinds to the first photo after the last view.
-    if (hasNext.value) void step(1)
+    if (hasNext.value) void step(stepDelta.value)
     else void goTo(0)
   },
 })
@@ -93,8 +107,8 @@ function navigate(move: () => Promise<void>): void {
 
 function onKeydown(event: KeyboardEvent): void {
   if (!layout.value.scrollable) return
-  if (event.key === 'ArrowLeft' && hasPrev.value) navigate(() => step(-1))
-  else if (event.key === 'ArrowRight' && hasNext.value) navigate(() => step(1))
+  if (event.key === 'ArrowLeft' && hasPrev.value) navigate(() => step(-stepDelta.value))
+  else if (event.key === 'ArrowRight' && hasNext.value) navigate(() => step(stepDelta.value))
   else return
   event.preventDefault()
 }
@@ -132,7 +146,7 @@ watch(index, (current) => emit('change', current))
         class="nav-btn nav-prev"
         aria-label="Foto anterior"
         :disabled="!hasPrev"
-        @click="navigate(() => step(-1))"
+        @click="navigate(() => step(-stepDelta))"
       >
         <i class="fas fa-chevron-left text-sm" aria-hidden="true"></i>
       </button>
@@ -182,7 +196,7 @@ watch(index, (current) => emit('change', current))
         class="nav-btn nav-next"
         aria-label="Foto siguiente"
         :disabled="!hasNext"
-        @click="navigate(() => step(1))"
+        @click="navigate(() => step(stepDelta))"
       >
         <i class="fas fa-chevron-right text-sm" aria-hidden="true"></i>
       </button>
