@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { readJSON, writeJSON } from '@/composables/useLocalStorage'
+import { readJSON, readRaw, writeJSON, writeRaw } from '@/composables/useLocalStorage'
 import { reorder } from '@/features/gallery/galleryList'
 import { restoreGallerySettings } from '@/features/gallery/gallerySettings'
 import { isSameTransform, recenteredTransform } from '@/features/gallery/photoTransform'
@@ -53,10 +53,16 @@ async function deletePhotoQuietly(id: string): Promise<void> {
 export const useGalleryStore = defineStore('gallery', () => {
   const photos = ref<GalleryPhoto[]>(restorePhotos(readJSON<unknown>(STORAGE_KEYS.GALLERY_PHOTOS, [])))
   const settings = ref<GallerySettings>(restoreGallerySettings(readJSON<unknown>(STORAGE_KEYS.GALLERY_SETTINGS, null)))
+  const isGalleryEnabled = ref<boolean>(readRaw(STORAGE_KEYS.GALLERY_ENABLED, 'true') !== 'false')
   const isSaving = ref(false)
   const isRecropping = ref(false)
   const errors = ref<string[]>([])
   const recropFailures = ref<Record<string, string[]>>({})
+
+  function setGalleryEnabled(enabled: boolean): void {
+    isGalleryEnabled.value = enabled
+    writeRaw(STORAGE_KEYS.GALLERY_ENABLED, String(enabled))
+  }
 
   function setPhotos(next: GalleryPhoto[]): void {
     photos.value = next
@@ -195,6 +201,8 @@ export const useGalleryStore = defineStore('gallery', () => {
   return {
     photos,
     settings,
+    isGalleryEnabled,
+    setGalleryEnabled,
     isSaving,
     isRecropping,
     errors,

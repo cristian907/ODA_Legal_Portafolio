@@ -8,12 +8,12 @@ const { photos, settings } = storeToRefs(useGalleryStore())
 </script>
 
 <template>
-  <section id="galeria" class="border-b border-svc-3/10 bg-svc-1 py-20 transition-colors">
+  <section id="carrusel" class="border-b border-svc-3/10 bg-svc-1 py-20 transition-colors">
     <div class="app-container">
       <SectionHeader
-        tag="Instalaciones &amp; Despacho"
-        title="Galería Profesional"
-        subtitle="Conoce mis instalaciones de primer nivel y la atención profesional a tu servicio."
+        tag="Recorrido Visual"
+        title="Carrusel Fotográfico"
+        subtitle="Explora nuestras instalaciones y momentos destacados en un formato interactivo."
       />
     </div>
 

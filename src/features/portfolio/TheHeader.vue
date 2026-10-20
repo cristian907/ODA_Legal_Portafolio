@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { useThemeStore } from '@/stores/theme'
+import { useGalleryStore } from '@/stores/gallery'
 
 const theme = useThemeStore()
+const galleryStore = useGalleryStore()
 const menuOpen = ref(false)
 
 // When rendered inside the admin live preview the header must not be `fixed`
@@ -14,13 +16,14 @@ function onToggle() {
   theme.toggleTheme()
 }
 
-const links = [
+const links = computed(() => [
   { hash: '#inicio', label: 'Inicio' },
   { hash: '#video', label: 'Video' },
-  { hash: '#galeria', label: 'Galería' },
+  { hash: '#carrusel', label: 'Carrusel' },
   { hash: '#servicios', label: 'Servicios' },
+  ...(galleryStore.isGalleryEnabled ? [{ hash: '#galeria', label: 'Galería' }] : []),
   { hash: '#contacto', label: 'Contacto' },
-]
+])
 
 // Simple highlight: the first link is active by default; navigating updates it.
 const active = ref('#inicio')

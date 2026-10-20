@@ -2,17 +2,20 @@
 import { inject, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
+import { useGalleryStore } from '@/stores/gallery'
 import TangramLoader from './TangramLoader.vue'
 import TheHeader from './TheHeader.vue'
 import HeroSection from './HeroSection.vue'
 import VideoSection from './VideoSection.vue'
-import ServicesSection from './ServicesSection.vue'
 import PhotoCarouselSection from './carousel/PhotoCarouselSection.vue'
+import ServicesSection from './ServicesSection.vue'
+import GallerySection from './GallerySection.vue'
 import TheFooter from './TheFooter.vue'
 
 const previewMode = inject('previewMode', false)
 const route = useRoute()
 const theme = useThemeStore()
+const gallery = useGalleryStore()
 
 // Solo se muestra al cargar la landing pública ('/'), nunca dentro de admin ni en LivePreview
 const showLoader = ref(!previewMode && route.path === '/' && theme.loaderEnabled)
@@ -26,6 +29,7 @@ const showLoader = ref(!previewMode && route.path === '/' && theme.loaderEnabled
     <VideoSection />
     <PhotoCarouselSection />
     <ServicesSection />
+    <GallerySection v-if="gallery.isGalleryEnabled" />
   </main>
   <TheFooter />
 </template>

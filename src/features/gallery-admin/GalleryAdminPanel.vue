@@ -18,9 +18,14 @@ import { partitionPhotoFiles } from './partitionPhotoFiles'
 import type { EditorSession } from './editorSession'
 
 const store = useGalleryStore()
-const { photos, settings, isRecropping, isSaving, errors, recropFailures } = storeToRefs(store)
+const { photos, settings, isGalleryEnabled, isRecropping, isSaving, errors, recropFailures } = storeToRefs(store)
 const { show } = useToast()
 const { confirm } = useConfirm()
+
+function toggleGalleryEnabled(): void {
+  store.setGalleryEnabled(!isGalleryEnabled.value)
+  show(isGalleryEnabled.value ? 'Galería activada en el sitio' : 'Galería desactivada en el sitio')
+}
 
 const ratioOptions = ASPECT_RATIOS.map((ratio) => ({ value: ratio, label: ratio }))
 const desktopItemsOptions = DESKTOP_ITEMS_PER_VIEW.map((count) => ({
@@ -188,6 +193,40 @@ const iconButton =
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
     <div class="flex flex-col gap-6 p-5 [color-scheme:dark] min-[900px]:min-h-0 min-[900px]:flex-1 min-[900px]:overflow-y-auto">
+      <!-- Gallery section visibility -->
+      <section
+        class="flex flex-col gap-3 rounded-xl border border-[#1e293b] bg-[#111827] p-4"
+        aria-labelledby="galleryVisibilityHeading"
+      >
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-col">
+            <span id="galleryVisibilityHeading" class="text-sm font-semibold text-slate-200">
+              Galería en el sitio
+            </span>
+            <span class="text-xs text-slate-400">
+              {{
+                isGalleryEnabled
+                  ? 'La galería (cuadrícula con filtros y visor) está visible en la página principal.'
+                  : 'La galería está desactivada y oculta en la página principal.'
+              }}
+            </span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            :aria-checked="isGalleryEnabled"
+            aria-labelledby="galleryVisibilityHeading"
+            :class="[switchClass, isGalleryEnabled ? 'border-[#c5a059] bg-[#c5a059]' : 'border-[#334155] bg-[#0b0f17]']"
+            @click="toggleGalleryEnabled"
+          >
+            <span
+              class="inline-block h-4 w-4 rounded-full transition-transform"
+              :class="isGalleryEnabled ? 'translate-x-6 bg-[#0f172a]' : 'translate-x-1 bg-slate-400'"
+            ></span>
+          </button>
+        </div>
+      </section>
+
       <!-- Carousel settings -->
       <section
         class="flex flex-col gap-5 rounded-xl border border-[#1e293b] bg-[#111827] p-4"

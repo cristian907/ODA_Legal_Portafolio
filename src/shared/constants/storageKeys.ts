@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   // Portfolio photo carousel (records returned by the local file server + admin metadata)
   GALLERY_PHOTOS: 'oda_gallery_photos',
   GALLERY_SETTINGS: 'oda_gallery_settings',
+  GALLERY_ENABLED: 'oda_gallery_enabled',
 } as const
 
 // sessionStorage (cleared when the tab closes)

@@ -102,6 +102,25 @@ describe('gallery store initial state', () => {
     expect(store.settings.itemsPerView).toBe(4)
     expect(store.settings.slideStep).toBe('group')
   })
+
+  it('starts with gallery enabled by default and persists updates', () => {
+    const store = useGalleryStore()
+    expect(store.isGalleryEnabled).toBe(true)
+
+    store.setGalleryEnabled(false)
+    expect(store.isGalleryEnabled).toBe(false)
+    expect(localStorage.getItem(STORAGE_KEYS.GALLERY_ENABLED)).toBe('false')
+
+    store.setGalleryEnabled(true)
+    expect(store.isGalleryEnabled).toBe(true)
+    expect(localStorage.getItem(STORAGE_KEYS.GALLERY_ENABLED)).toBe('true')
+  })
+
+  it('restores gallery enabled state from storage when false', () => {
+    localStorage.setItem(STORAGE_KEYS.GALLERY_ENABLED, 'false')
+    const store = useGalleryStore()
+    expect(store.isGalleryEnabled).toBe(false)
+  })
 })
 
 describe('addPhoto', () => {
