@@ -1,6 +1,9 @@
 /* ==========================================================================
    TANGRAM LOADER - PANTALLA DE CARGA CON ANIMACIÓN TANGRAM
-   Secuencia de 21 Keyframes: Figura 164 -> Figura 29 -> Figura 7
+   Secuencia de 21 Keyframes:
+   - Figura 164: Cáliz / Trofeo
+   - Figura 29: Flecha con Bloque
+   - Figura 7: Puente / Arco
    ========================================================================== */
 
 /* Contenedor Overlay Pantalla Completa */
@@ -138,6 +141,7 @@
   will-change: transform;
 }
 
+/* FIGURA 1: Triángulo Grande 1 */
 #figura-1 .anim-tx  { animation-name: figura1-translateX; }
 #figura-1 .anim-ty  { animation-name: figura1-translateY; }
 #figura-1 .anim-rot {
@@ -145,6 +149,7 @@
   animation-name: figura1-rotate;
 }
 
+/* FIGURA 2: Triángulo Grande 2 */
 #figura-2 .anim-tx  { animation-name: figura2-translateX; }
 #figura-2 .anim-ty  { animation-name: figura2-translateY; }
 #figura-2 .anim-rot {
@@ -152,6 +157,7 @@
   animation-name: figura2-rotate;
 }
 
+/* FIGURA 3: Triángulo Mediano */
 #figura-3 .anim-tx  { animation-name: figura3-translateX; }
 #figura-3 .anim-ty  { animation-name: figura3-translateY; }
 #figura-3 .anim-rot {
@@ -159,6 +165,7 @@
   animation-name: figura3-rotate;
 }
 
+/* FIGURA 4: Triángulo Pequeño 1 */
 #figura-4 .anim-tx  { animation-name: figura4-translateX; }
 #figura-4 .anim-ty  { animation-name: figura4-translateY; }
 #figura-4 .anim-rot {
@@ -166,6 +173,7 @@
   animation-name: figura4-rotate;
 }
 
+/* FIGURA 5: Triángulo Pequeño 2 */
 #figura-5 .anim-tx  { animation-name: figura5-translateX; }
 #figura-5 .anim-ty  { animation-name: figura5-translateY; }
 #figura-5 .anim-rot {
@@ -173,6 +181,7 @@
   animation-name: figura5-rotate;
 }
 
+/* FIGURA 6: Cuadrado */
 #figura-6 .anim-tx  { animation-name: figura6-translateX; }
 #figura-6 .anim-ty  { animation-name: figura6-translateY; }
 #figura-6 .anim-rot {
@@ -180,6 +189,7 @@
   animation-name: figura6-rotate;
 }
 
+/* FIGURA 7: Paralelogramo (Romboide) */
 #figura-7 .anim-tx  { animation-name: figura7-translateX; }
 #figura-7 .anim-ty  { animation-name: figura7-translateY; }
 #figura-7 .anim-rot {
@@ -188,10 +198,13 @@
 }
 
 /* ==========================================================================
-   21 KEYFRAMES (FIGURA 164 -> FIGURA 29 -> FIGURA 7)
+   DECLARACIÓN DE LOS 21 KEYFRAMES (SECUENCIA COMPLETA)
+   - 0% a 15%:   Figura 164 (Cáliz / Trofeo)
+   - 45% a 60%:  Figura 29 (Flecha con Bloque)
+   - 88% a 100%: Figura 7 (Puente / Arco)
    ========================================================================== */
 
-/* FIGURA 1 */
+/* FIGURA 1: Triángulo Grande 1 */
 @keyframes figura1-translateX {
   0%, 15%   { transform: translateX(300px); }
   45%, 60%  { transform: translateX(311.78px); }
@@ -208,7 +221,7 @@
   88%, 100% { transform: rotate(315deg); }
 }
 
-/* FIGURA 2 */
+/* FIGURA 2: Triángulo Grande 2 */
 @keyframes figura2-translateX {
   0%, 15%   { transform: translateX(466.67px); }
   45%, 60%  { transform: translateX(350.83px); }
@@ -225,7 +238,7 @@
   88%, 100% { transform: rotate(135deg); }
 }
 
-/* FIGURA 3 */
+/* FIGURA 3: Triángulo Mediano */
 @keyframes figura3-translateX {
   0%, 15%   { transform: translateX(133.33px); }
   45%, 60%  { transform: translateX(60.60px); }
@@ -242,7 +255,7 @@
   88%, 100% { transform: rotate(405deg); }
 }
 
-/* FIGURA 4 */
+/* FIGURA 4: Triángulo Pequeño 1 */
 @keyframes figura4-translateX {
   0%, 15%   { transform: translateX(233.33px); }
   45%, 60%  { transform: translateX(453.20px); }
@@ -259,7 +272,7 @@
   88%, 100% { transform: rotate(225deg); }
 }
 
-/* FIGURA 5 */
+/* FIGURA 5: Triángulo Pequeño 2 */
 @keyframes figura5-translateX {
   0%, 15%   { transform: translateX(233.33px); }
   45%, 60%  { transform: translateX(333.68px); }
@@ -276,7 +289,7 @@
   88%, 100% { transform: rotate(135deg); }
 }
 
-/* FIGURA 6 */
+/* FIGURA 6: Cuadrado */
 @keyframes figura6-translateX {
   0%, 15%   { transform: translateX(200px); }
   45%, 60%  { transform: translateX(93.93px); }
@@ -293,7 +306,7 @@
   88%, 100% { transform: rotate(45deg); }
 }
 
-/* FIGURA 7 */
+/* FIGURA 7: Paralelogramo (Romboide) */
 @keyframes figura7-translateX {
   0%, 15%   { transform: translateX(300px); }
   45%, 60%  { transform: translateX(526.77px); }

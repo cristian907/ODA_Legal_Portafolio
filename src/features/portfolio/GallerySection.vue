@@ -54,7 +54,7 @@ function closeLightbox() {
           v-for="item in visibleItems"
           :key="item.title"
           type="button"
-          class="gallery-item group relative h-[260px] cursor-pointer overflow-hidden rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+          class="gallery-item group relative h-65 cursor-pointer overflow-hidden rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
           @click="openLightbox(item.img)"
         >
           <img

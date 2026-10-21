@@ -7,9 +7,9 @@ defineProps({
 </script>
 
 <template>
-  <article class="service-card group flex flex-col rounded-xl bg-svc-2 p-[2.5rem_2rem]">
+  <article class="service-card group flex flex-col rounded-xl bg-svc-2 px-8 py-10">
     <div
-      class="service-icon mb-6 flex h-[60px] w-[60px] items-center justify-center rounded-xl border border-svc-4 bg-svc-1 text-svc-4"
+      class="service-icon mb-6 flex h-15 w-15 items-center justify-center rounded-xl border border-svc-4 bg-svc-1 text-svc-4"
     >
       <i class="fas text-xl" :class="icon"></i>
     </div>

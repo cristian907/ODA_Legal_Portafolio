@@ -21,7 +21,7 @@ watch(
   <Transition name="modal">
     <div
       v-if="state.open"
-      class="fixed inset-0 z-[3100] flex items-center justify-center bg-black/70 p-6"
+      class="fixed inset-0 z-3100 flex items-center justify-center bg-black/70 p-6"
       role="dialog"
       aria-modal="true"
       @click.self="resolve(false)"
