@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useGalleryStore } from '@/stores/gallery'
+
+const galleryStore = useGalleryStore()
+
 const socials = [
   { icon: 'fa-linkedin-in', label: 'LinkedIn' },
   { icon: 'fa-twitter', label: 'Twitter' },
@@ -6,12 +11,13 @@ const socials = [
   { icon: 'fa-instagram', label: 'Instagram' },
 ]
 
-const navLinks = [
+const navLinks = computed(() => [
   { hash: '#inicio', label: 'Inicio' },
+  { hash: '#carrusel', label: 'Carrusel' },
   { hash: '#servicios', label: 'Especialidades' },
-  { hash: '#galeria', label: 'Galería' },
+  ...(galleryStore.isGalleryEnabled ? [{ hash: '#galeria', label: 'Galería' }] : []),
   { hash: '#contacto', label: 'Contacto Directo' },
-]
+])
 
 const practiceLinks = [
   'Derecho Civil',

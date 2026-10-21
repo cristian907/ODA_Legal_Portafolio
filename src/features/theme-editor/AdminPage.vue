@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useToast } from '@/composables/useToast'
@@ -10,6 +10,10 @@ import EditorView from './EditorView.vue'
 import LivePreview from './LivePreview.vue'
 import CvWizard from '@/features/cv-wizard/CvWizard.vue'
 import CvPreviewPanel from '@/features/cv-wizard/CvPreviewPanel.vue'
+import VideoAdminPanel from '@/features/video-admin/VideoAdminPanel.vue'
+import VideoPreviewPanel from '@/features/video-admin/VideoPreviewPanel.vue'
+import GalleryAdminPanel from '@/features/gallery-admin/GalleryAdminPanel.vue'
+import GalleryPreviewPanel from '@/features/gallery-admin/GalleryPreviewPanel.vue'
 import ToastHost from '@/components/feedback/ToastHost.vue'
 import ConfirmModal from '@/components/feedback/ConfirmModal.vue'
 import type { SavedStyle, ThemeName } from '@/types/theme'
@@ -18,11 +22,22 @@ const auth = useAuthStore()
 const theme = useThemeStore()
 const { show } = useToast()
 
-type AdminModule = 'styles' | 'cv'
+type AdminModule = 'styles' | 'cv' | 'video' | 'gallery'
 type StylesView = 'general' | 'library' | 'editor'
 type ReturnView = 'general' | 'library'
 
 const activeModule = ref<AdminModule>('styles')
+
+const MODULES: { id: AdminModule; label: string; icon: string }[] = [
+  { id: 'styles', label: 'Estilos', icon: 'fa-palette' },
+  { id: 'cv', label: 'Creación de CV', icon: 'fa-id-card' },
+  { id: 'video', label: 'Video', icon: 'fa-film' },
+  { id: 'gallery', label: 'Galería', icon: 'fa-images' },
+]
+
+/** Modules laid out as the 40/60 split that stacks below 900px. */
+const isSplitModule = computed(() => activeModule.value === 'video' || activeModule.value === 'gallery')
+
 const view = ref<StylesView>('general')
 const editorReturnView = ref<ReturnView>('general')
 
@@ -71,43 +86,39 @@ watch(activeModule, (m) => {
 <template>
   <LoginScreen v-if="!auth.isLoggedIn" />
 
-  <div v-else class="flex h-screen flex-col bg-[#0b0f17] text-white">
+  <div v-else class="admin-view flex h-screen h-dvh flex-col overflow-hidden bg-[#0b0f17] text-white">
     <!-- Topbar -->
     <header class="flex h-[70px] shrink-0 items-center justify-between border-b border-[#1e293b] px-6">
       <div class="flex items-center gap-4">
         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#c5a059] text-[#0f172a]">
           <i class="fas fa-balance-scale"></i>
         </span>
-        <span class="hidden font-semibold sm:inline">Panel de Control | ODA Legal</span>
+        <span class="hidden font-semibold lg:inline">Panel de Control | ODA Legal</span>
 
-        <nav class="ml-2 flex gap-1 rounded-lg border border-[#c5a059]/20 bg-white/5 p-1">
+        <nav class="ml-2 flex gap-1 rounded-lg border border-[#c5a059]/20 bg-white/5 p-1" aria-label="Módulos">
           <button
-            class="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition"
+            v-for="item in MODULES"
+            :key="item.id"
+            type="button"
+            class="inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition"
             :class="
-              activeModule === 'styles'
+              activeModule === item.id
                 ? 'bg-gradient-to-br from-[#c5a059] to-[#b38e44] text-[#0f172a]'
                 : 'text-slate-400 hover:text-white'
             "
-            @click="activeModule = 'styles'"
+            :aria-current="activeModule === item.id ? 'page' : undefined"
+            :title="item.label"
+            :aria-label="item.label"
+            @click="activeModule = item.id"
           >
-            <i class="fas fa-palette"></i> Estilos
-          </button>
-          <button
-            class="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition"
-            :class="
-              activeModule === 'cv'
-                ? 'bg-gradient-to-br from-[#c5a059] to-[#b38e44] text-[#0f172a]'
-                : 'text-slate-400 hover:text-white'
-            "
-            @click="activeModule = 'cv'"
-          >
-            <i class="fas fa-id-card"></i> Creación de CV
+            <i class="fas" :class="item.icon" aria-hidden="true"></i>
+            <span class="hidden min-[960px]:inline">{{ item.label }}</span>
           </button>
         </nav>
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="hidden items-center gap-2 text-sm text-slate-400 md:flex">
+        <span class="hidden items-center gap-2 text-sm text-slate-400 xl:flex">
           <i class="fas fa-user-shield"></i> Lic. Oscar De Abreu (Admin)
         </span>
         <RouterLink
@@ -128,11 +139,20 @@ watch(activeModule, (m) => {
 
     <!-- Two-column dashboard -->
     <main
-      class="grid min-h-0 flex-1"
-      :style="{ gridTemplateColumns: activeModule === 'cv' ? '45% 55%' : '32% 68%' }"
+      class="grid min-h-0 flex-1 overflow-hidden"
+      :class="
+        isSplitModule
+          ? 'auto-rows-max grid-cols-1 overflow-y-auto [color-scheme:dark] min-[900px]:auto-rows-[minmax(0,1fr)] min-[900px]:grid-cols-[40%_60%] min-[900px]:overflow-hidden'
+          : 'grid-rows-[minmax(0,1fr)] overflow-hidden'
+      "
+      :style="
+        isSplitModule
+          ? undefined
+          : { gridTemplateColumns: activeModule === 'cv' ? '45% 55%' : '32% 68%' }
+      "
     >
       <!-- Controls panel -->
-      <div class="flex min-h-0 flex-col border-r border-[#1e293b] bg-[#0b0f17]">
+      <div class="admin-panel flex min-h-0 flex-col border-r border-[#1e293b] bg-[#0b0f17]">
         <template v-if="activeModule === 'styles'">
           <!-- Tabs (hidden in editor) -->
           <div v-if="view !== 'editor'" class="flex gap-1 border-b border-[#1e293b] px-5 pt-3">
@@ -195,7 +215,11 @@ watch(activeModule, (m) => {
         </template>
 
         <!-- CV module -->
-        <CvWizard v-else @download="cvPreview?.downloadPdf()" />
+        <CvWizard v-else-if="activeModule === 'cv'" @download="cvPreview?.downloadPdf()" />
+
+        <VideoAdminPanel v-else-if="activeModule === 'video'" />
+
+        <GalleryAdminPanel v-else />
       </div>
 
       <!-- Preview panel -->
@@ -214,7 +238,11 @@ watch(activeModule, (m) => {
           </div>
         </template>
 
-        <CvPreviewPanel v-else ref="cvPreview" />
+        <CvPreviewPanel v-else-if="activeModule === 'cv'" ref="cvPreview" />
+
+        <VideoPreviewPanel v-else-if="activeModule === 'video'" />
+
+        <GalleryPreviewPanel v-else />
       </div>
     </main>
 

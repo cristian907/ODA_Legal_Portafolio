@@ -22,6 +22,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
       v-for="opt in options"
       :key="opt.value"
       type="button"
+      :aria-pressed="modelValue === opt.value"
       class="inline-flex items-center gap-1.5 rounded-md font-semibold transition"
       :class="[
         size === 'sm' ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-sm',
@@ -31,7 +32,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
       ]"
       @click="$emit('update:modelValue', opt.value)"
     >
-      <i v-if="opt.icon" class="fas" :class="opt.icon"></i>
+      <i v-if="opt.icon" class="fas" :class="opt.icon" aria-hidden="true"></i>
       <span v-if="opt.label">{{ opt.label }}</span>
     </button>
   </div>

@@ -63,7 +63,7 @@ const containerStyle = computed(() => {
 </script>
 
 <template>
-  <div class="h-full overflow-y-auto" :data-theme="config.theme" :style="containerStyle">
+  <div class="live-preview-container h-full overflow-y-auto" :data-theme="config.theme" :style="containerStyle">
     <PortfolioPage />
   </div>
 </template>
