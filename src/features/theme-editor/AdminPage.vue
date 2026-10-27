@@ -56,7 +56,10 @@ function closeEditor() {
   theme.closeDraft()
   view.value = editorReturnView.value
 }
+const isDraftValid = computed(() => theme.validateStyleName(theme.draft?.name ?? '').ok)
+
 function saveEditor() {
+  if (!isDraftValid.value) return
   const result = theme.saveDraft(theme.draft?.name ?? '')
   if (!result.ok) {
     show(result.message ?? 'No se pudo guardar el estilo', 'error')
@@ -201,7 +204,11 @@ watch(activeModule, (m) => {
 
           <!-- Editor action bar -->
           <div v-if="view === 'editor'" class="flex gap-3 border-t border-[#1e293b] p-4">
-            <button class="btn-primary flex-1" @click="saveEditor">
+            <button
+              class="btn-primary flex-1"
+              :disabled="!isDraftValid"
+              @click="saveEditor"
+            >
               <i class="fas fa-check-circle"></i>
               {{ theme.draft?.id ? 'Guardar cambios' : 'Guardar estilo' }}
             </button>

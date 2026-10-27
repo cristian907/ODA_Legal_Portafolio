@@ -289,7 +289,18 @@ export const useThemeStore = defineStore('theme', () => {
 
   function defaultStyleName(theme: ThemeName): string {
     const themeLabel = theme === 'dark' ? 'Oscuro' : 'Claro'
-    return `Estilo ${themeLabel} #${savedStyles.value.length + 1}`
+    const editingStyleId = draft.value ? draft.value.id : null
+    let counter = 1
+    let candidate = `Estilo ${themeLabel} #${counter}`
+    while (
+      savedStyles.value.some(
+        (style) => style.id !== editingStyleId && style.name.toLowerCase() === candidate.toLowerCase(),
+      )
+    ) {
+      counter++
+      candidate = `Estilo ${themeLabel} #${counter}`
+    }
+    return candidate
   }
 
   function upsertDraftIntoLibrary(draftStyle: SavedStyle): void {
@@ -397,6 +408,7 @@ export const useThemeStore = defineStore('theme', () => {
     loaderEnabled,
     setLoaderEnabled,
     validateStyleName,
+    defaultStyleName,
     openDraft,
     closeDraft,
     setDraftTheme,
