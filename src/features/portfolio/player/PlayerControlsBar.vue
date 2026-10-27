@@ -88,7 +88,7 @@ const formattedDuration = computed(() => formatTime(props.duration))
         title="Subtítulos (c)"
         @click="$emit('toggle-subtitles')"
       >
-        <span class="rounded border border-current px-1 py-0.2 font-bold tracking-tight" style="font-size: calc(var(--size-body) * 0.7);">CC</span>
+        <span class="rounded border border-current px-1 py-0.2 text-[10px] font-bold tracking-tight">CC</span>
         <span v-if="subtitlesActive" class="absolute bottom-1.5 left-2 right-2 h-0.5 rounded-full bg-[var(--svc-color-4)]"></span>
       </button>
 
@@ -124,7 +124,7 @@ const formattedDuration = computed(() => formatTime(props.duration))
 
 <style scoped>
 .player-time-display {
-  font-size: var(--size-body);
+  font-size: 13px;
   color: var(--text-on-dark);
   line-height: 1;
 }

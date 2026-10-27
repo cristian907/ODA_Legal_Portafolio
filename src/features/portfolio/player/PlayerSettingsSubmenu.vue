@@ -43,10 +43,10 @@ defineEmits<{
 <style scoped>
 .submenu-title,
 .submenu-item {
-  font-size: var(--size-body);
+  font-size: 13px;
 }
 
 .submenu-hint {
-  font-size: calc(var(--size-body) * 0.85);
+  font-size: 11px;
 }
 </style>

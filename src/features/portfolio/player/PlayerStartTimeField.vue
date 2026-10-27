@@ -29,8 +29,8 @@ function onInput(event: Event): void {
     class="start-time-badge ml-1 flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 px-2 py-0.5 backdrop-blur-sm transition-colors hover:bg-white/15 sm:ml-2"
     title="Indica el segundo exacto desde el que arrancará la reproducción"
   >
-    <i class="fas fa-stopwatch text-[var(--svc-color-4)]"></i>
-    <span class="hidden font-medium opacity-80 md:inline">Inicio:</span>
+    <i class="fas fa-stopwatch text-[11px] text-[var(--svc-color-4)]"></i>
+    <span class="start-time-label hidden font-medium opacity-80 md:inline">Inicio:</span>
     <input
       type="number"
       min="0"
@@ -41,14 +41,26 @@ function onInput(event: Event): void {
       @input="onInput"
       @keydown.stop
     />
-    <span class="opacity-60">s</span>
+    <span class="start-time-unit opacity-60">s</span>
   </div>
 </template>
 
 <style scoped>
-.start-time-badge,
-.start-time-input {
-  font-size: var(--size-body);
+.start-time-badge {
+  font-size: 12px;
   color: var(--text-on-dark);
+}
+
+.start-time-label {
+  font-size: 11px;
+}
+
+.start-time-input {
+  font-size: 12px;
+  color: var(--text-on-dark);
+}
+
+.start-time-unit {
+  font-size: 10px;
 }
 </style>

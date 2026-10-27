@@ -147,7 +147,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .player-hover-time {
-  font-size: var(--size-body);
+  font-size: 12px;
   color: var(--text-on-dark);
 }
 </style>

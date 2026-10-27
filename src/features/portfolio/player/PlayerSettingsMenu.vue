@@ -163,10 +163,10 @@ function selectRate(rate: number): void {
 }
 
 .settings-row {
-  font-size: var(--size-body);
+  font-size: 13px;
 }
 
 .settings-summary {
-  font-size: calc(var(--size-body) * 0.88);
+  font-size: 11px;
 }
 </style>
