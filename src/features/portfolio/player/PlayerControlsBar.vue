@@ -35,10 +35,10 @@ const formattedDuration = computed(() => formatTime(props.duration))
 </script>
 
 <template>
-  <div class="flex items-center justify-between text-white">
+  <div class="flex items-center justify-between" style="color: var(--text-on-dark);">
     <div class="flex items-center gap-1 sm:gap-2">
       <button
-        class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-lg transition-transform hover:scale-110 hover:text-red-500 active:scale-95"
+        class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-lg transition-transform hover:scale-110 hover:text-[var(--svc-color-4)] active:scale-95"
         :title="isPlaying ? 'Pausar (k / espacio)' : 'Reproducir (k / espacio)'"
         @click="$emit('toggle-play')"
       >
@@ -46,7 +46,7 @@ const formattedDuration = computed(() => formatTime(props.duration))
       </button>
 
       <button
-        class="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-full text-sm text-white/80 transition-colors hover:text-white sm:flex"
+        class="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-full text-sm opacity-80 transition-colors hover:opacity-100 hover:text-[var(--svc-color-4)] sm:flex"
         title="Retroceder 10 segundos (j)"
         @click="$emit('skip', -10)"
       >
@@ -54,7 +54,7 @@ const formattedDuration = computed(() => formatTime(props.duration))
       </button>
 
       <button
-        class="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-full text-sm text-white/80 transition-colors hover:text-white sm:flex"
+        class="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-full text-sm opacity-80 transition-colors hover:opacity-100 hover:text-[var(--svc-color-4)] sm:flex"
         title="Adelantar 10 segundos (l)"
         @click="$emit('skip', 10)"
       >
@@ -68,10 +68,10 @@ const formattedDuration = computed(() => formatTime(props.duration))
         @change="$emit('change-volume', $event)"
       />
 
-      <div class="ml-1 text-xs font-medium text-white/90 sm:text-sm">
+      <div class="player-time-display ml-1 font-medium select-none">
         <span>{{ formattedCurrentTime }}</span>
-        <span class="mx-1 text-white/40">/</span>
-        <span class="text-white/70">{{ formattedDuration }}</span>
+        <span class="mx-1 opacity-40">/</span>
+        <span class="opacity-80">{{ formattedDuration }}</span>
       </div>
 
       <PlayerStartTimeField
@@ -83,20 +83,20 @@ const formattedDuration = computed(() => formatTime(props.duration))
 
     <div class="relative flex items-center gap-1 sm:gap-2">
       <button
-        class="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-sm transition-colors hover:bg-white/10"
-        :class="subtitlesActive ? 'text-white' : 'text-white/65 hover:text-white'"
+        class="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-white/10"
+        :class="subtitlesActive ? 'text-[var(--svc-color-4)]' : 'opacity-70 hover:opacity-100 hover:text-[var(--svc-color-4)]'"
         title="Subtítulos (c)"
         @click="$emit('toggle-subtitles')"
       >
-        <span class="rounded border border-current px-1 py-0.2 text-[10px] font-bold tracking-tight">CC</span>
-        <span v-if="subtitlesActive" class="absolute bottom-1.5 left-2 right-2 h-0.5 rounded-full bg-red-600"></span>
+        <span class="rounded border border-current px-1 py-0.2 font-bold tracking-tight" style="font-size: calc(var(--size-body) * 0.7);">CC</span>
+        <span v-if="subtitlesActive" class="absolute bottom-1.5 left-2 right-2 h-0.5 rounded-full bg-[var(--svc-color-4)]"></span>
       </button>
 
       <slot name="settings" />
 
       <button
         v-if="pipSupported"
-        class="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-sm text-white/85 transition-colors hover:bg-white/10 hover:text-white sm:flex"
+        class="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-sm opacity-85 transition-colors hover:bg-white/10 hover:opacity-100 hover:text-[var(--svc-color-4)] sm:flex"
         title="Pantalla en pantalla (PiP)"
         @click="$emit('toggle-pip')"
       >
@@ -104,7 +104,7 @@ const formattedDuration = computed(() => formatTime(props.duration))
       </button>
 
       <button
-        class="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-sm text-white/85 transition-colors hover:bg-white/10 hover:text-white md:flex"
+        class="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-sm opacity-85 transition-colors hover:bg-white/10 hover:opacity-100 hover:text-[var(--svc-color-4)] md:flex"
         :title="theaterMode ? 'Modo normal' : 'Modo cine (teatro)'"
         @click="$emit('toggle-theater')"
       >
@@ -112,7 +112,7 @@ const formattedDuration = computed(() => formatTime(props.duration))
       </button>
 
       <button
-        class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-base text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+        class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-base opacity-85 transition-colors hover:bg-white/10 hover:opacity-100 hover:text-[var(--svc-color-4)]"
         :title="isFullscreen ? 'Salir de pantalla completa (f)' : 'Pantalla completa (f)'"
         @click="$emit('toggle-fullscreen')"
       >
@@ -121,3 +121,11 @@ const formattedDuration = computed(() => formatTime(props.duration))
     </div>
   </div>
 </template>
+
+<style scoped>
+.player-time-display {
+  font-size: var(--size-body);
+  color: var(--text-on-dark);
+  line-height: 1;
+}
+</style>

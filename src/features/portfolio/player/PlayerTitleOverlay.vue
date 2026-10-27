@@ -12,10 +12,28 @@ defineProps<{
     :class="visible ? 'opacity-100' : 'opacity-0'"
   >
     <div>
-      <h3 class="text-sm font-semibold text-white drop-shadow-md sm:text-base">
+      <h3 class="video-overlay-title font-semibold drop-shadow-md">
         {{ title }}
       </h3>
-      <span class="text-xs text-white/70">{{ subtitle || 'Reproductor Personalizado ODA' }}</span>
+      <span class="video-overlay-subtitle drop-shadow-sm">
+        {{ subtitle || 'Reproductor Personalizado ODA' }}
+      </span>
     </div>
   </div>
 </template>
+
+<style scoped>
+.video-overlay-title {
+  font-size: var(--size-subtitles);
+  color: var(--text-on-dark);
+  line-height: 1.25;
+}
+
+.video-overlay-subtitle {
+  font-size: var(--size-body);
+  color: var(--text-on-dark);
+  opacity: 0.8;
+  line-height: 1.35;
+  display: block;
+}
+</style>

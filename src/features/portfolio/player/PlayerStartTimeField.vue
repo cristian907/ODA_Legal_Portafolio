@@ -26,21 +26,29 @@ function onInput(event: Event): void {
 
 <template>
   <div
-    class="ml-1 flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 px-2 py-0.5 text-xs text-white/90 backdrop-blur-sm transition-colors hover:bg-white/15 sm:ml-2"
+    class="start-time-badge ml-1 flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 px-2 py-0.5 backdrop-blur-sm transition-colors hover:bg-white/15 sm:ml-2"
     title="Indica el segundo exacto desde el que arrancará la reproducción"
   >
-    <i class="fas fa-stopwatch text-[11px] text-red-500"></i>
-    <span class="hidden text-[11px] font-medium text-white/80 md:inline">Inicio:</span>
+    <i class="fas fa-stopwatch text-[var(--svc-color-4)]"></i>
+    <span class="hidden font-medium opacity-80 md:inline">Inicio:</span>
     <input
       type="number"
       min="0"
       :max="max"
       :value="modelValue"
-      class="w-12 rounded bg-black/50 px-1 py-0.5 text-center font-mono text-xs font-bold text-white focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-red-500"
+      class="start-time-input w-12 rounded bg-black/50 px-1 py-0.5 text-center font-mono font-bold focus:bg-black/80 focus:outline-none focus:ring-1 focus:ring-[var(--svc-color-4)]"
       title="Escribe el segundo de inicio"
       @input="onInput"
       @keydown.stop
     />
-    <span class="text-[10px] text-white/60">s</span>
+    <span class="opacity-60">s</span>
   </div>
 </template>
+
+<style scoped>
+.start-time-badge,
+.start-time-input {
+  font-size: var(--size-body);
+  color: var(--text-on-dark);
+}
+</style>

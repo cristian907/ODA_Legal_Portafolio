@@ -117,14 +117,14 @@ onBeforeUnmount(() => {
         class="overflow-hidden rounded-md border border-white/20 bg-black bg-no-repeat shadow-lg"
         :style="thumbnailStyle"
       ></div>
-      <span class="rounded bg-black/85 px-2 py-0.5 text-xs font-semibold text-white shadow-md backdrop-blur-xs">
+      <span class="player-hover-time rounded bg-black/85 px-2 py-0.5 font-semibold shadow-md backdrop-blur-xs">
         {{ formattedHoverTime }}
       </span>
     </div>
 
     <div
       v-else-if="hoverTime !== null"
-      class="pointer-events-none absolute -top-8 -translate-x-1/2 rounded bg-black/85 px-2 py-0.5 text-xs font-semibold text-white shadow-md backdrop-blur-xs"
+      class="player-hover-time pointer-events-none absolute -top-8 -translate-x-1/2 rounded bg-black/85 px-2 py-0.5 font-semibold shadow-md backdrop-blur-xs"
       :style="{ left: `${hoverPercent}%` }"
     >
       {{ formattedHoverTime }}
@@ -135,12 +135,19 @@ onBeforeUnmount(() => {
         class="absolute inset-y-0 left-0 rounded-full bg-white/40 transition-all duration-200"
         :style="{ width: `${bufferedPercent}%` }"
       ></div>
-      <div class="absolute inset-y-0 left-0 rounded-full bg-red-600" :style="{ width: `${playedPercent}%` }"></div>
+      <div class="absolute inset-y-0 left-0 rounded-full bg-[var(--svc-color-4)]" :style="{ width: `${playedPercent}%` }"></div>
       <div
-        class="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-600 shadow-md transition-all duration-150"
+        class="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--svc-color-4)] shadow-md transition-all duration-150"
         :class="scrubbing ? 'h-4 w-4 scale-125' : 'h-3.5 w-3.5 scale-0 group-hover/scrubber:scale-100'"
         :style="{ left: `${playedPercent}%` }"
       ></div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.player-hover-time {
+  font-size: var(--size-body);
+  color: var(--text-on-dark);
+}
+</style>

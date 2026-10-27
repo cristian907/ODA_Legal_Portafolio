@@ -96,8 +96,8 @@ function selectRate(rate: number): void {
 <template>
   <div class="relative">
     <button
-      class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-base text-white/85 transition-all duration-200 hover:bg-white/10 hover:text-white"
-      :class="{ 'rotate-45 text-white': open }"
+      class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-base opacity-85 transition-all duration-200 hover:bg-white/10 hover:opacity-100 hover:text-[var(--svc-color-4)]"
+      :class="{ 'rotate-45 opacity-100 text-[var(--svc-color-4)]': open }"
       title="Configuración"
       @click="toggleOpen"
     >
@@ -106,22 +106,22 @@ function selectRate(rate: number): void {
 
     <div
       v-if="open"
-      class="absolute bottom-12 right-0 z-50 w-64 overflow-hidden rounded-xl border border-white/15 bg-black/95 text-white shadow-2xl backdrop-blur-xl transition-all"
+      class="player-settings-popup absolute bottom-12 right-0 z-50 w-72 overflow-hidden rounded-xl border border-[var(--svc-color-4)]/20 bg-black/95 shadow-2xl backdrop-blur-xl transition-all"
       @click.stop
     >
-      <div v-if="currentTab === 'main'" class="py-1 text-xs">
+      <div v-if="currentTab === 'main'" class="py-1">
         <button
           v-for="row in rows"
           :key="row.tab"
-          class="flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-left transition-colors hover:bg-white/15"
+          class="settings-row flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-left transition-colors hover:bg-white/15 hover:text-[var(--svc-color-4)]"
           @click="currentTab = row.tab"
         >
           <div class="flex items-center gap-3">
-            <i class="fas text-sm text-white/70" :class="row.icon"></i>
+            <i class="fas opacity-70" :class="row.icon"></i>
             <span>{{ row.label }}</span>
           </div>
-          <div class="flex items-center gap-1.5 text-white/60">
-            <span class="max-w-[85px] truncate text-[11px]">{{ row.summary }}</span>
+          <div class="flex items-center gap-1.5 opacity-60">
+            <span class="max-w-[100px] truncate settings-summary">{{ row.summary }}</span>
             <i class="fas fa-chevron-right text-[10px]"></i>
           </div>
         </button>
@@ -156,3 +156,17 @@ function selectRate(rate: number): void {
     </div>
   </div>
 </template>
+
+<style scoped>
+.player-settings-popup {
+  color: var(--text-on-dark);
+}
+
+.settings-row {
+  font-size: var(--size-body);
+}
+
+.settings-summary {
+  font-size: calc(var(--size-body) * 0.88);
+}
+</style>

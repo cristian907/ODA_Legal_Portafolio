@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <div v-if="isBuffering" class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
-    <div class="h-14 w-14 animate-spin rounded-full border-4 border-white/20 border-t-red-600"></div>
+    <div class="h-14 w-14 animate-spin rounded-full border-4 border-white/20 border-t-[var(--svc-color-4)]"></div>
   </div>
 
   <div
@@ -19,7 +19,8 @@ defineProps<{
     class="pointer-events-none absolute inset-0 flex items-center justify-center"
   >
     <div
-      class="animate-center-pulse flex h-20 w-20 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm"
+      class="animate-center-pulse flex h-20 w-20 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm"
+      style="color: var(--text-on-dark);"
     >
       <i class="fas text-3xl" :class="centerFeedback.icon"></i>
     </div>
@@ -32,15 +33,20 @@ defineProps<{
     :class="sideFeedback.side === 'left' ? 'left-0' : 'right-0'"
   >
     <div
-      class="animate-side-fade flex flex-col items-center justify-center gap-1 rounded-full bg-white/10 px-5 py-4 text-white backdrop-blur-md"
+      class="animate-side-fade flex flex-col items-center justify-center gap-1 rounded-full bg-white/10 px-5 py-4 backdrop-blur-md"
+      style="color: var(--text-on-dark);"
     >
       <i class="fas text-xl" :class="sideFeedback.side === 'left' ? 'fa-rotate-left' : 'fa-rotate-right'"></i>
-      <span class="text-xs font-bold">{{ sideFeedback.text }}</span>
+      <span class="side-feedback-text font-bold">{{ sideFeedback.text }}</span>
     </div>
   </div>
 </template>
 
 <style scoped>
+.side-feedback-text {
+  font-size: var(--size-body);
+}
+
 @keyframes centerPulse {
   0% {
     transform: scale(0.6);

@@ -25,7 +25,7 @@ function onSliderInput(event: Event): void {
 <template>
   <div class="group/volume flex items-center">
     <button
-      class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-base transition-transform hover:scale-110 active:scale-95"
+      class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-base transition-transform hover:scale-110 hover:text-[var(--svc-color-4)] active:scale-95"
       :title="muted ? 'Desactivar silencio (m)' : 'Silenciar (m)'"
       @click="$emit('toggle-mute')"
     >
@@ -41,7 +41,7 @@ function onSliderInput(event: Event): void {
         max="1"
         step="0.05"
         :value="muted ? 0 : volume"
-        class="yt-volume-slider h-1 w-full cursor-pointer appearance-none rounded-lg bg-white/30 accent-white"
+        class="yt-volume-slider h-1 w-full cursor-pointer appearance-none rounded-lg bg-white/30 accent-[var(--svc-color-4)]"
         @input="onSliderInput"
       />
     </div>
@@ -54,7 +54,7 @@ function onSliderInput(event: Event): void {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--svc-color-4);
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
@@ -63,7 +63,7 @@ function onSliderInput(event: Event): void {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--svc-color-4);
   border: none;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
