@@ -13,7 +13,7 @@ function submit() {
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-[#0b0f17] p-6">
+  <div class="admin-view flex min-h-screen items-center justify-center bg-[#0b0f17] p-6">
     <div class="w-full max-w-md rounded-2xl border border-[#1e293b] bg-[#0f172a] p-8 shadow-2xl">
       <div class="mb-6 flex flex-col items-center gap-3">
         <span

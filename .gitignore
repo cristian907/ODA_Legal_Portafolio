@@ -29,6 +29,9 @@ dist-ssr/
 *.local
 .vite/
 
+# Local video uploads (server/)
+uploads/
+
 # Tooling caches
 .atl/
 .codegraph/
